@@ -1,0 +1,8 @@
+[submodule "modules/scala-native"]
+	path = modules/scala-native
+	url = https://github.com/avdv/scala-native.git
+	branch = integ
+[submodule "modules/scopt"]
+	path = modules/scopt
+	url = https://github.com/avdv/scopt.git
+	branch = scala-native-snapshot
