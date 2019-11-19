@@ -29,3 +29,22 @@ cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot/
+
+before_deploy:
+  - export SCALALS=scalals-${TRAVIS_OS_NAME}-${TRAVIS_CPU_ARCH}
+  - mv native/target/scala-2.11/scalals-out "$SCALALS"
+  # Set up git user name and tag this commit
+  - git config --local user.name "Travis CI"
+  - git config --local user.email "builds@travis-ci.com"
+  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - git tag $TRAVIS_TAG
+
+deploy:
+  provider: releases
+  api_key:
+    secure: fuPcl3t5hKt6NfCh2jrmei2fGMgaIF87BgEQ4FZIa0G9WbecgZtnhL5LgB9WWglPh86gOwn8aQpEg5RWhglUJhlh02tCYF70VtsNRbXTtojG3KRiCVcA+HRvHMn86j7NfVJ7GA5DymqdGeSmbaFXrjYQxdyo/8QLKxFnzsF7nUkBNteY9gvLb4W/v/1k0BzrPPVm0QS8cOlhAJI85J9qY8LaNyV+i1rtfoWtgsYRd6HWcT6CQtpeP2PG4PQOU0ckt/t2EM9JjNtkNtC9BUEHCVAAohbZde3EeC8ENfiR+nNn8uQnO+QpgOjmbgv3hAmFj5y2dOy7YX0U83qeIApWDSOm1bguKiPWQAQSSAp6nxbpaq69s6ncJx4pWFmuv+FrF/6fZjID9I+ZBwa5GFl0A4MY7wgOBoToCiN0t26Reo1r5ltnzKn3J9IwC1vq0W6l9KPyEoy6kpS4uvn+IPtHmvan3sHifd4bvCL+mtZ0BhmkWVxldFCCb5BsdSKqj1UV5LONREdRu60VmVWI8zRfez+M237Ml5CZWXTBi4rhSCUE+5Hi1RHo8+TEY3a9+PaNGxtu4ng/Jero0zdnOllPdxhCpJtDTB++KFN7lW3OODtlO2UysJhSwY7e/9BW7DaS/71XSvePzQeks7L5H+pU4iYstfpFv54yY3XbnwmHF7Q=
+  file: "${SCALALS}"
+  skip_cleanup: true
+  draft: true
+  on:
+    repo: avdv/scalals
