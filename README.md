@@ -1,3 +1,15 @@
+# About
+
+This is yet another [colorls](athityakumar/colorls) clone.
+
+![screenshot](images/screenshot1.png)
+
+# Features
+
+1. fast (compiled to native code)
+2. aims to be a drop-in replacement to GNU ls
+3. supports `LS_COLORS`
+
 # Building
 
 Currently, you need to build scala-native locally from [here](https://github.com/avdv/scala-native/tree/integ),
