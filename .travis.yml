@@ -10,9 +10,11 @@ language: scala
 scala:
   - 2.11.12
 
-script:
-  - (cd modules/scala-native && sbt -Dfile.encoding=UTF8 -sbt-version 1.2.8 rebuild)
+install:
+  - (cd modules/scala-native && sbt -Dfile.encoding=UTF8 ^^1.2.8 rebuild)
   - (cd modules/scopt && sbt -Dfile.encoding=UTF8 -sbt-version 1.2.8 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
+
+script:
   - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION scalalsNative/run
 
 sudo: false
