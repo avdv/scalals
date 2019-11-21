@@ -2,7 +2,7 @@
 
 # About
 
-This is yet another [colorls](athityakumar/colorls) clone.
+This is yet another [colorls](https://github.com/athityakumar/colorls) clone.
 
 ![screenshot](images/screenshot1.png)
 
