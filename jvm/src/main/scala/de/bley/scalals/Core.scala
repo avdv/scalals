@@ -41,15 +41,14 @@ final case class FileInfo(path: Path) extends generic.FileInfo {
   val name = path.getFileName.toString
 
   @inline def isDirectory: Boolean = attributes.isDirectory
-    @inline def isRegularFile: Boolean = attributes.isRegularFile
-    @inline def isSymlink: Boolean = attributes.isSymbolicLink
-    @inline def group: GroupPrincipal = attributes.group()
-    @inline def owner: UserPrincipal = attributes.owner()
-    @inline def permissions: Int = FileInfo.mode(attributes).toInt
-    @inline def size: Long = attributes.size()
-    @inline def lastModifiedTime: Instant = attributes.lastModifiedTime().toInstant
-    @inline def lastAccessTime: Instant = attributes.lastAccessTime().toInstant
-    @inline def creationTime: Instant = attributes.creationTime().toInstant
-    @inline def isExecutable = attributes.permissions().asScala.exists(FileInfo.executableBits)
+  @inline def isRegularFile: Boolean = attributes.isRegularFile
+  @inline def isSymlink: Boolean = attributes.isSymbolicLink
+  @inline def group: GroupPrincipal = attributes.group()
+  @inline def owner: UserPrincipal = attributes.owner()
+  @inline def permissions: Int = FileInfo.mode(attributes).toInt
+  @inline def size: Long = attributes.size()
+  @inline def lastModifiedTime: Instant = attributes.lastModifiedTime().toInstant
+  @inline def lastAccessTime: Instant = attributes.lastAccessTime().toInstant
+  @inline def creationTime: Instant = attributes.creationTime().toInstant
+  @inline def isExecutable = attributes.permissions().asScala.exists(FileInfo.executableBits)
 }
-
