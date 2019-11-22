@@ -9,6 +9,10 @@ import de.bley.scalals.CoreConfig.{ aliases, files }
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
+import squants.information.Information
+import squants.information.InformationConversions._
+import squants.experimental.formatter.DefaultFormatter
+import squants.experimental.unitgroups.information.IECInformation
 
 sealed trait FileSizeMode
 final case class ScaleSize(factor: Int)
@@ -201,11 +205,33 @@ object GitDecorator extends Decorator {
   }
 }
 
-final case class SizeDecorator(scale: Long = 1L) extends Decorator {
+object SizeDecorator {
+  val sizeFormatter = new DefaultFormatter(IECInformation)
+}
+
+final case class SizeDecorator(scale: Information) extends Decorator {
+
+  /**
+    * @see https://stackoverflow.com/questions/3263892/format-file-size-as-mb-gb-etc
+    * @see https://en.wikipedia.org/wiki/Zettabyte
+    * @param fileSize Up to Exabytes
+    * @return
+    */
+  private def humanReadableByteSize(fileSize: Long): String = {
+    if (fileSize <= 0) return "0 B"
+    // kilo, Mega, Giga, Tera, Peta, Exa, Zetta, Yotta
+    val units: Array[String] = Array("B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    val digitGroup = (Math.log10(fileSize.toDouble) / Math.log10(1024))
+    f"${fileSize / Math.pow(1024, digitGroup)}%3.3f ${units(digitGroup.toInt)}"
+  }
+
   override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
-    val output = f"${subject.size.toDouble / scale}%.2f"
-    builder.append(output)
-    output.length
+    val scaled = subject.size.bytes
+    //val output = f"$scaled%.2f"
+    val best = SizeDecorator.sizeFormatter.inBestUnit(scaled)
+    val output = f"${best.value}%f ${best.unit.symbol}" //.toString()
+    builder.append(output).append(' ')
+    output.length + 1
   }
 }
 

@@ -29,6 +29,10 @@ object types {
    };
    */
   type winsize = CStruct4[UShort, UShort, UShort, UShort]
+  /*trait winsize extends CStruct4[UShort, UShort, UShort, UShort] {
+    def ws_row = _1
+    def ws_col = _2
+  }*/
 }
 
 object Terminal {

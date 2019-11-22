@@ -1,7 +1,4 @@
-
 import scala.sys.process._
-
-// Set to false or remove if you want to show stubs as linking errors
 
 val sharedSettings = Seq(
   scalaVersion := "2.11.12",
@@ -34,6 +31,7 @@ lazy val scalals =
     .settings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %%% "scopt" % "3.7.1",
+        "org.typelevel" %%% "squants" % "1.4.0",
         "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
       )
     )
@@ -58,6 +56,6 @@ lazy val scalals =
           objFile
         }
       },
+      // Set to false or remove if you want to show stubs as linking errors
       nativeLinkStubs := true
     )
-

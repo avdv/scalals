@@ -1,6 +1,8 @@
 package de.bley.scalals
 
 import java.nio.file.{ Path, Paths }
+import squants.information.Information
+import squants.information.Bytes
 
 //import scala.io.AnsiColor
 
@@ -34,7 +36,8 @@ object `package` {
 }
 
 final case class Config(
-    blockSize: Long = 1,
+    classify: Boolean = false,
+    blockSize: Information = Bytes(1),
     sort: SortMode.SortMode = SortMode.name,
     showAll: Boolean = false,
     listDirectories: Boolean = true,
@@ -52,6 +55,9 @@ final case class Config(
 )
 
 object Main {
+  implicit val informationReads: scopt.Read[Information] = scopt.Read.reads[Information] { str =>
+    Information(str).get
+  }
   val parser = new scopt.OptionParser[Config]("scalals") {
     head("scalals", BuildInfo.version)
 
@@ -77,7 +83,7 @@ object Main {
     opt[Unit]('l', "long")
       .text("use a long listing format")
       .action((_, c) ⇒ c.copy(long = true))
-    opt[Long]("block-size") // TODO: parse unit
+    opt[Information]("block-size") // TODO: parse unit
       .text("scale sizes by SIZE when printing them")
       .action((factor, c) ⇒ c.copy(blockSize = factor))
     opt[Unit]('L', "dereference")
