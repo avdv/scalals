@@ -33,7 +33,6 @@ cache:
 before_deploy:
   - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
       'project scalalsNative'
-      'set nativeLTO := "thin"'
       'set nativeMode := "release"'
       nativeLink
   - export SCALALS=scalals-${TRAVIS_OS_NAME}-${TRAVIS_CPU_ARCH}
