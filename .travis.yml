@@ -31,7 +31,11 @@ cache:
     - $HOME/.sbt/boot/
 
 before_deploy:
-  - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION 'set nativeLTO := "thin"' 'set nativeMode := "release"' nativeLink
+  - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
+      'project scalalsNative'
+      'set nativeLTO := "thin"'
+      'set nativeMode := "release"'
+      nativeLink
   - export SCALALS=scalals-${TRAVIS_OS_NAME}-${TRAVIS_CPU_ARCH}
   - mv native/target/scala-2.11/scalals-out "$SCALALS"
   # Set up git user name and tag this commit
