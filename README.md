@@ -22,7 +22,6 @@ and closing files.
 $ git clone -b integ https://github.com/avdv/scala-native.git
 $ cd scala-native
 $ sbt
-> ^^1.2.8
 > rebuild
 ```
 
