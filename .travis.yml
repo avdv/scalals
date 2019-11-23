@@ -5,6 +5,11 @@ if: branch = master OR tag IS present
 os:
   - linux
 
+addons:
+  apt:
+    packages:
+      - llvm-7-dev
+
 language: scala
 
 scala:
@@ -15,7 +20,7 @@ install:
   - (cd modules/scopt && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
 
 script:
-  - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION scalalsNative/run
+  - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION 'set scalalsNative / nativeLTO := "thin"' scalalsNative/run
 
 sudo: false
 
