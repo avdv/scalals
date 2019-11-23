@@ -22,14 +22,14 @@ install:
   - which clang
   - which clang-7
   - clang --version
-  - clang -flto=thin -O2 file1.c file2.c -c
-  - clang -flto=thin -O2 file1.o file2.o -o a.out
+  - /usr/lib/llvm-7/bin/clang -flto=thin -O2 file1.c file2.c -c
+  - /usr/lib/llvm-7/bin/clang -flto=thin -O2 file1.o file2.o -o a.out
 
 #  - (cd modules/scala-native && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 rebuild)
 #  - (cd modules/scopt && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
 
 script:
-  - echo ok
+  - ./a.out
 #sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION 'set scalalsNative / nativeLTO := "thin"' scalalsNative/run
 
 sudo: false
