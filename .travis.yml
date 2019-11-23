@@ -5,6 +5,8 @@ if: branch = master OR tag IS present
 os:
   - linux
 
+dist: bionic
+
 addons:
   apt:
     packages:
