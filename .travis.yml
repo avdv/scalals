@@ -11,6 +11,7 @@ addons:
   apt:
     packages:
       - clang-7
+      - llvm-7-dev
 
 language: scala
 
