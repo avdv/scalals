@@ -10,7 +10,6 @@ dist: bionic
 addons:
   apt:
     packages:
-      - llvm-7-dev
       - clang-7
 
 language: scala
@@ -19,18 +18,15 @@ scala:
   - 2.11.12
 
 install:
-  - which clang
-  - which clang-7
-  - clang --version
-  - /usr/lib/llvm-7/bin/clang -flto=thin -O2 file1.c file2.c -c
-  - /usr/lib/llvm-7/bin/clang -flto=thin -O2 file1.o file2.o -o a.out
-
-#  - (cd modules/scala-native && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 rebuild)
-#  - (cd modules/scopt && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
+  - export CLANG_PATH=/usr/lib/llvm-7/bin/clang CLANGPP_PATH=/usr/lib/llvm-7/bin/clang++
+  - (cd modules/scala-native && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 rebuild)
+  - (cd modules/scopt && sbt -Dfile.encoding=UTF8 -sbt-version 1.3.3 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
 
 script:
-  - ./a.out
-#sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION 'set scalalsNative / nativeLTO := "thin"' scalalsNative/run
+  - sbt -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION 'set scalalsNative / nativeLTO := "thin"' scalalsNative/run
+
+after_success:
+  - ldd native/target/scala-2.11/scalals-out
 
 sudo: false
 
