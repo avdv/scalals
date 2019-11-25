@@ -33,7 +33,7 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.scopt" %%% "scopt" % "3.7.1",
+        "com.github.avdv" %%% "scopt" % "3.7.1.1",
         "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
       )
     )
