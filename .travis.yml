@@ -49,11 +49,12 @@ before_deploy:
     declare -r version=$( cat VERSION )
     
     if ! git rev-parse --quiet --verify "v${version}^{tag}" > /dev/null; then
+      export TRAVIS_TAG="v${version}"
+
       # Set up git user name and tag this commit
       git config --local user.name "Travis CI"
       git config --local user.email "builds@travis-ci.com"
       git tag -m "Release version $version" $TRAVIS_TAG
-      export TRAVIS_TAG="v${version}"
     fi
   - test -n "$TRAVIS_TAG" &&
     sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
