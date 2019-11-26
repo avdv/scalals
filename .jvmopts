@@ -1,0 +1,6 @@
+-Xms512m
+-Xmx2G
+-Xss2m
+-XX:MaxInlineLevel=18
+-XX:+UnlockExperimentalVMOptions
+-XX:+UseJVMCICompiler
