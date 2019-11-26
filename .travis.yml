@@ -1,12 +1,13 @@
 conditions: v1
 
-if: branch = master AND tag IS blank
+if: branch = master OR tag IS present
 
 os:
-  - linux
   - osx
 
 dist: bionic
+
+#osx_image: xcode10
 
 addons:
   apt:
@@ -19,16 +20,10 @@ language: scala
 scala:
   - 2.11.12
 
-install:
-  - test "$TRAVIS_OS_NAME" != 'linux' || export CLANG_PATH=/usr/lib/llvm-7/bin/clang CLANGPP_PATH=/usr/lib/llvm-7/bin/clang++
-  - (cd modules/scala-native && sbt -batch -Dfile.encoding=UTF8 -sbt-version 1.3.3 rebuild)
-  - (cd modules/scopt && sbt -batch -Dfile.encoding=UTF8 -sbt-version 1.3.3 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
-
 script:
-  - sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION scalalsNative/run
-
-after_success:
-  - test "$TRAVIS_OS_NAME" != 'linux' || ldd native/target/scala-2.11/scalals-out
+  - free -m
+  - java -XshowSettings:vm -version
+  - sbt -batch -J-XshowSettings:vm projects
 
 sudo: false
 
