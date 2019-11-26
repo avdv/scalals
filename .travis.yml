@@ -3,17 +3,18 @@ conditions: v1
 if: branch = master OR tag IS present
 
 os:
+  - linux
   - osx
 
 dist: bionic
 
 #osx_image: xcode10
 
-addons:
-  apt:
-    packages:
-      - clang-7
-      - llvm-7-dev
+#addons:
+#  apt:
+#    packages:
+#      - clang-7
+#      - llvm-7-dev
 
 language: scala
 
@@ -23,7 +24,7 @@ scala:
 script:
   - free -m
   - java -XshowSettings:vm -version
-  - sbt -batch -J-XshowSettings:vm projects
+  - sbt -batch -J-XshowSettings:vm -J-showversion about
 
 sudo: false
 
