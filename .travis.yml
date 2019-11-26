@@ -1,6 +1,6 @@
 conditions: v1
 
-if: branch = master OR tag IS present
+if: branch = master AND tag IS blank
 
 os:
   - linux
@@ -45,18 +45,24 @@ cache:
     - $HOME/.sbt/launchers/
 
 before_deploy:
-  - sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
+  - |
+    declare -r version=$( cat VERSION )
+    
+    if ! git rev-parse --quiet --verify "v${version}^{tag}" > /dev/null; then
+      # Set up git user name and tag this commit
+      git config --local user.name "Travis CI"
+      git config --local user.email "builds@travis-ci.com"
+      git tag -m "Release version $version" $TRAVIS_TAG
+      export TRAVIS_TAG="v${version}"
+    fi
+  - test -n "$TRAVIS_TAG" &&
+    sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
       'project scalalsNative'
       'set nativeMode := "release"'
       'set nativeLTO := "thin"'
       nativeLink
   - export SCALALS=scalals-${TRAVIS_OS_NAME}-${TRAVIS_CPU_ARCH}
   - mv native/target/scala-2.11/scalals-out "$SCALALS"
-  # Set up git user name and tag this commit
-  - git config --local user.name "Travis CI"
-  - git config --local user.email "builds@travis-ci.com"
-  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-  - git tag $TRAVIS_TAG
 
 deploy:
   provider: releases
@@ -66,4 +72,6 @@ deploy:
   skip_cleanup: true
   draft: true
   on:
+    all_branches: true
+    condition: $TRAVIS_TAG =~ ^v[0-9][.]
     repo: avdv/scalals
