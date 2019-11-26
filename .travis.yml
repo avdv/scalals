@@ -22,7 +22,8 @@ scala:
   - 2.11.12
 
 script:
-  - free -m
+  - top -l 1 -s 0 
+  - sbt -help
   - java -XshowSettings:vm -version
   - sbt -batch -J-XshowSettings:vm -J-showversion about
 
