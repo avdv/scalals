@@ -56,7 +56,7 @@ before_deploy:
     if git tag -m "Release version $version" "v${version}"; then
       export TRAVIS_TAG="v${version}"
     fi
-  - test -n "$TRAVIS_TAG" &&
+  - test -z "$TRAVIS_TAG" ||
     sbt -batch -offline -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
       'project scalalsNative'
       'set nativeMode := "release"'
