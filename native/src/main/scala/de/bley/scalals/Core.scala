@@ -24,17 +24,17 @@ object FileInfo {
       if (err == 0) buf
       else throw new IOException(s"could not stat $path") // TODO use errno
     }
-    new FileInfo(path, info)
+    new FileInfo(path, toCString(path.getFileName.toString), info)
   }
 }
 
-final class FileInfo private (val path: Path, private val info: Ptr[stat.stat]) extends generic.FileInfo {
+final class FileInfo private (val path: Path, val cstr: CString, private val info: Ptr[stat.stat]) extends generic.FileInfo {
   import scalanative.posix.{ grp, pwd }
   import scalanative.posix.sys.statOps._
   import scalanative.posix.timeOps._
   import scalanative.libc.errno
 
-  val name = path.getFileName.toString
+  val name = fromCString(cstr)
 
   @inline def isDirectory: Boolean = stat.S_ISDIR(info.st_mode) != 0
   @inline def isRegularFile: Boolean = stat.S_ISREG(info.st_mode) != 0
@@ -167,7 +167,7 @@ object Core {
               e.splitAt(dot).swap
             else ("", f.name)
           }
-        case _ ⇒ Ordering.by((f: FileInfo) ⇒ f.name)
+        case _ ⇒ Ordering.fromLessThan((a: FileInfo, b: FileInfo) => locale.strcoll(a.cstr, b.cstr) < 0)
       }
 
       val orderDirection = if (config.reverse) orderBy.reverse else orderBy

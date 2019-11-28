@@ -17,4 +17,7 @@ object locale {
   def LC_NUMERIC: CInt = extern
 
   def setlocale(category: CInt, locale: CString): CString = extern
+
+  // int strcoll(const char *s1, const char *s2);
+  def strcoll(a: CString, b: CString): CInt = extern
 }
