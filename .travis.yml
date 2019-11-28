@@ -58,7 +58,7 @@ before_deploy:
       git tag -m "Release version $version" $TRAVIS_TAG
     fi
   - test -n "$TRAVIS_TAG" &&
-    sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
+    sbt -batch -offline -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
       'project scalalsNative'
       'set nativeMode := "release"'
       'set nativeLTO := "thin"'
