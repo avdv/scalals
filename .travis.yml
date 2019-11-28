@@ -29,6 +29,16 @@ script:
 
 after_success:
   - test "$TRAVIS_OS_NAME" != 'linux' || ldd native/target/scala-2.11/scalals-out
+  - |
+    declare -r version=$( cat VERSION )
+    
+    # Set up git user name and tag this commit
+    git config --local user.name "Travis CI"
+    git config --local user.email "builds@travis-ci.com"
+
+    if git tag -m "Release version $version" "v${version}"; then
+      export TRAVIS_TAG="v${version}"
+    fi
 
 sudo: false
 
@@ -46,18 +56,7 @@ cache:
     - $HOME/.sbt/launchers/
 
 before_deploy:
-  - |
-    declare -r version=$( cat VERSION )
-    
-    # Set up git user name and tag this commit
-    git config --local user.name "Travis CI"
-    git config --local user.email "builds@travis-ci.com"
-
-    if git tag -m "Release version $version" "v${version}"; then
-      export TRAVIS_TAG="v${version}"
-    fi
-  - test -z "$TRAVIS_TAG" ||
-    sbt -batch -offline -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
+  - sbt -batch -offline -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION
       'project scalalsNative'
       'set nativeMode := "release"'
       'set nativeLTO := "thin"'
@@ -74,3 +73,4 @@ deploy:
   draft: true
   on:
     repo: avdv/scalals
+    tags: true
