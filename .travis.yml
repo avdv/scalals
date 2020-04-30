@@ -8,6 +8,9 @@ os:
 
 dist: bionic
 
+jdk:
+  - openjdk11
+
 addons:
   apt:
     packages:
