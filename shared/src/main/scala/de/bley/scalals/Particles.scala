@@ -41,7 +41,7 @@ trait Decorator {
     case _                                       => ColorDecorator(this)
   }
 
-  def cond(p: Boolean)(d: ⇒ Decorator): Decorator = {
+  def cond(p: Boolean)(d: => Decorator): Decorator = {
     if (p) this + d else this
   }
 }
@@ -118,15 +118,15 @@ object GitDecorator extends Decorator {
   import scala.io.AnsiColor._
 
   override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
-    GitDecorator(subject.path).toOption.fold(0) { info ⇒
-      info.get(subject.name).fold(builder.append(s"  $GREEN✓$RESET ")) { modes ⇒
+    GitDecorator(subject.path).toOption.fold(0) { info =>
+      info.get(subject.name).fold(builder.append(s"  $GREEN✓$RESET ")) { modes =>
         val m = modes.map {
-          case 'M' ⇒ BLUE + 'M' + RESET
-          case 'D' ⇒ RED + 'D' + RESET
-          case 'A' ⇒ YELLOW + 'A' + RESET
-          case '?' ⇒ MAGENTA + '?' + RESET
+          case 'M' => BLUE + 'M' + RESET
+          case 'D' => RED + 'D' + RESET
+          case 'A' => YELLOW + 'A' + RESET
+          case '?' => MAGENTA + '?' + RESET
           case '!' => " "
-          case c ⇒ c.toString
+          case c   => c.toString
         }
         builder
           .append(" " * (3 - modes.size))
@@ -148,7 +148,7 @@ object GitDecorator extends Decorator {
   private def getStatus(path: Path) = {
     val proc = new ProcessBuilder("git", "-C", path.toAbsolutePath.toString, "rev-parse", "--show-prefix").start()
     val status = for {
-      prefix ← Try(Source.fromInputStream(proc.getInputStream()).mkString.trim)
+      prefix <- Try(Source.fromInputStream(proc.getInputStream()).mkString.trim)
       if {
         while (!proc.waitFor(10, TimeUnit.MILLISECONDS)) ()
         proc.exitValue() == 0
@@ -164,8 +164,8 @@ object GitDecorator extends Decorator {
         "--ignored",
         "."
       ).start()
-      out ← Try(Source.fromInputStream(gitStatus.getInputStream()))
-      gitInfo = mutable.HashMap.empty[String, mutable.HashSet[Char]].withDefault(m ⇒ mutable.HashSet.empty[Char])
+      out <- Try(Source.fromInputStream(gitStatus.getInputStream()))
+      gitInfo = mutable.HashMap.empty[String, mutable.HashSet[Char]].withDefault(m => mutable.HashSet.empty[Char])
       sb = new StringBuilder
       iter: BufferedIterator[Char] = out.iter.buffered
     } yield {
