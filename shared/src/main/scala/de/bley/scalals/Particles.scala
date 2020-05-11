@@ -6,6 +6,7 @@ import java.nio.file.{ Path, Paths }
 
 import de.bley.scalals.CoreConfig.{ aliases, files }
 
+import scala.collection.compat._
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
@@ -167,7 +168,7 @@ object GitDecorator extends Decorator {
       out <- Try(Source.fromInputStream(gitStatus.getInputStream()))
       gitInfo = mutable.HashMap.empty[String, mutable.HashSet[Char]].withDefault(m => mutable.HashSet.empty[Char])
       sb = new StringBuilder
-      iter: BufferedIterator[Char] = out.iter.buffered
+      iter = out.iter.buffered
     } yield {
       def getc(): Boolean = {
         val ch = iter.next()
@@ -195,7 +196,7 @@ object GitDecorator extends Decorator {
 
         gitInfo(f) = gitInfo(f) ++= mode
       }
-      gitInfo.toMap.mapValues(_.toSet)
+      gitInfo.view.mapValues(_.toSet).toMap
     }
     status
   }

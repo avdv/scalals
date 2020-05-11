@@ -34,15 +34,19 @@ lazy val scalals =
     .settings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %%% "scopt" % "3.7.1",
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
-      )
-    )
-    // configure JVM settings
-    //.jvmSettings(/* ... */)
-    // configure Scala-Native settings
-    .nativeSettings(
+        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0",
+        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
+      ),
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
+      testFrameworks := Seq(new TestFramework("utest.runner.Framework"))
+    )
+    // configure JVM settings
+    .jvmSettings(
+      scalaVersion := "2.13.2"
+    )
+    // configure Scala-Native settings
+    .nativeSettings(
       nativeCompileOptions += "-Wall",
       nativeLinkingOptions ++= {
         val cFiles = (baseDirectory.value / "src" / "main" / "c") ** "*.c"
