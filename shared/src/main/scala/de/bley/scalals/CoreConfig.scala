@@ -42,14 +42,14 @@ object Colors {
   def ansiColor(str: String): String = "\u001b[" + str + "m"
 
   val getType: PartialFunction[String, FileType] = {
-    case "fi" ⇒ RegularFile
-    case "di" ⇒ Directory
-    case "ln" ⇒ Symlink
-    case "or" ⇒ Orphan
-    case "ex" ⇒ Executable
-    case "so" => Socket
-    case "pi" => Pipe
-    case "do" | "bd" | "cd" ⇒ Special // door, block device, char device
+    case "fi"               => RegularFile
+    case "di"               => Directory
+    case "ln"               => Symlink
+    case "or"               => Orphan
+    case "ex"               => Executable
+    case "so"               => Socket
+    case "pi"               => Pipe
+    case "do" | "bd" | "cd" => Special // door, block device, char device
     // case "mh" => multi hardlink
     case s if s.startsWith("*.") => Extension(s)
   }
@@ -57,13 +57,13 @@ object Colors {
   lazy val getColors: Map[AnyRef, String] = {
     val Assign = raw"([^=]+)=([\d;]+|target)".r
     for {
-      definition ← sys.env.get("LS_COLORS").filterNot(_.isEmpty).toList
-      assign ← definition.split(':')
+      definition <- sys.env.get("LS_COLORS").filterNot(_.isEmpty).toList
+      assign <- definition.split(':')
       Assign(lhs, rhs) = assign
       if getType.isDefinedAt(lhs)
       fileType = getType(lhs)
     } yield {
-      fileType → { if (rhs == "target") "" else ansiColor(rhs) }
+      fileType -> { if (rhs == "target") "" else ansiColor(rhs) }
     }
   }.toMap[AnyRef, String].withDefaultValue(ansiColor("00"))
 

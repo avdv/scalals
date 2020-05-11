@@ -28,7 +28,8 @@ object FileInfo {
   }
 }
 
-final class FileInfo private (val path: Path, val cstr: CString, private val info: Ptr[stat.stat]) extends generic.FileInfo {
+final class FileInfo private (val path: Path, val cstr: CString, private val info: Ptr[stat.stat])
+    extends generic.FileInfo {
   import scalanative.posix.{ grp, pwd }
   import scalanative.posix.sys.statOps._
   import scalanative.posix.timeOps._
@@ -127,7 +128,7 @@ object Core {
     listAll(list(filePaths.toArray, config), config, decorators)
 
     for {
-      path ← dirPaths
+      path <- dirPaths
     } {
       if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
       try {
@@ -138,7 +139,7 @@ object Core {
 
         listAll(list(entries, config), config, decorators)
       } catch {
-        case e: NoSuchFileException ⇒
+        case e: NoSuchFileException =>
           Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
       }
     }
@@ -157,17 +158,17 @@ object Core {
   private def list(items: Array[Path], config: Config)(implicit z: Zone) = {
     implicit val ordering: Ordering[FileInfo] = {
       val orderBy = config.sort match {
-        case SortMode.size ⇒ Ordering.by((f: FileInfo) => (-f.size, f.name))
-        case SortMode.time ⇒ Ordering.by((f: FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
-        case SortMode.extension ⇒
-          Ordering.by { (f: FileInfo) ⇒
+        case SortMode.size => Ordering.by((f: FileInfo) => (-f.size, f.name))
+        case SortMode.time => Ordering.by((f: FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
+        case SortMode.extension =>
+          Ordering.by { (f: FileInfo) =>
             val e = f.name.dropWhile(_ == '.')
             val dot = e.lastIndexOf('.')
             if (dot > 0)
               e.splitAt(dot).swap
             else ("", f.name)
           }
-        case _ ⇒ Ordering.fromLessThan((a: FileInfo, b: FileInfo) => locale.strcoll(a.cstr, b.cstr) < 0)
+        case _ => Ordering.fromLessThan((a: FileInfo, b: FileInfo) => locale.strcoll(a.cstr, b.cstr) < 0)
       }
 
       val orderDirection = if (config.reverse) orderBy.reverse else orderBy
@@ -206,8 +207,8 @@ object Core {
     if (listingBuffer.nonEmpty) {
       val output = timing("decorate") {
         for {
-          fileInfo ← listingBuffer.toVector
-          decorator ← decorators
+          fileInfo <- listingBuffer.toVector
+          decorator <- decorators
           builder = new StringBuilder()
         } yield {
           decorator.decorate(fileInfo, builder) -> builder
@@ -242,7 +243,7 @@ object Core {
           println(
             record
               .reduceLeft[(Int, StringBuilder)] {
-                case ((width, builder), (width2, builder2)) ⇒
+                case ((width, builder), (width2, builder2)) =>
                   val colSize = maxColSize(i)
                   i += 1
                   width2 -> builder
@@ -362,7 +363,7 @@ object Core {
           val owner = try {
             file.owner
           } catch {
-            case e: IOException ⇒ "-"
+            case e: IOException => "-"
           }
 
           builder.append(owner)
@@ -377,7 +378,7 @@ object Core {
             //principalCache.getOrElseUpdate(group, group.getName)
             file.group
           } catch {
-            case e: IOException ⇒ "-"
+            case e: IOException => "-"
           }
           builder.append(group)
           group.length()
