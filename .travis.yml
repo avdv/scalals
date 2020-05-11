@@ -26,6 +26,7 @@ install:
   - test "$TRAVIS_OS_NAME" != 'linux' || export CLANG_PATH=/usr/lib/llvm-7/bin/clang CLANGPP_PATH=/usr/lib/llvm-7/bin/clang++
   - (cd modules/scala-native && sbt -batch -Dfile.encoding=UTF8 -sbt-version 1.3.3 rebuild)
   - (cd modules/scopt && sbt -batch -Dfile.encoding=UTF8 -sbt-version 1.3.3 ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
+  - (cd modules/scala-library-compat && SCALANATIVE_VERSION=0.4.0-SNAPSHOT sbt -batch -sbt-version 1.3.3 compat211Native/publishLocal)
 
 script:
   - sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION scalalsNative/run
