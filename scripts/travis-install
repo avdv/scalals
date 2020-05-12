@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eEuCo pipefail || exit 1
+
+declare -r SCALA_NATIVE_BUILD="$HOME/.ivy2/local/.sn-build-${SN_BUILD}"
+
+if [ -e "$SCALA_NATIVE_BUILD" ]; then
+  echo "using cache..."
+else
+  rm -rf $HOME/.ivy2/local
+
+  (cd modules/scala-native && sbt -batch -Dfile.encoding=UTF8 -sbt-version $SBT_VERSION rebuild)
+  (cd modules/scopt && sbt -batch -Dfile.encoding=UTF8 -sbt-version $SBT_VERSION ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
+  (cd modules/scala-library-compat && SCALANATIVE_VERSION=0.4.0-SNAPSHOT sbt -batch -sbt-version $SBT_VERSION compat211Native/publishLocal)
+
+  touch "$SCALA_NATIVE_BUILD"
+fi
