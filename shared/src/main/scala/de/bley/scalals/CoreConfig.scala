@@ -1,5 +1,7 @@
 package de.bley.scalals
 
+import java.nio.file.Files
+
 object CoreConfig {
   val files: Map[String, Char] = SFiles.map
 //    val p = new Properties()
@@ -71,7 +73,10 @@ object Colors {
     val color = if (file.isDirectory) {
       Directory
     } else if (file.isSymlink) {
-      Symlink
+      if (Files.notExists(file.path) && getColors.contains(Orphan))
+        Orphan
+      else
+        Symlink
     } else if (file.isPipe) {
       Pipe
     } else if (file.isSocket) {
