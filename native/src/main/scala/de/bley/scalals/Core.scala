@@ -6,7 +6,9 @@ import java.time.Instant
 import scala.collection.mutable
 import java.io.IOException
 
+import scalanative.libc.errno
 import scalanative.unsafe._
+import scalanative.posix.errno._
 import scalanative.posix.sys.stat
 
 object FileInfo {
@@ -22,7 +24,13 @@ object FileInfo {
           stat.lstat(toCString(path.toString), buf)
 
       if (err == 0) buf
-      else throw new IOException(s"could not stat $path") // TODO use errno
+      else {
+        errno.errno match {
+          case e if e == ENOENT => throw new IOException("No such file or directory")
+          case e if e == EACCES => throw new IOException("Permission denied")
+          case _      => throw new IOException("I/O error")
+        }
+      }
     }
     new FileInfo(path, toCString(path.getFileName.toString), info)
   }
@@ -179,8 +187,10 @@ object Core {
     val listingBuffer = scala.collection.mutable.TreeSet.empty[FileInfo]
     for {
       path <- items
-    } {
+    } try {
       listingBuffer += FileInfo(path, config.dereference)
+    } catch {
+      case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
     }
     listingBuffer
   }
