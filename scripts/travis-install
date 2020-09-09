@@ -9,7 +9,7 @@ if [ -e "$SCALA_NATIVE_BUILD" ]; then
 else
   rm -rf $HOME/.ivy2/local
 
-  (cd modules/scala-native && sbt -batch -Dfile.encoding=UTF8 -sbt-version $SBT_VERSION rebuild)
+  (cd modules/scala-native && sbt -batch -Dfile.encoding=UTF8 -sbt-version $SBT_VERSION publishLocal)
   (cd modules/scopt && sbt -batch -Dfile.encoding=UTF8 -sbt-version $SBT_VERSION ++$TRAVIS_SCALA_VERSION scoptNative/publishLocal)
   (cd modules/scala-library-compat && SCALANATIVE_VERSION=0.4.0-SNAPSHOT sbt -batch -sbt-version $SBT_VERSION compat211Native/publishLocal)
 
