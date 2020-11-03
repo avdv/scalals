@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.2
-    - uses: cachix/install-nix-action@v10
+    - uses: cachix/install-nix-action@v11
     - run: nix-shell --run "niv update"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
