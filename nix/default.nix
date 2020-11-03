@@ -5,6 +5,12 @@ let
   # default nixpkgs
   pkgs = import sources.nixpkgs {};
 
+  sbt = pkgs.sbt.overrideAttrs (
+    _: rec {
+      patchPhase = ''echo -java-home ${pkgs.adoptopenjdk-bin} >> conf/sbtopts'';
+    }
+  );
+
   # gitignore.nix 
   gitignoreSource = (import sources."gitignore.nix" { inherit (pkgs) lib; }).gitignoreSource;
 
@@ -13,9 +19,12 @@ in
 {
   inherit pkgs src;
 
+  clang = pkgs.clang_10;
+
   # provided by shell.nix
   devTools = {
-    inherit (pkgs) niv pre-commit;
+    inherit sbt;
+    inherit (pkgs) niv pre-commit clang_10;
   };
 
   # to be built by github actions
