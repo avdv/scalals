@@ -36,8 +36,11 @@ in
         nixpkgs-fmt.enable = true;
         nix-linter.enable = true;
       };
-      # generated files
-      excludes = [ "^nix/sources\.nix$" ];
+      # generated files / submodules
+      excludes = [
+        "^nix/sources\.nix$"
+        "^modules/"
+      ];
     };
   };
 }
