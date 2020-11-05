@@ -31,5 +31,5 @@ jobs:
     - run: nix-shell --run "scripts/travis-install && sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"
     - name: build binary # if: ${{ startsWith(github.refs, 'refs/tags/v') }}
       run: |
-        nix-shell --run "sbt -batch -offline -Dfile.encoding=UTF8 'project scalalsNative' 'set nativeMode := \"release\"' 'set nativeLTO := \"thin\"' nativeLink"
+        nix-shell --run "sbt -batch -Dfile.encoding=UTF8 'set offline := true' 'project scalalsNative' 'set nativeMode := \"release\"' 'set nativeLTO := \"thin\"' nativeLink"
         nix-build nix/scalals.nix
