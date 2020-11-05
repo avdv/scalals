@@ -10,7 +10,7 @@ let
     }
   );
 
-  # gitignore.nix 
+  # gitignore.nix
   gitignoreSource = (import sources."gitignore.nix" { inherit (pkgs) lib; }).gitignoreSource;
 
   src = gitignoreSource ./..;
