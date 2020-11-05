@@ -1,9 +1,8 @@
 { sources ? import ./sources.nix
 }:
-
 let
   # default nixpkgs
-  pkgs = import sources.nixpkgs {};
+  pkgs = import sources.nixpkgs { };
 
   sbt = pkgs.sbt.overrideAttrs (
     _: rec {
