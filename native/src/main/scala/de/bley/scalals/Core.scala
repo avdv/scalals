@@ -1,6 +1,6 @@
 package de.bley.scalals
 
-import java.nio.file.{ FileSystems, Files, NoSuchFileException, Path, Paths }
+import java.nio.file.{ Files, NoSuchFileException, Path, Paths }
 import java.time.Instant
 
 import scala.collection.mutable
@@ -8,11 +8,13 @@ import java.io.IOException
 
 import scalanative.libc.errno
 import scalanative.unsafe._
+import scalanative.unsigned._
 import scalanative.posix.errno._
 import scalanative.posix.sys.stat
 
 object FileInfo {
-  val lookupService = FileSystems.getDefault.getUserPrincipalLookupService
+  // FIXME: crashes with a scala.scalanative.runtime.UndefinedBehaviorError
+  //val lookupService = FileSystems.getDefault.getUserPrincipalLookupService
 
   def apply(path: Path, dereference: Boolean)(implicit z: Zone) = {
     val info = {
@@ -28,7 +30,7 @@ object FileInfo {
         errno.errno match {
           case e if e == ENOENT => throw new IOException("No such file or directory")
           case e if e == EACCES => throw new IOException("Permission denied")
-          case _      => throw new IOException("I/O error")
+          case _                => throw new IOException("I/O error")
         }
       }
     }
@@ -39,27 +41,27 @@ object FileInfo {
 final class FileInfo private (val path: Path, val cstr: CString, private val info: Ptr[stat.stat])
     extends generic.FileInfo {
   import scalanative.posix.{ grp, pwd }
-  import scalanative.posix.sys.statOps._
-  import scalanative.posix.timeOps._
+  // FIXME: reimplement stat with better resolution
+  //import scalanative.posix.timeOps._
   import scalanative.libc.errno
 
   val name = fromCString(cstr)
 
-  @inline def isDirectory: Boolean = stat.S_ISDIR(info.st_mode) != 0
-  @inline def isRegularFile: Boolean = stat.S_ISREG(info.st_mode) != 0
-  @inline def isSymlink: Boolean = stat.S_ISLNK(info.st_mode) != 0
-  @inline def isPipe: Boolean = stat.S_ISFIFO(info.st_mode) != 0
-  @inline def isSocket: Boolean = stat.S_ISSOCK(info.st_mode) != 0
-  @inline def isCharDev: Boolean = stat.S_ISCHR(info.st_mode) != 0
-  @inline def isBlockDev: Boolean = stat.S_ISBLK(info.st_mode) != 0
+  @inline def isDirectory: Boolean = stat.S_ISDIR(info._13) != 0
+  @inline def isRegularFile: Boolean = stat.S_ISREG(info._13) != 0
+  @inline def isSymlink: Boolean = stat.S_ISLNK(info._13) != 0
+  @inline def isPipe: Boolean = stat.S_ISFIFO(info._13) != 0
+  @inline def isSocket: Boolean = stat.S_ISSOCK(info._13) != 0
+  @inline def isCharDev: Boolean = stat.S_ISCHR(info._13) != 0
+  @inline def isBlockDev: Boolean = stat.S_ISBLK(info._13) != 0
   @inline def group: String = {
     val buf = stackalloc[grp.group]
     errno.errno = 0
-    val err = grp.getgrgid(info.st_gid, buf)
+    val err = grp.getgrgid(info._5, buf)
     if (err == 0) {
       fromCString(buf._1)
     } else if (errno.errno == 0) {
-      info.st_gid.toString
+      info._5.toString
     } else {
       throw new IOException(s"$path: ${errno.errno}")
     }
@@ -67,20 +69,21 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
   @inline def owner: String = {
     val buf = stackalloc[pwd.passwd]
     errno.errno = 0
-    val err = pwd.getpwuid(info.st_uid, buf)
+    val err = pwd.getpwuid(info._4, buf)
     if (err == 0) {
       fromCString(buf._1)
     } else if (errno.errno == 0) {
-      info.st_uid.toString
+      info._4.toString
     } else {
       throw new IOException(s"$path: ${errno.errno}")
     }
   }
-  @inline def permissions: Int = info.st_mode.toInt
+  @inline def permissions: Int = info._13.toInt
   @inline def size: Long = info._6
-  @inline def lastModifiedTime: Instant = Instant.ofEpochSecond(info.st_mtim.tv_sec, info.st_mtim.tv_nsec)
-  @inline def lastAccessTime: Instant = Instant.ofEpochSecond(info.st_atim.tv_sec, info.st_atim.tv_nsec)
-  @inline def creationTime: Instant = Instant.ofEpochSecond(info.st_ctim.tv_sec, info.st_ctim.tv_nsec)
+  // Still not fixed in scala-native: timestamps only have seconds resolution
+  @inline def lastModifiedTime: Instant = Instant.ofEpochSecond(info._8)
+  @inline def lastAccessTime: Instant = Instant.ofEpochSecond(info._7)
+  @inline def creationTime: Instant = Instant.ofEpochSecond(info._9)
   @inline def isExecutable = {
     import scala.scalanative.unsigned._
     (info._13 & (stat.S_IXGRP | stat.S_IXOTH | stat.S_IXUSR)) != 0.toUInt
@@ -226,7 +229,7 @@ object Core {
       }
 
       val sizes = output.map(_._1)
-      val minlen = sizes.min
+      //val minlen = sizes.min
       val columns =
         if (config.long || config.oneLine) decorators.size
         else {
@@ -341,7 +344,7 @@ object Core {
                 !time_t = file.lastModifiedTime.toEpochMilli() / 1000
 
                 val tm = time.localtime(time_t)
-                if (0 == time.strftime(str, 70, format, tm))
+                if (0.toULong == time.strftime(str, 70.toULong, format, tm))
                   "n/a" // buffer to small
                 else
                   fromCString(str)
