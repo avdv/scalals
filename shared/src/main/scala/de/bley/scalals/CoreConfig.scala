@@ -61,7 +61,10 @@ object Colors {
     for {
       definition <- sys.env.get("LS_COLORS").filterNot(_.isEmpty).toList
       assign <- definition.split(':')
-      Assign(lhs, rhs) = assign
+      (lhs, rhs) <- assign match {
+        case Assign(lhs, rhs) => Some(lhs -> rhs)
+        case _ => None
+      }
       if getType.isDefinedAt(lhs)
       fileType = getType(lhs)
     } yield {

@@ -1,12 +1,10 @@
 package de.bley.scalals
 
 import java.util.concurrent.TimeUnit
-import java.util.Locale
 import java.nio.file.{ Path, Paths }
 
 import de.bley.scalals.CoreConfig.{ aliases, files }
 
-import scala.collection.compat._
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
@@ -78,8 +76,8 @@ final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extend
   override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
 
     val indicator = style match {
-      case IndicatorStyle.none                           => ""
-      case IndicatorStyle.slash if (subject.isDirectory) => "/"
+      case IndicatorStyle.slash => if (subject.isDirectory) "/" else ""
+      case IndicatorStyle.none  => ""
       case IndicatorStyle.classify | IndicatorStyle.fileType =>
         if (subject.isDirectory)
           "/"
@@ -93,6 +91,7 @@ final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extend
           "*"
         else
           ""
+      case _ => ""
     }
     builder.append(indicator)
     indicator.length
@@ -215,7 +214,7 @@ object IconDecorator extends Decorator {
     val ext = {
       val e = subject.name.dropWhile(_ == '.')
       val dot = e.lastIndexOf('.')
-      if (dot > 0) e.substring(dot + 1).toLowerCase(Locale.ENGLISH)
+      if (dot > 0) e.substring(dot + 1).toLowerCase() // FIXME: Locale.ENGLISH
       else ""
     }
     //val key = if (files.contains(ext)) ext else aliases.getOrElse(ext, ext)

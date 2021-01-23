@@ -4,7 +4,7 @@ import scala.sys.process._
 // Set to false or remove if you want to show stubs as linking errors
 
 val sharedSettings = Seq(
-  scalaVersion := "2.11.12",
+  scalaVersion := "2.13.4",
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",
@@ -15,12 +15,9 @@ val sharedSettings = Seq(
     "-unchecked",
     "-Xfatal-warnings",
     "-Xlint",
-    "-Yno-adapted-args",
     "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard",
-    "-Xfuture",
-    "-Ywarn-unused-import"
   )
 )
 
@@ -33,9 +30,8 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.scopt" %%% "scopt" % "3.7.1",
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0",
-        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6"
+        "com.github.scopt" %%% "scopt" % "4.0.0",
+        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
       ),
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
@@ -43,10 +39,14 @@ lazy val scalals =
     )
     // configure JVM settings
     .jvmSettings(
-      scalaVersion := "2.13.2"
     )
     // configure Scala-Native settings
     .nativeSettings(
+      //nativeConfig ~= {
+      //  _.withLTO(LTO.thin)
+      //    .withMode(Mode.releaseFast)
+      //    .withGC(GC.commix)
+      //}
       nativeCompileOptions += "-Wall",
       nativeLinkingOptions ++= {
         val cFiles = (baseDirectory.value / "src" / "main" / "c") ** "*.c"

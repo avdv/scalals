@@ -3,8 +3,7 @@ conditions: v1
 if: branch = master AND tag IS blank
 
 env:
-  # SN_BUILD is used as a key to invalidate cached scala-native artefacts
-  - SN_BUILD=101 SBT_VERSION=1.3.13
+  - SBT_VERSION=1.4.6
 
 os:
   - linux
@@ -24,11 +23,10 @@ addons:
 language: scala
 
 scala:
-  - 2.11.12
+  - 2.13.4
 
 install:
   - test "$TRAVIS_OS_NAME" != 'linux' || export CLANG_PATH=/usr/lib/llvm-7/bin/clang CLANGPP_PATH=/usr/lib/llvm-7/bin/clang++
-  - scripts/travis-install
 
 script:
   - sbt -batch -Dfile.encoding=UTF8 ++$TRAVIS_SCALA_VERSION scalalsNative/run
@@ -59,7 +57,6 @@ cache:
     # coursier cache on macOS
     - $HOME/Library/Caches/Coursier
     - $HOME/.ivy2/cache
-    - $HOME/.ivy2/local
     - $HOME/.sbt/boot/
     - $HOME/.sbt/launchers/
 
