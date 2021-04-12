@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/avdv/scalals.svg?branch=master)](https://travis-ci.com/avdv/scalals)
+[![Test](https://github.com/avdv/scalals/actions/workflows/test.yml/badge.svg)](https://github.com/avdv/scalals/actions/workflows/test.yml)
 
 # About
 
