@@ -23,6 +23,7 @@ jobs:
     - uses: cachix/cachix-action@v10
       with:
         name: cbley
+        extraPullNames: pre-commit-hooks
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         # Only needed for private caches
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
