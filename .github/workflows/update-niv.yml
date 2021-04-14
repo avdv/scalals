@@ -3,8 +3,8 @@ name: Update niv
 on:
   workflow_dispatch:
   schedule:
-    # every day at 8am UTC
-    - cron: '0 8 * * *'
+    # every tuesday at 3pm UTC
+    - cron: '0 15 * * tue'
 
 jobs:
   update-dependencies:
