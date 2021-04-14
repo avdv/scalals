@@ -1,6 +1,7 @@
 name: Update niv
 
 on:
+  workflow_dispatch:
   schedule:
     # every day at 8am UTC
     - cron: '0 8 * * *'
