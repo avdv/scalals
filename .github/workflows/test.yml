@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.4
-      with:
-        submodules: true
     - name: Cache SBT
       uses: actions/cache@v2.1.5
       with:
@@ -34,4 +32,4 @@ jobs:
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git fetch --tags --force --recurse-submodules
     - run: nix-build
-    - run: nix-shell --run "./build.sh && sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"
+    - run: nix-shell --run "sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"

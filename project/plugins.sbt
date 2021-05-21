@@ -1,3 +1,4 @@
+// BEWARE: this is not supposed to be scala-native 0.4.0 release!!
 addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.4.0")
 addSbtPlugin("org.portable-scala" % "sbt-scala-native-crossproject" % "1.0.0")
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.0.0")

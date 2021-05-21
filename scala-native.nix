@@ -8,8 +8,8 @@ project.pkgs.stdenv.mkDerivation rec {
   src = project.pkgs.fetchFromGitHub {
     owner = "scala-native";
     repo = pname;
-    rev = "202c894ad85c155d48f041d78675318bd7246980";
-    sha256 = "1y4vhc6piywg0rlfi37hnadlczlcir2pnx5zdsgkpyl2jac8i217";
+    rev = "4270a34a56c0797098c3705d4b9ce85f7a79cf32";
+    sha256 = "0lzjqh4l25nywjvr306f8crkx9v0ssvrbq8wa3ky6di8l4kmdic6";
   };
 
   deps =
@@ -21,17 +21,24 @@ project.pkgs.stdenv.mkDerivation rec {
 
       name = "${name}-scala-native";
 
+      patches = [ ./toClass.diff ];
+
       nativeBuildInputs = [ project.pkgs.sbt ];
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "0cbvbl3gijn4yma6kxl9w8iixddwvh2xz35ks8ik6kl8bzm2bfcl";
+      outputHash = "0s84dyfrqz24vjkaf3d271qgr2q95rvglwcnin5y006hv09waryc";
       outputHashMode = "recursive";
 
       preHook = ''
         export HOME="$NIX_BUILD_TOP"
         export USER="nix"
         export COURSIER_CACHE="$HOME/coursier"
+      '';
+
+      preBuild = ''
+        # pretend this is scala-native 0.4.0
+        substituteInPlace nir/src/main/scala/scala/scalanative/nir/Versions.scala --replace '0.4.1-SNAPSHOT' '0.4.0'
       '';
 
       # set publication time to fixed value and re-compute hashes
@@ -50,7 +57,7 @@ project.pkgs.stdenv.mkDerivation rec {
       buildPhase = ''
         runHook preBuild
 
-        sbt --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch publishLocal '++2.13.4' \
+        sbt --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch publishLocal '++2.13.6' \
             auxlib/publishLocal \
             clib/publishLocal \
             javalib/publishLocal \
