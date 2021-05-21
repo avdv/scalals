@@ -23,7 +23,7 @@ in
   # provided by shell.nix
   devTools = {
     inherit sbt;
-    inherit (pkgs) niv pre-commit clang_10;
+    inherit (pkgs) niv pre-commit clang_10 tinycc;
   };
 
   # to be built by github actions
