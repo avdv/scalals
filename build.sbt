@@ -21,6 +21,14 @@ val sharedSettings = Seq(
   )
 )
 
+def generateConstants(base: File): File = {
+  base.mkdirs()
+  val outputFile = base / "constants.scala"
+  val cmd = s"tcc -run jvm/src/main/c/constants.scala.c" #> outputFile
+  cmd.!
+  outputFile
+}
+
 lazy val scalals =
   // select supported platforms
   crossProject(JVMPlatform, NativePlatform)
@@ -39,6 +47,9 @@ lazy val scalals =
     )
     // configure JVM settings
     .jvmSettings(
+      sourceGenerators in Compile += Def.task {
+        Seq(generateConstants((sourceManaged in Compile).value / "de" / "bley" / "scalals"))
+      }.taskValue
     )
     // configure Scala-Native settings
     .nativeSettings(
