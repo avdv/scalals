@@ -38,7 +38,7 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.scopt" %%% "scopt" % "4.0.0",
+        "com.github.scopt" %%% "scopt" % "4.0.1",
         "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
       ),
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
