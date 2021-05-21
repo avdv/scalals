@@ -1,0 +1,17 @@
+diff --git a/nativelib/src/main/scala/scala/scalanative/runtime/package.scala b/nativelib/src/main/scala/scala/scalanative/runtime/package.scala
+index 2a16e306..ae107d93 100644
+--- a/nativelib/src/main/scala/scala/scalanative/runtime/package.scala
++++ b/nativelib/src/main/scala/scala/scalanative/runtime/package.scala
+@@ -6,6 +6,12 @@ import scalanative.runtime.Intrinsics._
+ 
+ package object runtime {
+ 
++  @deprecated("compatibility for 0.4.0")
++  def toClass(raw: RawPtr): _Class[_] = {
++    val rtti = loadRawPtr(raw)
++    castRawPtrToObject(rtti).asInstanceOf[_Class[_]]
++  }
++
+   /** Used as a stub right hand of intrinsified methods. */
+   def intrinsic: Nothing = throwUndefined()
+ 

@@ -4,7 +4,7 @@ import scala.sys.process._
 // Set to false or remove if you want to show stubs as linking errors
 
 val sharedSettings = Seq(
-  scalaVersion := "2.13.4",
+  scalaVersion := "2.13.6",
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding", "UTF-8",

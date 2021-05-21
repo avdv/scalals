@@ -20,22 +20,11 @@ This is yet another [colorls](https://github.com/athityakumar/colorls) clone.
 
 # Building
 
-Currently, you need to build scala-native locally from [here](https://github.com/avdv/scala-native/tree/integ),
-since this branch has integrated some crucial patches to fix problems with java.time.Instant, file times
-and closing files.
+## Using nix
 
-```console
-$ git clone -b integ https://github.com/avdv/scala-native.git
-$ cd scala-native
-$ sbt
-> rebuild
-```
+1. run `cachix use cbley` (optional, but reduces build time significantly)
+2. run `nix-shell --run sbt`
 
-You also need to build scopt for this scala-native version:
-
-```console
-$ git clone -b scala-native-snapshot https://github.com/avdv/scopt.git
-$ cd scopt
-$ sbt scoptNative/publishLocal
-```
-
+_Note_: this project uses a scala-native version build off the master branch,
+        versioned as 0.4.0 and patched to make it a drop-in replacement for the
+        official 0.4.0 release.
