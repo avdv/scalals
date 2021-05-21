@@ -2,9 +2,11 @@ package de.bley.scalals
 package generic
 
 import java.time.Instant
+import java.nio.file.Path
 
 trait FileInfo {
   def name: String
+  def path: Path
   def isDirectory: Boolean
   def isRegularFile: Boolean
   def isSymlink: Boolean
