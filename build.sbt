@@ -48,8 +48,8 @@ lazy val scalals =
     )
     // configure JVM settings
     .jvmSettings(
-      sourceGenerators in Compile += Def.task {
-        Seq(generateConstants((sourceManaged in Compile).value / "de" / "bley" / "scalals"))
+      Compile / sourceGenerators += Def.task {
+        Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue
     )
     // configure Scala-Native settings
@@ -62,7 +62,7 @@ lazy val scalals =
       nativeCompileOptions += "-Wall",
       nativeLinkingOptions ++= {
         val cFiles = (baseDirectory.value / "src" / "main" / "c") ** "*.c"
-        val outDir = (sourceManaged in Compile).value / "native"
+        val outDir = (Compile / sourceManaged).value / "native"
         val clang = nativeClang.value.absolutePath
         val clangOptions = nativeCompileOptions.value
 
