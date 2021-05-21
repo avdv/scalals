@@ -39,7 +39,8 @@ lazy val scalals =
     .settings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %%% "scopt" % "4.0.1",
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
+        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0",
+        "com.lihaoyi" %%% "utest" % "0.7.10" % Test
       ),
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
