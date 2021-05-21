@@ -21,12 +21,12 @@ class FileSize(mode: FileSizeMode) {
 // more decorators
 
 trait Decorator {
-  def decorate(subject: FileInfo, builder: StringBuilder): Int
+  def decorate(subject: generic.FileInfo, builder: StringBuilder): Int
 
   def +(other: Decorator): Decorator = {
     val self = this
     new Decorator {
-      override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+      override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
         self.decorate(subject, builder) + other.decorate(subject, builder)
       }
     }
@@ -47,7 +47,7 @@ trait Decorator {
 
 object Decorator {
   object name extends Decorator {
-    override def decorate(file: FileInfo, builder: StringBuilder): Int = {
+    override def decorate(file: generic.FileInfo, builder: StringBuilder): Int = {
       builder.append(file.name)
       file.name.length
     }
@@ -62,7 +62,7 @@ object ColorDecorator {
   import scala.io.AnsiColor.RESET
 
   def apply(d: Decorator): Decorator = new Decorator {
-    override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+    override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
       val code = Colors.colorFor(subject)
       val o = d.decorate(subject, builder.append(code))
       builder.append(RESET)
@@ -73,7 +73,7 @@ object ColorDecorator {
 }
 
 final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extends Decorator {
-  override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+  override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
 
     val indicator = style match {
       case IndicatorStyle.slash => if (subject.isDirectory) "/" else ""
@@ -100,7 +100,7 @@ final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extend
 
 object HyperlinkDecorator {
   def apply(d: Decorator): Decorator = new Decorator {
-    override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+    override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
       builder
         .append("\u001b]8;;file://")
         .append(subject.path.toString)
@@ -117,7 +117,7 @@ object HyperlinkDecorator {
 object GitDecorator extends Decorator {
   import scala.io.AnsiColor._
 
-  override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+  override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
     GitDecorator(subject.path).toOption.fold(0) { info =>
       info.get(subject.name).fold(builder.append(s"  $GREEN✓$RESET ")) { modes =>
         val m = modes.map {
@@ -202,7 +202,7 @@ object GitDecorator extends Decorator {
 }
 
 final case class SizeDecorator(scale: Long = 1L) extends Decorator {
-  override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+  override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
     val output = f"${subject.size.toDouble / scale}%.2f"
     builder.append(output)
     output.length
@@ -210,7 +210,7 @@ final case class SizeDecorator(scale: Long = 1L) extends Decorator {
 }
 
 object IconDecorator extends Decorator {
-  override def decorate(subject: FileInfo, builder: StringBuilder): Int = {
+  override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
     val ext = {
       val e = subject.name.dropWhile(_ == '.')
       val dot = e.lastIndexOf('.')

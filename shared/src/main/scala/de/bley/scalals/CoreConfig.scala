@@ -72,7 +72,7 @@ object Colors {
     }
   }.toMap[AnyRef, String].withDefaultValue(ansiColor("00"))
 
-  def colorFor(file: FileInfo) = {
+  def colorFor(file: generic.FileInfo) = {
     val color = if (file.isDirectory) {
       Directory
     } else if (file.isSymlink) {
