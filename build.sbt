@@ -38,9 +38,7 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.scopt" %%% "scopt" % "4.0.1",
         "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0",
-        "com.lihaoyi" %%% "utest" % "0.7.10" % Test
       ),
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
@@ -48,12 +46,20 @@ lazy val scalals =
     )
     // configure JVM settings
     .jvmSettings(
+      libraryDependencies ++= Seq(
+        "com.github.scopt" %% "scopt" % "4.0.1",
+        "com.lihaoyi" %% "utest" % "0.7.10" % Test
+      ),
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue
     )
     // configure Scala-Native settings
     .nativeSettings(
+      libraryDependencies ++= Seq(
+        "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive(),
+        "com.lihaoyi" %% "utest_native0.4" % "0.7.10" % Test intransitive()
+      ),
       //nativeConfig ~= {
       //  _.withLTO(LTO.thin)
       //    .withMode(Mode.releaseFast)
