@@ -88,13 +88,12 @@ trait Core {
         var i = 0
         println(
           record
-            .reduceLeft[(Int, StringBuilder)] {
-              case ((width, builder), (width2, builder2)) =>
-                val colSize = maxColSize(i)
-                i += 1
-                width2 -> builder
-                  .append(" " * (colSize - width + 1))
-                  .append(builder2)
+            .reduceLeft[(Int, StringBuilder)] { case ((width, builder), (width2, builder2)) =>
+              val colSize = maxColSize(i)
+              i += 1
+              width2 -> builder
+                .append(" " * (colSize - width + 1))
+                .append(builder2)
             }
             ._2
         )
@@ -176,11 +175,12 @@ trait Core {
 
       val user = new Decorator {
         override def decorate(file: FileInfo, builder: StringBuilder): Int = {
-          val owner = try {
-            file.owner
-          } catch {
-            case e: IOException => "-"
-          }
+          val owner =
+            try {
+              file.owner
+            } catch {
+              case e: IOException => "-"
+            }
 
           builder.append(owner)
           owner.length()
@@ -189,13 +189,14 @@ trait Core {
 
       val group = new Decorator {
         override def decorate(file: FileInfo, builder: StringBuilder): Int = {
-          val group = try {
-            //val group = file.group
-            //principalCache.getOrElseUpdate(group, group.getName)
-            file.group
-          } catch {
-            case e: IOException => "-"
-          }
+          val group =
+            try {
+              //val group = file.group
+              //principalCache.getOrElseUpdate(group, group.getName)
+              file.group
+            } catch {
+              case e: IOException => "-"
+            }
           builder.append(group)
           group.length()
         }

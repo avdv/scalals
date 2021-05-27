@@ -118,7 +118,7 @@ object Terminal {
 
   val isTTYOutput: Boolean = System.console != null
   val width: Int = {
-    sys.env.get("COLUMNS").orElse(Try("tput cols".!!).toOption).flatMap(_.toIntOption).getOrElse(80)    
+    sys.env.get("COLUMNS").orElse(Try("tput cols".!!).toOption).flatMap(_.toIntOption).getOrElse(80)
   }
 }
 
@@ -136,10 +136,11 @@ object FileInfo {
 final case class FileInfo(path: Path)(dereference: Boolean) extends generic.FileInfo {
   import UnixConstants._
 
-  private val attributes = if (dereference)
-                             Files.readAttributes(path, classOf[PosixFileAttributes])
-                           else
-                             Files.readAttributes(path, classOf[PosixFileAttributes], LinkOption.NOFOLLOW_LINKS)
+  private val attributes =
+    if (dereference)
+      Files.readAttributes(path, classOf[PosixFileAttributes])
+    else
+      Files.readAttributes(path, classOf[PosixFileAttributes], LinkOption.NOFOLLOW_LINKS)
 
   val name = path.getFileName.toString
 
