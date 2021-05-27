@@ -63,7 +63,7 @@ object Colors {
       assign <- definition.split(':')
       (lhs, rhs) <- assign match {
         case Assign(lhs, rhs) => Some(lhs -> rhs)
-        case _ => None
+        case _                => None
       }
       if getType.isDefinedAt(lhs)
       fileType = getType(lhs)

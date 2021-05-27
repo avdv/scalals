@@ -53,8 +53,8 @@ object Decorator {
     }
   }
 
-  def apply(d: Decorator, ds: Decorator*): Decorator = ds.foldLeft(d) {
-    case (lhs, rhs) => lhs + rhs
+  def apply(d: Decorator, ds: Decorator*): Decorator = ds.foldLeft(d) { case (lhs, rhs) =>
+    lhs + rhs
   }
 }
 
@@ -219,9 +219,11 @@ object IconDecorator extends Decorator {
     }
     //val key = if (files.contains(ext)) ext else aliases.getOrElse(ext, ext)
     //val symbol = files.getOrElse(key,  ) //
-    val symbol = files.getOrElse(ext, {
-      aliases.get(ext).fold(if (subject.isDirectory) '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
-    })
+    val symbol = files.getOrElse(
+      ext, {
+        aliases.get(ext).fold(if (subject.isDirectory) '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
+      }
+    )
     builder.append(' ').append(symbol).append("  ")
 
     4
