@@ -8,8 +8,8 @@ project.pkgs.stdenv.mkDerivation rec {
   src = project.pkgs.fetchFromGitHub {
     owner = "scala-native";
     repo = pname;
-    rev = "4270a34a56c0797098c3705d4b9ce85f7a79cf32";
-    sha256 = "0lzjqh4l25nywjvr306f8crkx9v0ssvrbq8wa3ky6di8l4kmdic6";
+    rev = "7997e294c3d29aeb4c32d8b91b8e91062f667e1f";
+    sha256 = "1sn01jbn0w9p6dnj726q242abm9lnl4wykryyih17fjmicn4mghv";
   };
 
   deps =
@@ -27,18 +27,13 @@ project.pkgs.stdenv.mkDerivation rec {
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "0s84dyfrqz24vjkaf3d271qgr2q95rvglwcnin5y006hv09waryc";
+      outputHash = "1s1ki5jmh6r5d50ma8d032xgmvhmy2gv9aw4142ybc3ggfwbi3mk";
       outputHashMode = "recursive";
 
       preHook = ''
         export HOME="$NIX_BUILD_TOP"
         export USER="nix"
         export COURSIER_CACHE="$HOME/coursier"
-      '';
-
-      preBuild = ''
-        # pretend this is scala-native 0.4.0
-        substituteInPlace nir/src/main/scala/scala/scalanative/nir/Versions.scala --replace '0.4.1-SNAPSHOT' '0.4.0'
       '';
 
       # set publication time to fixed value and re-compute hashes
