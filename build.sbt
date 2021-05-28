@@ -79,6 +79,6 @@ lazy val scalals =
           objFile
         }
       },
-      nativeLinkStubs := true
+      nativeLinkStubs := false
     )
 
