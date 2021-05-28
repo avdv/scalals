@@ -47,13 +47,9 @@ object Core extends generic.Core {
     } {
       if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
       try {
-        val entries = new mutable.ArrayBuffer[Path](64)
-        Files
-          .newDirectoryStream(
-            path,
-            { p => config.showAll || !Files.isHidden(p) }
-          )
-          .forEach(entries.addOne)
+        val entries = for {
+          path <- Files.newDirectoryStream(path).asScala if config.showAll || !Files.isHidden(path)
+        } yield path
 
         listAll(list(entries.toArray, config), config, decorators)
       } catch {
