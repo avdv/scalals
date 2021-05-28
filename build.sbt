@@ -65,20 +65,6 @@ lazy val scalals =
       //    .withGC(GC.commix)
       //}
       nativeCompileOptions += "-Wall",
-      nativeLinkingOptions ++= {
-        val cFiles = (baseDirectory.value / "src" / "main" / "c") ** "*.c"
-        val outDir = (Compile / sourceManaged).value / "native"
-        val clang = nativeClang.value.absolutePath
-        val clangOptions = nativeCompileOptions.value
-
-        IO.createDirectory(outDir)
-
-        cFiles.get.map { cfile ⇒
-          val objFile = outDir / cfile.base + ".o"
-          val _ = Process(clang, clangOptions ++ Seq(cfile.absolutePath, "-c", "-o", objFile)).!!
-          objFile
-        }
-      },
       nativeLinkStubs := false
     )
 
