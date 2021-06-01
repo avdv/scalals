@@ -2,12 +2,14 @@
 }:
 let
   scala-native = import ./scala-native.nix { inherit project; };
+  mkShell = project.pkgs.mkShell.override { stdenv = project.pkgs.stdenvNoCC; };
 in
-project.pkgs.mkShell {
+mkShell {
   CLANG_PATH = project.clang + "/bin/clang";
   CLANGPP_PATH = project.clang + "/bin/clang++";
 
-  buildInputs = builtins.attrValues project.devTools;
+  nativeBuildInputs = builtins.attrValues project.devTools;
+
   shellHook = ''
     ${project.ci.pre-commit-check.shellHook}
     mkdir --parents "$HOME/.ivy2/local"
