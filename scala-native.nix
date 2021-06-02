@@ -1,7 +1,11 @@
 { project ? import ./nix { }
 }:
 
-project.pkgs.stdenv.mkDerivation rec {
+let
+  stdenv = project.pkgs.stdenvNoCC;
+in
+
+stdenv.mkDerivation rec {
   pname = "scala-native";
   version = "0.4.1-SNAPSHOT";
 
@@ -16,7 +20,7 @@ project.pkgs.stdenv.mkDerivation rec {
     let
       name = "${pname}-${version}";
     in
-    project.pkgs.stdenv.mkDerivation {
+    stdenv.mkDerivation {
       inherit src;
 
       name = "${name}-scala-native";
