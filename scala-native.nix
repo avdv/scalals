@@ -21,13 +21,13 @@ project.pkgs.stdenv.mkDerivation rec {
 
       name = "${name}-scala-native";
 
-      patches = [ ./toClass.diff ];
+      patches = [ ./toClass.diff ./stableNirOutput.diff ];
 
       nativeBuildInputs = [ project.pkgs.sbt ];
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "1s1ki5jmh6r5d50ma8d032xgmvhmy2gv9aw4142ybc3ggfwbi3mk";
+      outputHash = "1k1wszyjvn20wp6873hzlri5i8pjqcj795asd0iy38sykc992lh5";
       outputHashMode = "recursive";
 
       preHook = ''

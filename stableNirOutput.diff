@@ -1,0 +1,25 @@
+diff --git a/nir/src/main/scala/scala/scalanative/nir/serialization/BinarySerializer.scala b/nir/src/main/scala/scala/scalanative/nir/serialization/BinarySerializer.scala
+index eb788a30..f9877297 100644
+--- a/nir/src/main/scala/scala/scalanative/nir/serialization/BinarySerializer.scala
++++ b/nir/src/main/scala/scala/scalanative/nir/serialization/BinarySerializer.scala
+@@ -30,8 +30,9 @@ final class BinarySerializer {
+   import bufferUnderyling.currentPosition
+ 
+   def serialize(defns: Seq[Defn], outputStream: OutputStream): Unit = {
+-    val names     = defns.map(_.name)
+-    val filenames = initFiles(defns)
++    val sortedDefns = defns.sortBy(_.name)
++    val names     = sortedDefns.map(_.name)
++    val filenames = initFiles(sortedDefns)
+     val positions = mutable.UnrolledBuffer.empty[Int]
+ 
+     Prelude.writeTo(buffer,
+@@ -48,7 +49,7 @@ final class BinarySerializer {
+       putInt(0)
+     }
+ 
+-    defns
++    sortedDefns
+       .zip(positions)
+       .foreach {
+         case (defn, marker) =>
