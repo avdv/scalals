@@ -16,7 +16,7 @@ let
   src = gitignoreSource ./..;
 in
 {
-  inherit pkgs src;
+  inherit pkgs src sbt;
 
   clang = pkgs.clang_10;
 
