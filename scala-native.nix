@@ -27,11 +27,11 @@ stdenv.mkDerivation rec {
 
       patches = [ ./toClass.diff ./stableNirOutput.diff ];
 
-      nativeBuildInputs = [ project.pkgs.sbt ];
+      nativeBuildInputs = [ project.sbt ];
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "0rdif16h3d6xbxdgk003sj6swhmw8icc37ws37ghj6rxd9w8snpj";
+      outputHash = "0m9jchavxxpsl1jg6gjsxbmybrq8lp44lyab6fki8w282386hqhy";
       outputHashMode = "recursive";
 
       preHook = ''
