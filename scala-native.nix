@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "1k1wszyjvn20wp6873hzlri5i8pjqcj795asd0iy38sykc992lh5";
+      outputHash = "0rdif16h3d6xbxdgk003sj6swhmw8icc37ws37ghj6rxd9w8snpj";
       outputHashMode = "recursive";
 
       preHook = ''
@@ -55,6 +55,8 @@ stdenv.mkDerivation rec {
 
       buildPhase = ''
         runHook preBuild
+
+        export SCALANATIVE_MODE=release-fast
 
         sbt --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch publishLocal '++2.13.6' \
             auxlib/publishLocal \
