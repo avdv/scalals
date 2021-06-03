@@ -1,7 +1,11 @@
 { project ? import ./nix { }
 }:
 
-project.pkgs.stdenv.mkDerivation rec {
+let
+  stdenv = project.pkgs.stdenvNoCC;
+in
+
+stdenv.mkDerivation rec {
   pname = "scala-native";
   version = "0.4.1-SNAPSHOT";
 
@@ -16,18 +20,18 @@ project.pkgs.stdenv.mkDerivation rec {
     let
       name = "${pname}-${version}";
     in
-    project.pkgs.stdenv.mkDerivation {
+    stdenv.mkDerivation {
       inherit src;
 
       name = "${name}-scala-native";
 
-      patches = [ ./toClass.diff ];
+      patches = [ ./toClass.diff ./stableNirOutput.diff ];
 
-      nativeBuildInputs = [ project.pkgs.sbt ];
+      nativeBuildInputs = [ project.sbt ];
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "1s1ki5jmh6r5d50ma8d032xgmvhmy2gv9aw4142ybc3ggfwbi3mk";
+      outputHash = "0m9jchavxxpsl1jg6gjsxbmybrq8lp44lyab6fki8w282386hqhy";
       outputHashMode = "recursive";
 
       preHook = ''
@@ -51,6 +55,8 @@ project.pkgs.stdenv.mkDerivation rec {
 
       buildPhase = ''
         runHook preBuild
+
+        export SCALANATIVE_MODE=release-fast
 
         sbt --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch publishLocal '++2.13.6' \
             auxlib/publishLocal \
