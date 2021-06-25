@@ -12,6 +12,7 @@ import scalanative.unsafe._
 import scalanative.unsigned._
 import scalanative.posix.errno._
 import scalanative.posix.sys.stat
+import java.nio.file.LinkOption
 
 object FileInfo {
   // FIXME: crashes with a scala.scalanative.runtime.UndefinedBehaviorError
@@ -120,7 +121,7 @@ object Core extends generic.Core {
 
   def ls(config: Config) = Zone { implicit z =>
     val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_))
+    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, LinkOption.NOFOLLOW_LINKS))
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 

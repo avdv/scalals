@@ -36,7 +36,7 @@ object Core extends generic.Core {
 
   def ls(config: de.bley.scalals.Config): Unit = {
     val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_))
+    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, LinkOption.NOFOLLOW_LINKS))
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 
