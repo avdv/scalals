@@ -28,8 +28,9 @@ trait Core {
   def permissionString(imode: Int): String
 
   def ls(config: Config) = Env { implicit z =>
+    val linkOptions = if (config.dereferenceArgs) Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
     val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, LinkOption.NOFOLLOW_LINKS))
+    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions: _*))
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 
