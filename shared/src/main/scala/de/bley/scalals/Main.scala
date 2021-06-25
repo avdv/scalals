@@ -41,6 +41,7 @@ final case class Config(
     groupDirectoriesFirst: Boolean = false,
     hyperlink: Boolean = false,
     dereference: Boolean = false,
+    dereferenceArgs: Boolean = false,
     indicatorStyle: IndicatorStyle.IndicatorStyle = IndicatorStyle.none,
     long: Boolean = false,
     oneLine: Boolean = false,
@@ -64,6 +65,9 @@ object Main {
     opt[Unit]('F', "classify")
       .text("append indicator (one of */=>@|) to entries")
       .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.classify))
+    opt[Unit]('H', "dereference-command-line")
+      .text("follow symbolic links listed on the command line")
+      .action((_, c) => c.copy(dereferenceArgs = true))
     opt[Unit]("file-type")
       .text("likewise, except do not append '*'")
       .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.fileType))
