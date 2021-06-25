@@ -21,7 +21,7 @@ in
   # provided by shell.nix
   devTools = {
     inherit sbt;
-    inherit (pkgs) niv pre-commit tinycc;
+    inherit (pkgs) git niv pre-commit tinycc which;
   };
 
   # to be built by github actions

@@ -32,6 +32,6 @@ jobs:
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git fetch --tags --force --recurse-submodules
     - run: nix-build
-    - run: nix-shell --run "sbt scalafmtCheckAll"
-    - run: nix-shell --run "sbt -batch -Dfile.encoding=UTF8 test"
-    - run: nix-shell --run "sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"
+    - run: nix-shell --pure --run "sbt scalafmtCheckAll"
+    - run: nix-shell --pure --run "sbt -batch -Dfile.encoding=UTF8 test"
+    - run: nix-shell --pure --run "sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"
