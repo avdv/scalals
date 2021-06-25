@@ -18,12 +18,10 @@ in
 {
   inherit pkgs src sbt;
 
-  clang = pkgs.clang_10;
-
   # provided by shell.nix
   devTools = {
     inherit sbt;
-    inherit (pkgs) niv pre-commit clang_10 tinycc;
+    inherit (pkgs) niv pre-commit tinycc;
   };
 
   # to be built by github actions
