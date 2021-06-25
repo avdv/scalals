@@ -4,8 +4,6 @@ import java.nio.file.attribute._
 import java.nio.file.{ Files, LinkOption, Path }
 import java.time.{ Instant, ZoneId }
 import java.time.format.DateTimeFormatter
-import java.nio.file.{ NoSuchFileException, Paths }
-import java.io.IOException
 import java.text.Collator
 
 import scala.jdk.CollectionConverters._
@@ -34,67 +32,11 @@ object Core extends generic.Core {
     }
   }
 
-  def ls(config: de.bley.scalals.Config): Unit = {
-    val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, LinkOption.NOFOLLOW_LINKS))
-    val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
-    val decorators = layout(config)
-
-    listAll(list(filePaths.toArray, config), config, decorators)
-
-    for {
-      path <- dirPaths
-    } {
-      if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
-      try {
-        val entries = for {
-          path <- Files.newDirectoryStream(path).asScala if config.showAll || !Files.isHidden(path)
-        } yield path
-
-        listAll(list(entries.toArray, config), config, decorators)
-      } catch {
-        case e: NoSuchFileException =>
-          Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
-      }
-    }
-  }
-
   private val collator = Collator.getInstance
 
-  private def list(items: Array[Path], config: Config) = {
-    implicit val ordering: Ordering[generic.FileInfo] = {
-      val orderBy = config.sort match {
-        case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
-        case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
-        case SortMode.extension =>
-          Ordering.by { (f: generic.FileInfo) =>
-            val e = f.name.dropWhile(_ == '.')
-            val dot = e.lastIndexOf('.')
-            if (dot > 0)
-              e.splitAt(dot).swap
-            else ("", f.name)
-          }
-        case _ =>
-          Ordering
-            .fromLessThan((a: FileInfo, b: FileInfo) => collator.compare(a.name, b.name) < 0)
-            .asInstanceOf[Ordering[generic.FileInfo]]
-      }
-
-      val orderDirection = if (config.reverse) orderBy.reverse else orderBy
-
-      if (config.groupDirectoriesFirst) groupDirsFirst(orderDirection) else orderDirection
-    }
-
-    val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
-    for {
-      path <- items
-    } try {
-      listingBuffer += FileInfo(path)(config.dereference)
-    } catch {
-      case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
-    }
-    listingBuffer
-  }
+  protected val orderByName = Ordering
+    .fromLessThan((a: FileInfo, b: FileInfo) => collator.compare(a.name, b.name) < 0)
+    .asInstanceOf[Ordering[generic.FileInfo]]
 
   private val sb = new StringBuilder(3 * 3)
 
@@ -127,9 +69,11 @@ object FileInfo {
     Class.forName("sun.nio.fs.UnixFileAttributes").getDeclaredField("st_mode").tap(_.setAccessible(true))
 
   private def mode(attr: PosixFileAttributes) = modeField.getInt(attr)
+
+  def apply(path: Path, dereference: Boolean): FileInfo = new FileInfo(path, dereference)
 }
 
-final case class FileInfo(path: Path)(dereference: Boolean) extends generic.FileInfo {
+final class FileInfo private (val path: Path, dereference: Boolean) extends generic.FileInfo {
   import UnixConstants._
 
   private val attributes =

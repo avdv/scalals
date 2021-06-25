@@ -1,10 +1,8 @@
 package de.bley.scalals
 
-import java.nio.file.{ Files, NoSuchFileException, Path, Paths }
 import java.time.Instant
 
 import scala.collection.mutable
-import scala.jdk.CollectionConverters._
 import java.io.IOException
 
 import scalanative.libc.errno
@@ -12,13 +10,13 @@ import scalanative.unsafe._
 import scalanative.unsigned._
 import scalanative.posix.errno._
 import scalanative.posix.sys.stat
-import java.nio.file.LinkOption
+import java.nio.file.Path
 
 object FileInfo {
   // FIXME: crashes with a scala.scalanative.runtime.UndefinedBehaviorError
   //val lookupService = FileSystems.getDefault.getUserPrincipalLookupService
 
-  def apply(path: Path, dereference: Boolean)(implicit z: Zone) = {
+  def apply(path: Path, dereference: Boolean)(implicit z: Env) = {
     val info = {
       val buf = alloc[stat.stat]
       val err =
@@ -100,6 +98,10 @@ object Core extends generic.Core {
 
   private val sb = new StringBuilder(3 * 3)
 
+  protected val orderByName = Ordering
+    .fromLessThan[FileInfo]((a, b) => locale.strcoll(a.cstr, b.cstr) < 0)
+    .asInstanceOf[Ordering[generic.FileInfo]]
+
   final override def permissionString(imode: Int): String = {
     import scala.scalanative.unsigned._
     val mode = imode.toUInt
@@ -117,66 +119,6 @@ object Core extends generic.Core {
     //val end = System.nanoTime
     //Console.err.println(marker + " " + (end - start).toString)
     r
-  }
-
-  def ls(config: Config) = Zone { implicit z =>
-    val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, LinkOption.NOFOLLOW_LINKS))
-    val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
-    val decorators = layout(config)
-
-    listAll(list(filePaths.toArray, config), config, decorators)
-
-    for {
-      path <- dirPaths
-    } {
-      if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
-      try {
-        val entries = for {
-          path <- Files.newDirectoryStream(path).asScala if config.showAll || !Files.isHidden(path)
-        } yield path
-
-        listAll(list(entries.toArray, config), config, decorators)
-      } catch {
-        case e: NoSuchFileException =>
-          Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
-      }
-    }
-  }
-
-  private def list(items: Array[Path], config: Config)(implicit z: Zone) = {
-    implicit val ordering: Ordering[generic.FileInfo] = {
-      val orderBy = config.sort match {
-        case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
-        case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
-        case SortMode.extension =>
-          Ordering.by { (f: generic.FileInfo) =>
-            val e = f.name.dropWhile(_ == '.')
-            val dot = e.lastIndexOf('.')
-            if (dot > 0)
-              e.splitAt(dot).swap
-            else ("", f.name)
-          }
-        case _ =>
-          Ordering
-            .fromLessThan((a: FileInfo, b: FileInfo) => locale.strcoll(a.cstr, b.cstr) < 0)
-            .asInstanceOf[Ordering[generic.FileInfo]]
-      }
-
-      val orderDirection = if (config.reverse) orderBy.reverse else orderBy
-
-      if (config.groupDirectoriesFirst) groupDirsFirst(orderDirection) else orderDirection
-    }
-
-    val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
-    for {
-      path <- items
-    } try {
-      listingBuffer += FileInfo(path, config.dereference)
-    } catch {
-      case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
-    }
-    listingBuffer
   }
 
   val date = new Decorator {

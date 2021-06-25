@@ -22,7 +22,7 @@ object IndicatorStyle extends Enumeration {
   val fileType = Value("file-type")
 }
 
-object `package` {
+object implicits {
   implicit val pathRead = scopt.Read.reads(Paths.get(_: String))
   implicit val sortRead = scopt.Read.reads(SortMode withName _)
 
@@ -52,6 +52,8 @@ final case class Config(
 )
 
 object Main {
+  import implicits._
+
   val parser = new scopt.OptionParser[Config]("scalals") {
     head("scalals", BuildInfo.version)
 

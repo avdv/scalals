@@ -3,6 +3,11 @@ package generic
 
 import java.nio.file.Files
 import java.io.IOException
+import java.nio.file.{ Path, Paths }
+import java.nio.file.LinkOption
+import java.nio.file.NoSuchFileException
+import scala.annotation.unused
+import scala.jdk.CollectionConverters._
 
 trait Core {
   protected def format(r: Int, w: Int, x: Int, special: Boolean, ch: Char, builder: StringBuilder): Unit = {
@@ -18,9 +23,66 @@ trait Core {
       )
   }
 
+  protected def orderByName: Ordering[FileInfo]
+
   def permissionString(imode: Int): String
 
-  def ls(config: Config): Unit
+  def ls(config: Config) = Env { implicit z =>
+    val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
+    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, LinkOption.NOFOLLOW_LINKS))
+    val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
+    val decorators = layout(config)
+
+    listAll(list(filePaths.toArray, config), config, decorators)
+
+    for {
+      path <- dirPaths
+    } {
+      if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
+      try {
+        val entries = for {
+          path <- Files.newDirectoryStream(path).asScala if config.showAll || !Files.isHidden(path)
+        } yield path
+
+        listAll(list(entries.toArray, config), config, decorators)
+      } catch {
+        case e: NoSuchFileException =>
+          Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
+      }
+    }
+  }
+
+  protected def list(items: Array[Path], config: Config)(implicit @unused z: Env) = {
+    implicit val ordering: Ordering[FileInfo] = {
+      val orderBy = config.sort match {
+        case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
+        case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
+        case SortMode.extension =>
+          Ordering.by { (f: generic.FileInfo) =>
+            val e = f.name.dropWhile(_ == '.')
+            val dot = e.lastIndexOf('.')
+            if (dot > 0)
+              e.splitAt(dot).swap
+            else ("", f.name)
+          }
+        case _ => orderByName
+      }
+
+      val orderDirection = if (config.reverse) orderBy.reverse else orderBy
+
+      if (config.groupDirectoriesFirst) groupDirsFirst(orderDirection) else orderDirection
+    }
+
+    val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
+    for {
+      path <- items
+    } try {
+      listingBuffer += FileInfo(path, config.dereference)
+    } catch {
+      case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
+    }
+    listingBuffer
+  }
 
   protected def groupDirsFirst(underlying: Ordering[generic.FileInfo]): Ordering[generic.FileInfo] =
     new Ordering[FileInfo] {
