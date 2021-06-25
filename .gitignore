@@ -1,3 +1,6 @@
 
 # handled by pre-commit-hooks.nix
 /.pre-commit-config.yaml
+
+/.bsp
+
