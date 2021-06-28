@@ -6,7 +6,7 @@ let
 
   sbt = pkgs.sbt.overrideAttrs (
     _: rec {
-      patchPhase = ''echo -java-home ${pkgs.adoptopenjdk-bin} >> conf/sbtopts'';
+      patchPhase = ''echo -java-home ${pkgs.openjdk11_headless} >> conf/sbtopts'';
     }
   );
 
