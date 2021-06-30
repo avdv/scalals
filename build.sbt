@@ -37,7 +37,7 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0",
+        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1",
       ),
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
