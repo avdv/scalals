@@ -5,9 +5,10 @@ import java.nio.file.Files
 import java.io.IOException
 import java.nio.file.{ Path, Paths }
 import java.nio.file.LinkOption
-import java.nio.file.NoSuchFileException
+import java.nio.file.{ AccessDeniedException, NoSuchFileException }
 import scala.annotation.unused
 import scala.jdk.CollectionConverters._
+import scala.util.Using
 
 trait Core {
   protected def format(r: Int, w: Int, x: Int, special: Boolean, ch: Char, builder: StringBuilder): Unit = {
@@ -40,15 +41,20 @@ trait Core {
       path <- dirPaths
     } {
       if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
-      try {
+
+      Using(Files.newDirectoryStream(path)) { dirstream =>
         val entries = for {
-          path <- Files.newDirectoryStream(path).asScala if config.showAll || !Files.isHidden(path)
+          path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
         } yield path
 
         listAll(list(entries.toArray, config), config, decorators)
-      } catch {
+      } recover {
         case e: NoSuchFileException =>
           Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
+        case e: AccessDeniedException =>
+          Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
+        case e =>
+          Console.err.println(s"scalals: error $e")
       }
     }
   }
