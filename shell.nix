@@ -7,6 +7,8 @@ let
   mkShell = pkgs.mkShell.override { inherit stdenv; };
 in
 mkShell {
+  SN_VERSION = "0.4.1-SNAPSHOT";
+
   nativeBuildInputs = builtins.attrValues project.devTools;
 
   shellHook = ''
