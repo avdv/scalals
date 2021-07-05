@@ -1,13 +1,9 @@
 package de.bley.scalals
 
-import utest._
-
-object UtilsTests extends TestSuite {
+class UtilsTests extends munit.FunSuite {
   import Utils.glob
 
-  val tests = Tests {
-    test("glob - simple") {
-      assert(glob("abc", "abc"))
-    }
+  test("glob - simple") {
+    assert(glob("abc", "abc"))
   }
 }

@@ -37,14 +37,13 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-      buildInfoPackage := "de.bley.scalals",
-      testFrameworks := Seq(new TestFramework("utest.runner.Framework"))
+      buildInfoPackage := "de.bley.scalals"
     )
     // configure JVM settings
     .jvmSettings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt" % "4.0.1",
-        "com.lihaoyi" %% "utest" % "0.7.10" % Test
+        "org.scalameta" %% "munit" % "0.7.27" % Test
       ),
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
@@ -54,7 +53,7 @@ lazy val scalals =
     .nativeSettings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive(),
-        "com.lihaoyi" %% "utest_native0.4" % "0.7.10" % Test intransitive()
+        "org.scalameta" %% "munit_native0.4" % "0.7.27" % Test intransitive()
       ),
       //nativeConfig ~= {
       //  _.withLTO(LTO.thin)
