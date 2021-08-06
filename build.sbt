@@ -1,5 +1,5 @@
-
 import scala.sys.process._
+import java.nio.file.Paths
 
 ThisBuild / scalaVersion := "2.13.6"
 
@@ -55,12 +55,18 @@ lazy val scalals =
         "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive(),
         "org.scalameta" %% "munit_native0.4" % "0.7.27" % Test intransitive()
       ),
-      //nativeConfig ~= {
+      nativeConfig ~= { config =>
+        config
+          .withClang(
+            sys.env.get("CLANG_PATH").fold(config.clang)(Paths.get(_))
+          )
+          .withClangPP(
+            sys.env.get("CLANGPP_PATH").fold(config.clangPP)(Paths.get(_))
+          )
       //  _.withLTO(LTO.thin)
       //    .withMode(Mode.releaseFast)
       //    .withGC(GC.commix)
-      //}
+      },
       nativeCompileOptions += "-Wall",
       nativeLinkStubs := false
     )
-

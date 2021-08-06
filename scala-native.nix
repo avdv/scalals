@@ -12,8 +12,8 @@ stdenv.mkDerivation rec {
   src = project.pkgs.fetchFromGitHub {
     owner = "scala-native";
     repo = pname;
-    rev = "7997e294c3d29aeb4c32d8b91b8e91062f667e1f";
-    sha256 = "1sn01jbn0w9p6dnj726q242abm9lnl4wykryyih17fjmicn4mghv";
+    rev = "32bc2ea124ad40a80dbd19a51fc1dc61c416e043";
+    sha256 = "1cy0kr7jazghvlx7rvid7my6a2n7sh5qg579xsyyl1dzddqc9yhx";
   };
 
   deps =
@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "0m9jchavxxpsl1jg6gjsxbmybrq8lp44lyab6fki8w282386hqhy";
+      outputHash = "18lngqjdcwxf355l0diir753z64salfknypvb0j2plxqaay5l49w";
       outputHashMode = "recursive";
 
       preHook = ''
@@ -58,32 +58,26 @@ stdenv.mkDerivation rec {
 
         export SCALANATIVE_MODE=release-fast
 
-        sbt --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch publishLocal '++2.13.6' \
-            auxlib/publishLocal \
-            clib/publishLocal \
-            javalib/publishLocal \
-            javalibExtDummies/publishLocal \
-            junitAsyncJVM/publishLocal \
-            junitAsyncNative/publishLocal \
-            junitPlugin/publishLocal \
-            junitRuntime/publishLocal \
-            junitTestOutputsJVM/publishLocal \
-            junitTestOutputsNative/publishLocal \
-            nativelib/publishLocal \
-            nir/publishLocal \
+        sbt -Dsbt.supershell=false --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch '++2.13.6' \
             nscplugin/publishLocal \
+            junitPlugin/publishLocal \
+            nativelib/publishLocal \
+            clib/publishLocal \
             posixlib/publishLocal \
-            sandbox/publishLocal \
+            javalib/publishLocal \
+            auxlib/publishLocal \
             scalalib/publishLocal \
-            testInterface/publishLocal \
+            windowslib/publishLocal \
             testInterfaceSbtDefs/publishLocal \
-            testRunner/publishLocal \
-            testingCompiler/publishLocal \
-            testingCompilerInterface/publishLocal \
-            tests/publishLocal \
-            testsExt/publishLocal \
+            testInterface/publishLocal \
+            junitRuntime/publishLocal
+
+         sbt -Dsbt.supershell=false --sbt-dir "$HOME/sbt" --ivy "$HOME/.ivy2" --batch \
+            util/publishLocal \
+            nir/publishLocal \
             tools/publishLocal \
-            util/publishLocal
+            testRunner/publishLocal \
+            sbtScalaNative/publishLocal
       '';
 
       installPhase = ''
