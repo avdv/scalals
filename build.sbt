@@ -43,7 +43,7 @@ lazy val scalals =
     .jvmSettings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt" % "4.0.1",
-        "org.scalameta" %% "munit" % "0.7.27" % Test
+        "org.scalameta" %% "munit" % "0.7.28" % Test
       ),
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
@@ -53,7 +53,7 @@ lazy val scalals =
     .nativeSettings(
       libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive(),
-        "org.scalameta" %% "munit_native0.4" % "0.7.27" % Test intransitive()
+        "org.scalameta" %% "munit_native0.4" % "0.7.28" % Test intransitive()
       ),
       nativeConfig ~= { config =>
         config
