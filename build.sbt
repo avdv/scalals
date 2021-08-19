@@ -6,7 +6,8 @@ ThisBuild / scalaVersion := "2.13.6"
 val sharedSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",
-    "-encoding", "UTF-8",
+    "-encoding",
+    "UTF-8",
     "-feature",
     "-language:existentials",
     "-language:higherKinds",
@@ -14,9 +15,9 @@ val sharedSettings = Seq(
     "-unchecked",
     "-Xfatal-warnings",
     "-Xlint",
-    "-Ywarn-dead-code",        // N.B. doesn't work well with the ??? hole
+    "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
     "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard",
+    "-Ywarn-value-discard"
   )
 )
 
@@ -52,8 +53,8 @@ lazy val scalals =
     // configure Scala-Native settings
     .nativeSettings(
       libraryDependencies ++= Seq(
-        "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive(),
-        "org.scalameta" %% "munit_native0.4" % "0.7.28" % Test intransitive()
+        "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive (),
+        "org.scalameta" %% "munit_native0.4" % "0.7.28" % Test intransitive ()
       ),
       nativeConfig ~= { config =>
         config
