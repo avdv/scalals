@@ -12,8 +12,8 @@ stdenv.mkDerivation rec {
   src = project.pkgs.fetchFromGitHub {
     owner = "scala-native";
     repo = pname;
-    rev = "32bc2ea124ad40a80dbd19a51fc1dc61c416e043";
-    sha256 = "1cy0kr7jazghvlx7rvid7my6a2n7sh5qg579xsyyl1dzddqc9yhx";
+    rev = "556e4974e34418270c7d74ce233b3e2245ad0626";
+    sha256 = "06088y1hmav79d6l8dg9s1kbsfgm0gpi7qb8gmazp71kwkv5ylmw";
   };
 
   deps =
@@ -25,13 +25,13 @@ stdenv.mkDerivation rec {
 
       name = "${name}-scala-native";
 
-      patches = [ ./toClass.diff ./stableNirOutput.diff ];
+      patches = [ ./stableNirOutput.diff ];
 
       nativeBuildInputs = [ project.sbt ];
 
       dontStrip = true;
       outputHashAlgo = "sha256";
-      outputHash = "18lngqjdcwxf355l0diir753z64salfknypvb0j2plxqaay5l49w";
+      outputHash = "06b7fazdsykaxv7fvn1yfjm430kd1naj7ljnp67xwlnxik8s8pdz";
       outputHashMode = "recursive";
 
       preHook = ''

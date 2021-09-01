@@ -6,14 +6,14 @@ index eb788a30..f9877297 100644
    import bufferUnderyling.currentPosition
  
    def serialize(defns: Seq[Defn], outputStream: OutputStream): Unit = {
--    val names     = defns.map(_.name)
+-    val names = defns.map(_.name)
 -    val filenames = initFiles(defns)
 +    val sortedDefns = defns.sortBy(_.name)
 +    val names     = sortedDefns.map(_.name)
 +    val filenames = initFiles(sortedDefns)
      val positions = mutable.UnrolledBuffer.empty[Int]
  
-     Prelude.writeTo(buffer,
+     Prelude.writeTo(
 @@ -48,7 +49,7 @@ final class BinarySerializer {
        putInt(0)
      }
