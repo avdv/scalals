@@ -38,24 +38,20 @@ lazy val scalals =
     .settings(sharedSettings)
     .settings(
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-      buildInfoPackage := "de.bley.scalals"
+      buildInfoPackage := "de.bley.scalals",
+      libraryDependencies ++= Seq(
+        "com.github.scopt" %%% "scopt" % "4.0.1",
+        "org.scalameta" %%% "munit" % "0.7.29" % Test
+      )
     )
     // configure JVM settings
     .jvmSettings(
-      libraryDependencies ++= Seq(
-        "com.github.scopt" %% "scopt" % "4.0.1",
-        "org.scalameta" %% "munit" % "0.7.29" % Test
-      ),
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue
     )
     // configure Scala-Native settings
     .nativeSettings(
-      libraryDependencies ++= Seq(
-        "com.github.scopt" %% "scopt_native0.4" % "4.0.1" intransitive (),
-        "org.scalameta" %% "munit_native0.4" % "0.7.29" % Test intransitive ()
-      ),
       nativeConfig ~= { config =>
         config
           .withClang(
