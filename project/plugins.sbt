@@ -1,7 +1,4 @@
-// N.B. we are using a `0.4.1-SNAPSHOT` version by default, which is always set
-//      via nix. Solely for scala-steward, which cannot resolve the snapshot
-//      version this needs to be set to `0.4.0`.
-val scalaNativeVersion = sys.env.get("SN_VERSION").getOrElse("0.4.1")
+val scalaNativeVersion = "0.4.1"
 
 addSbtPlugin("org.scala-native" % "sbt-scala-native" % scalaNativeVersion)
 addSbtPlugin("org.portable-scala" % "sbt-scala-native-crossproject" % "1.1.0")
