@@ -7,14 +7,14 @@ object CoreConfig {
 //    val p = new Properties()
 //    p.load(this.getClass.getClassLoader.getResourceAsStream("files.properties"))
   //  p.load(new FileInputStream("files.properties"))
-  //p.asScala.mapValues(_.charAt(0)).toMap
-  //}
+  // p.asScala.mapValues(_.charAt(0)).toMap
+  // }
   val aliases: Map[String, String] = SAliases.map
-  //val p = new Properties()
+  // val p = new Properties()
 //    p.load(this.getClass.getClassLoader.getResourceAsStream("aliases.properties"))
-  //p.load(new FileInputStream("aliases.properties"))
-  //p.asScala.toMap
-  //}
+  // p.load(new FileInputStream("aliases.properties"))
+  // p.asScala.toMap
+  // }
 }
 
 sealed trait FileType
@@ -93,8 +93,8 @@ object Colors {
       Special
     }
 
-    //println("colors: #" + getColors.size.toString)
-    //getColors.get(color)
+    // println("colors: #" + getColors.size.toString)
+    // getColors.get(color)
     val fileColor = if (color eq RegularFile) {
       getColors.collectFirst {
         case (k, v) if k == file.name => v

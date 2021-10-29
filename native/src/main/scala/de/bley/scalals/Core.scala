@@ -14,7 +14,7 @@ import java.nio.file.Path
 
 object FileInfo {
   // FIXME: crashes with a scala.scalanative.runtime.UndefinedBehaviorError
-  //val lookupService = FileSystems.getDefault.getUserPrincipalLookupService
+  // val lookupService = FileSystems.getDefault.getUserPrincipalLookupService
 
   def apply(path: Path, dereference: Boolean)(implicit z: Env) = {
     val info = {
@@ -42,7 +42,7 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
     extends generic.FileInfo {
   import scalanative.posix.{ grp, pwd }
   // FIXME: reimplement stat with better resolution
-  //import scalanative.posix.timeOps._
+  // import scalanative.posix.timeOps._
   import scalanative.libc.errno
 
   val name = fromCString(cstr)
@@ -114,10 +114,10 @@ object Core extends generic.Core {
   }
 
   @inline def timing[T](marker: String)(body: => T): T = {
-    //val start = System.nanoTime
+    // val start = System.nanoTime
     val r = body
-    //val end = System.nanoTime
-    //Console.err.println(marker + " " + (end - start).toString)
+    // val end = System.nanoTime
+    // Console.err.println(marker + " " + (end - start).toString)
     r
   }
 
