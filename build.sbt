@@ -1,7 +1,7 @@
 import scala.sys.process._
 import java.nio.file.Paths
 
-ThisBuild / scalaVersion := "2.13.6"
+ThisBuild / scalaVersion := "2.13.7"
 
 val sharedSettings = Seq(
   scalacOptions ++= Seq(
