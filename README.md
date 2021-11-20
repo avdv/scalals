@@ -18,6 +18,10 @@ This is yet another [colorls](https://github.com/athityakumar/colorls) clone.
 2. install a Nerd Font from [here](https://www.nerdfonts.com/font-downloads) and use it in your terminal emulator
 3. set up your dircolors (see https://www.nordtheme.com/ports/dircolors for example)
 
+## With nix flakes
+
+Simply run `nix run github:avdv/scalals`. (_Hint_: `cachix use cbley` to avoid re-building)
+
 # Building
 
 ## Using nix
@@ -25,6 +29,7 @@ This is yet another [colorls](https://github.com/athityakumar/colorls) clone.
 1. run `cachix use cbley` (optional, but reduces build time significantly)
 2. run `nix-shell --run sbt`
 
-_Note_: this project uses a scala-native version build off the master branch,
-        versioned as 0.4.0 and patched to make it a drop-in replacement for the
-        official 0.4.0 release.
+## Using nix flakes
+
+1. run `cachix use cbley` (optional, but reduces build time significantly)
+2. run `nix build`
