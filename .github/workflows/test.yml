@@ -41,6 +41,7 @@ jobs:
         pushFilter: '[-](source|nixpkgs-src)$'
         # Only needed for private caches
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - run: git branch PR-${{ github.event.number }}
     - run: nix flake check
     - run: nix run
 #    - run: nix-shell --pure --run "sbt 'show scalalsNative/nativeConfig'"
