@@ -11,9 +11,26 @@ categories:
       - 'bugfix'
       - 'bug'
   - title: '🧰 Maintenance'
-    label: 'chore'
+    labels:
+      - 'chore'
+      - 'dependencies'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 template: |
   ## Changes
 
   $CHANGES
+autolabeler:
+  - label: 'chore'
+    files:
+      - '*.md'
+    branch:
+      - '/docs{0,1}\/.+/'
+      - '/update\/.+/'
+  - label: 'bug'
+    branch:
+      - '/fix\/.+/'
+    title:
+      - '/fix/i'
+  - label: 'enhancement'
+    branch:
+      - '/feature\/.+/'
