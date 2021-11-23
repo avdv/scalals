@@ -13,12 +13,10 @@
       (system:
         let
           sbtHeadlessOverlay = _: prev: {
-            sbt = prev.sbt.overrideAttrs (_: {
-              patchPhase = ''echo -java-home ${prev.openjdk11_headless} >> conf/sbtopts'';
-            });
+            sbt = prev.sbt.override { jre = prev.openjdk11_headless; };
           };
 
-          pkgs = import nixpkgs { inherit system; overlays = [ sbt-derivation.overlay sbtHeadlessOverlay ]; };
+          pkgs = import nixpkgs { inherit system; overlays = [ sbtHeadlessOverlay sbt-derivation.overlay ]; };
           pkgsStatic = pkgs.pkgsStatic;
           stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
