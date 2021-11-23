@@ -1,0 +1,31 @@
+name: Update flake ❄
+
+on:
+  workflow_dispatch:
+  schedule:
+    # every wednesday at 3pm UTC
+    - cron: '0 15 * * wed'
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v16
+    - uses: cachix/cachix-action@v10
+      with:
+        name: cbley
+        extraPullNames: pre-commit-hooks
+    - name: Set author identity
+      run: |
+        git config user.email '${{ github.actor }}@users.noreply.github.com'
+        git config user.name '${{ github.actor }}'
+    - run: nix flake update --commit-lock-file
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3.11.0
+      with:
+        commit-message: "[automation] flake update"
+        title: "[automation] flake update"
+        branch: "automation/update-flake-inputs"
+        labels: "dependencies"
+        token: "${{ secrets.PR_TOKEN }}"
