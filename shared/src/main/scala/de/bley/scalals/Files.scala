@@ -23,6 +23,7 @@ object SFiles {
     "ai" -> '',
     "ppt" -> '',
     "android" -> '',
+    "nix" -> '',
     "yml" -> '',
     "epub" -> '',
     "lua" -> '',
