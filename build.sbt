@@ -37,8 +37,8 @@ def generateConstants(base: File): File = {
   // might be an octal, hexadecimal or decimal integer literal
   def readCNumber(s: String): Int = Integer.parseInt(s, getRadix(s))
 
-  val constants = output.getLines().collect {
-    case definition(name, value) => f"val $name%s: Int = ${readCNumber(value)}%#x"
+  val constants = output.getLines().collect { case definition(name, value) =>
+    f"val $name%s: Int = ${readCNumber(value)}%#x"
   }
   io.IO.write(
     outputFile,

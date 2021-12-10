@@ -33,7 +33,7 @@ trait Decorator {
   }
 
   // TODO:
-  //def colored(color: String): Decorator = ColorDecorator(color, this)
+  // def colored(color: String): Decorator = ColorDecorator(color, this)
   def colored(mode: ColorMode.ColorMode): Decorator = mode match {
     case ColorMode.never                         => this
     case ColorMode.auto if !Terminal.isTTYOutput => this
@@ -66,7 +66,7 @@ object ColorDecorator {
       val code = Colors.colorFor(subject)
       val o = d.decorate(subject, builder.append(code))
       builder.append(RESET)
-      //inner.copy(text = s"$code${inner.text}$RESET")
+      // inner.copy(text = s"$code${inner.text}$RESET")
       o
     }
   }
@@ -217,8 +217,8 @@ object IconDecorator extends Decorator {
       if (dot > 0) e.substring(dot + 1).toLowerCase() // FIXME: Locale.ENGLISH
       else ""
     }
-    //val key = if (files.contains(ext)) ext else aliases.getOrElse(ext, ext)
-    //val symbol = files.getOrElse(key,  ) //
+    // val key = if (files.contains(ext)) ext else aliases.getOrElse(ext, ext)
+    // val symbol = files.getOrElse(key,  ) //
     val symbol = files.getOrElse(
       ext, {
         aliases.get(ext).fold(if (subject.isDirectory) '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
