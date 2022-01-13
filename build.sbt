@@ -2,7 +2,7 @@ import scala.util.matching.Regex
 import scala.sys.process._
 import java.nio.file.Paths
 
-ThisBuild / scalaVersion := "2.13.7"
+ThisBuild / scalaVersion := "2.13.8"
 
 val sharedSettings = Seq(
   scalacOptions ++= Seq(
@@ -37,8 +37,8 @@ def generateConstants(base: File): File = {
   // might be an octal, hexadecimal or decimal integer literal
   def readCNumber(s: String): Int = Integer.parseInt(s, getRadix(s))
 
-  val constants = output.getLines().collect {
-    case definition(name, value) => f"val $name%s: Int = ${readCNumber(value)}%#x"
+  val constants = output.getLines().collect { case definition(name, value) =>
+    f"val $name%s: Int = ${readCNumber(value)}%#x"
   }
   io.IO.write(
     outputFile,
