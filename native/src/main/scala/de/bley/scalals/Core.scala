@@ -18,7 +18,7 @@ object FileInfo {
 
   def apply(path: Path, dereference: Boolean)(implicit z: Env) = {
     val info = {
-      val buf = alloc[stat.stat]
+      val buf = alloc[stat.stat]()
       val err =
         if (dereference)
           stat.stat(toCString(path.toString), buf)
@@ -55,7 +55,7 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
   @inline def isCharDev: Boolean = stat.S_ISCHR(info._13) != 0
   @inline def isBlockDev: Boolean = stat.S_ISBLK(info._13) != 0
   @inline def group: String = {
-    val buf = stackalloc[grp.group]
+    val buf = stackalloc[grp.group]()
     errno.errno = 0
     val err = grp.getgrgid(info._5, buf)
     if (err == 0) {
@@ -67,7 +67,7 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
     }
   }
   @inline def owner: String = {
-    val buf = stackalloc[pwd.passwd]
+    val buf = stackalloc[pwd.passwd]()
     errno.errno = 0
     val err = pwd.getpwuid(info._4, buf)
     if (err == 0) {
@@ -135,7 +135,7 @@ object Core extends generic.Core {
           Zone { implicit z =>
             val format = if (instant > recentLimit) c"%b %e %R" else c"%b %e  %Y"
             val str = alloc[CChar](70)
-            val time_t = stackalloc[time.time_t]
+            val time_t = stackalloc[time.time_t]()
 
             !time_t = file.lastModifiedTime.toEpochMilli() / 1000
 
