@@ -35,7 +35,7 @@ object Terminal {
   def isTTYOutput: Boolean = xunistd.isatty(STDOUT_FILENO)
 
   def width: Int = {
-    val winsz = stackalloc[types.winsize]
+    val winsz = stackalloc[types.winsize]()
 
     var tty = open(c"/dev/tty", O_RDWR, 0.toUInt)
     try {
