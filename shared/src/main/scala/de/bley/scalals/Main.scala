@@ -167,7 +167,7 @@ object Main {
     arg[Path]("...")
       .unbounded()
       .optional()
-      //.withFallback(() => "someFallback")
+      // .withFallback(() => "someFallback")
       .action { (x, c) =>
         c.copy(paths = c.paths :+ x)
       }

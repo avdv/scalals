@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+    flake-compat = {
+      url = github:edolstra/flake-compat;
+      flake = false;
+    };
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
     sbt-derivation.url = "github:zaninime/sbt-derivation";
@@ -28,7 +32,7 @@
             pname = "scalals-native";
             version = "0.1.3";
 
-            depsSha256 = "sha256-DXIQXr2T3CnDD8+BUU2ttLSC6NGMeO3F5UiUjdBwS68=";
+            depsSha256 = "sha256-aNLsdewEn/5dYNy/idRB/v9oxN2u+riByKMKnZMU0So=";
 
             src = ./.;
 
@@ -65,7 +69,6 @@
               };
               # generated files / submodules
               excludes = [
-                "^nix/sources\.nix$"
                 "^modules/"
               ];
             };
