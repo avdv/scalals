@@ -32,7 +32,7 @@
             pname = "scalals-native";
             version = "0.1.3";
 
-            depsSha256 = "sha256-DXIQXr2T3CnDD8+BUU2ttLSC6NGMeO3F5UiUjdBwS68=";
+            depsSha256 = "sha256-aNLsdewEn/5dYNy/idRB/v9oxN2u+riByKMKnZMU0So=";
 
             src = ./.;
 
