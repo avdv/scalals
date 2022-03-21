@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+    flake-compat = {
+      url = github:edolstra/flake-compat;
+      flake = false;
+    };
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
     sbt-derivation.url = "github:zaninime/sbt-derivation";
@@ -65,7 +69,6 @@
               };
               # generated files / submodules
               excludes = [
-                "^nix/sources\.nix$"
                 "^modules/"
               ];
             };
