@@ -1,6 +1,6 @@
 package de.bley.scalals
 
-import scalanative.unsafe._
+import scalanative.unsafe.*
 
 @extern
 object locale {

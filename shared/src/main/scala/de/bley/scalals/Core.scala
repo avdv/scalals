@@ -7,19 +7,19 @@ import java.nio.file.{ Path, Paths }
 import java.nio.file.LinkOption
 import java.nio.file.{ AccessDeniedException, NoSuchFileException }
 import scala.annotation.unused
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
 trait Core {
   protected def format(r: Int, w: Int, x: Int, special: Boolean, ch: Char, builder: StringBuilder): Unit = {
     val _ = builder
-      .append(if (r == 0) '-' else 'r')
-      .append(if (w == 0) '-' else 'w')
+      .append(if r == 0 then '-' else 'r')
+      .append(if w == 0 then '-' else 'w')
       .append(
-        if (special) {
-          if (x == 0) ch.toUpper else ch
+        if special then {
+          if x == 0 then ch.toUpper else ch
         } else {
-          if (x == 0) '-' else 'x'
+          if x == 0 then '-' else 'x'
         }
       )
   }
@@ -29,9 +29,9 @@ trait Core {
   def permissionString(imode: Int): String
 
   def ls(config: Config) = Env { implicit z =>
-    val linkOptions = if (config.dereferenceArgs) Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
-    val items = if (config.paths.isEmpty) List(Paths.get(".")) else config.paths
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions: _*))
+    val linkOptions = if config.dereferenceArgs then Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
+    val items = if config.paths.isEmpty then List(Paths.get(".")) else config.paths
+    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions*))
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 
@@ -40,7 +40,7 @@ trait Core {
     for {
       path <- dirPaths
     } {
-      if (config.listDirectories && showPrefix) println(s"\uf115 $path:")
+      if config.listDirectories && showPrefix then println(s"\uf115 $path:")
 
       Using(Files.newDirectoryStream(path)) { dirstream =>
         val entries = for {
@@ -68,16 +68,15 @@ trait Core {
           Ordering.by { (f: generic.FileInfo) =>
             val e = f.name.dropWhile(_ == '.')
             val dot = e.lastIndexOf('.')
-            if (dot > 0)
-              e.splitAt(dot).swap
+            if dot > 0 then e.splitAt(dot).swap
             else ("", f.name)
           }
         case _ => orderByName
       }
 
-      val orderDirection = if (config.reverse) orderBy.reverse else orderBy
+      val orderDirection = if config.reverse then orderBy.reverse else orderBy
 
-      if (config.groupDirectoriesFirst) groupDirsFirst(orderDirection) else orderDirection
+      if config.groupDirectoriesFirst then groupDirsFirst(orderDirection) else orderDirection
     }
 
     val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
@@ -95,10 +94,10 @@ trait Core {
   protected def groupDirsFirst(underlying: Ordering[generic.FileInfo]): Ordering[generic.FileInfo] =
     new Ordering[FileInfo] {
       override def compare(a: generic.FileInfo, b: generic.FileInfo): Int = {
-        if (a.isDirectory == b.isDirectory) {
+        if a.isDirectory == b.isDirectory then {
           underlying.compare(a, b)
         } else {
-          if (a.isDirectory) -1 else 1
+          if a.isDirectory then -1 else 1
         }
       }
     }
@@ -122,7 +121,7 @@ trait Core {
 //    timing("sort")(listing.sort(if (config.reverse) comparator.reversed() else comparator))
 //    val sorted = timing("sort")(listingBuffer.sortWith(if (config.reverse) { (a: FileInfo, b: FileInfo) => !comparator(a, b) } else comparator))
 
-    if (listingBuffer.nonEmpty) {
+    if listingBuffer.nonEmpty then {
       val output =
         for {
           fileInfo <- listingBuffer.toVector
@@ -135,14 +134,14 @@ trait Core {
       val sizes = output.map(_._1)
       // val minlen = sizes.min
       val columns =
-        if (config.long || config.oneLine) decorators.size
+        if config.long || config.oneLine then decorators.size
         else {
           val terminalMax = Terminal.width
           (terminalMax / (sizes.max + 1)) max 1
         }
       val maxColSize = {
         val g = sizes.grouped(columns).toList
-        val h = if (sizes.size > columns) {
+        val h = if sizes.size > columns then {
           g.init :+ (g.last ++ List.fill(columns - g.last.size)(0))
         } else {
           g
@@ -199,27 +198,26 @@ trait Core {
     val decorator: Decorator = {
       val d = Decorator(
         IconDecorator,
-        if (config.hyperlink)
-          HyperlinkDecorator(Decorator.name)
+        if config.hyperlink then HyperlinkDecorator(Decorator.name)
         else Decorator.name
       ).colored(config.colorMode)
         .cond(config.indicatorStyle `ne` IndicatorStyle.none)(
           IndicatorDecorator(config.indicatorStyle)
         )
 
-      if (config.showGitStatus) GitDecorator + d else d
+      if config.showGitStatus then GitDecorator + d else d
     }
 
-    if (config.long) {
+    if config.long then {
       val perms = new Decorator {
         override def decorate(file: FileInfo, builder: StringBuilder): Int = {
           val firstChar =
-            if (file.isBlockDev) 'b'
-            else if (file.isCharDev) 'c'
-            else if (file.isDirectory) 'd'
-            else if (file.isSymlink) 'l'
-            else if (file.isPipe) 'p'
-            else if (file.isSocket) 's'
+            if file.isBlockDev then 'b'
+            else if file.isCharDev then 'c'
+            else if file.isDirectory then 'd'
+            else if file.isSymlink then 'l'
+            else if file.isPipe then 'p'
+            else if file.isSocket then 's'
             else '-'
 
           builder.append(firstChar).append(permissionString(file.permissions))
@@ -232,7 +230,7 @@ trait Core {
         override def decorate(file: FileInfo, builder: StringBuilder): Int = {
           val n = decorator.decorate(file, builder)
 
-          if (file.isSymlink) {
+          if file.isSymlink then {
             val t = Files.readSymbolicLink(file.path)
             val target = s" → $t"
 
@@ -274,7 +272,7 @@ trait Core {
 
       Vector(perms, user, group, new SizeDecorator(config.blockSize), date, fileAndLink)
     } else {
-      if (config.printSize) {
+      if config.printSize then {
         Vector(SizeDecorator(config.blockSize) + decorator)
       } else {
         Vector(decorator)

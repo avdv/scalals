@@ -1,13 +1,13 @@
 package de.bley.scalals
 
-import java.nio.file.attribute._
+import java.nio.file.attribute.*
 import java.nio.file.{ Files, LinkOption, Path }
 import java.time.{ Instant, ZoneId }
 import java.time.format.DateTimeFormatter
 import java.text.Collator
 
-import scala.jdk.CollectionConverters._
-import scala.util.chaining._
+import scala.jdk.CollectionConverters.*
+import scala.util.chaining.*
 import scala.util.Try
 import scala.collection.mutable
 
@@ -22,7 +22,7 @@ object Core extends generic.Core {
 
       val date = cache.getOrElseUpdate(
         instant / 1000, {
-          val format = if (instant > recentLimit) recentFormat else dateFormat
+          val format = if instant > recentLimit then recentFormat else dateFormat
 
           format.format(file.lastModifiedTime)
         }
@@ -41,7 +41,7 @@ object Core extends generic.Core {
   private val sb = new StringBuilder(3 * 3)
 
   def permissionString(mode: Int): String = {
-    import UnixConstants._
+    import UnixConstants.*
 
     sb.clear()
     format((mode & S_IRUSR).toInt, (mode & S_IWUSR).toInt, (mode & S_IXUSR).toInt, (mode & S_ISUID).toInt != 0, 's', sb)
@@ -52,7 +52,7 @@ object Core extends generic.Core {
 }
 
 object Terminal {
-  import sys.process._
+  import sys.process.*
 
   val isTTYOutput: Boolean = System.console != null
   val width: Int = {
@@ -74,13 +74,11 @@ object FileInfo {
 }
 
 final class FileInfo private (val path: Path, dereference: Boolean) extends generic.FileInfo {
-  import UnixConstants._
+  import UnixConstants.*
 
   private val attributes =
-    if (dereference)
-      Files.readAttributes(path, classOf[PosixFileAttributes])
-    else
-      Files.readAttributes(path, classOf[PosixFileAttributes], LinkOption.NOFOLLOW_LINKS)
+    if dereference then Files.readAttributes(path, classOf[PosixFileAttributes])
+    else Files.readAttributes(path, classOf[PosixFileAttributes], LinkOption.NOFOLLOW_LINKS)
 
   val name = path.getFileName.toString
 

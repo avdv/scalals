@@ -8,13 +8,13 @@ object Utils {
     var px, nx, nextPx, nextNx = 0
     var mismatch = false
 
-    while (!mismatch && (px < pattern.length || nx < string.length)) {
+    while !mismatch && (px < pattern.length || nx < string.length) do {
       var handled = false
 
-      if (px < pattern.length) {
+      if px < pattern.length then {
         (pattern(px): @switch) match {
           case '?' =>
-            if (nx < string.length) {
+            if nx < string.length then {
               px += 1
               nx += 1
               handled = true
@@ -29,7 +29,7 @@ object Utils {
             handled = true
 
           case c =>
-            if (nx < string.length && string(nx) == c) {
+            if nx < string.length && string(nx) == c then {
               px += 1
               nx += 1
               handled = true
@@ -37,9 +37,9 @@ object Utils {
         }
       }
 
-      if (handled) {
+      if handled then {
         // continue
-      } else if (0 < nextNx && nextNx <= string.length) {
+      } else if 0 < nextNx && nextNx <= string.length then {
         // Mismatch. Maybe restart.
         px = nextPx
         nx = nextNx
