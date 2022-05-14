@@ -59,8 +59,8 @@ trait Core {
     }
   }
 
-  protected def list(items: Array[Path], config: Config)(implicit @unused z: Env) = {
-    implicit val ordering: Ordering[FileInfo] = {
+  protected def list(items: Array[Path], config: Config)(using @unused z: Env) = {
+    given Ordering[FileInfo] = {
       val orderBy = config.sort match {
         case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
         case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
