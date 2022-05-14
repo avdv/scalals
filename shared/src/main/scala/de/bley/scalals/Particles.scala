@@ -34,7 +34,7 @@ trait Decorator {
 
   // TODO:
   // def colored(color: String): Decorator = ColorDecorator(color, this)
-  def colored(mode: ColorMode.ColorMode): Decorator = mode match {
+  def colored(mode: ColorMode): Decorator = mode match {
     case ColorMode.never                         => this
     case ColorMode.auto if !Terminal.isTTYOutput => this
     case _                                       => ColorDecorator(this)
@@ -72,13 +72,13 @@ object ColorDecorator {
   }
 }
 
-final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extends Decorator {
+final case class IndicatorDecorator(style: IndicatorStyle) extends Decorator {
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
 
     val indicator = style match {
       case IndicatorStyle.slash => if (subject.isDirectory) "/" else ""
       case IndicatorStyle.none  => ""
-      case IndicatorStyle.classify | IndicatorStyle.fileType =>
+      case IndicatorStyle.classify | IndicatorStyle.`file-type` =>
         if (subject.isDirectory)
           "/"
         else if (subject.isSymlink)
@@ -91,7 +91,6 @@ final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extend
           "*"
         else
           ""
-      case _ => ""
     }
     builder.append(indicator)
     indicator.length

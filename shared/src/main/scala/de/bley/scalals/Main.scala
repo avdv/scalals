@@ -4,51 +4,44 @@ import java.nio.file.{ Path, Paths }
 
 //import scala.io.AnsiColor
 
-object SortMode extends Enumeration {
-  type SortMode = Value
+enum SortMode:
   // TODO: version (-v)
-  val name, none, size, time, extension = Value
-}
+  case name, none, size, time, extension
 
-object ColorMode extends Enumeration {
-  type ColorMode = Value
-  val always, auto, never = Value
-}
+enum ColorMode:
+  case always, auto, never
 
-object IndicatorStyle extends Enumeration {
-  type IndicatorStyle = Value
+enum IndicatorStyle:
+  case none, slash, classify, `file-type`
 
-  val none, slash, classify = Value
-  val fileType = Value("file-type")
-}
 
 object implicits {
-  implicit val pathRead = scopt.Read.reads(Paths.get(_: String))
-  implicit val sortRead = scopt.Read.reads(SortMode withName _)
+  implicit val pathRead: scopt.Read[Path] = scopt.Read.reads(Paths.get(_: String))
+  implicit val sortRead: scopt.Read[SortMode] = scopt.Read.reads(SortMode valueOf _)
 
-  implicit val colorModeRead: scopt.Read[ColorMode.ColorMode] =
-    scopt.Read.reads[ColorMode.ColorMode](ColorMode withName _)
+  implicit val colorModeRead: scopt.Read[ColorMode] =
+    scopt.Read.reads[ColorMode](ColorMode valueOf _)
 
-  implicit val indicatorStyleRead: scopt.Read[IndicatorStyle.IndicatorStyle] =
-    scopt.Read.reads(IndicatorStyle withName _)
+  implicit val indicatorStyleRead: scopt.Read[IndicatorStyle] =
+    scopt.Read.reads(IndicatorStyle valueOf _)
 }
 
 final case class Config(
     blockSize: Long = 1,
-    sort: SortMode.SortMode = SortMode.name,
+    sort: SortMode = SortMode.name,
     showAll: Boolean = false,
     listDirectories: Boolean = true,
     groupDirectoriesFirst: Boolean = false,
     hyperlink: Boolean = false,
     dereference: Boolean = false,
     dereferenceArgs: Boolean = false,
-    indicatorStyle: IndicatorStyle.IndicatorStyle = IndicatorStyle.none,
+    indicatorStyle: IndicatorStyle = IndicatorStyle.none,
     long: Boolean = false,
     oneLine: Boolean = false,
     showGitStatus: Boolean = false,
     printSize: Boolean = false,
     paths: List[Path] = List.empty,
-    colorMode: ColorMode.ColorMode = ColorMode.auto,
+    colorMode: ColorMode = ColorMode.auto,
     reverse: Boolean = false
 )
 
@@ -58,7 +51,7 @@ object Main {
   val parser = new scopt.OptionParser[Config]("scalals") {
     head("scalals", BuildInfo.version)
 
-    opt[SortMode.Value]("sort")
+    opt[SortMode]("sort")
       .unbounded()
       .text("sort by WORD instead of name: none (-U), size (-S), time (-t), extension (-X)")
       .valueName("WORD")
@@ -74,14 +67,14 @@ object Main {
     opt[Unit]("file-type")
       .unbounded()
       .text("likewise, except do not append '*'")
-      .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.fileType))
-    opt[IndicatorStyle.Value]("indicator-style")
+      .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.`file-type`))
+    opt[IndicatorStyle]("indicator-style")
       .unbounded()
       .text(
         "append indicator with style WORD to entry names: none (default), slash (-p), file-type (--file-type), classify (-F)"
       )
       .valueName("STYLE")
-      .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.fileType))
+      .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.`file-type`))
     opt[Unit]('p', "indicator-style=slash")
       .unbounded()
       .text("append / indicator to directories")
@@ -118,7 +111,7 @@ object Main {
       .unbounded()
       .text("do not list . and ..")
       .action((_, c) => c)
-    opt[ColorMode.ColorMode]("color")
+    opt[ColorMode]("color")
       .unbounded()
       .text("colorize the output")
       .action((mode, c) => c.copy(colorMode = mode))
