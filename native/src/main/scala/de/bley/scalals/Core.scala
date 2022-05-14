@@ -6,9 +6,9 @@ import scala.collection.mutable
 import java.io.IOException
 
 import scalanative.libc.errno
-import scalanative.unsafe._
-import scalanative.unsigned._
-import scalanative.posix.errno._
+import scalanative.unsafe.*
+import scalanative.unsigned.*
+import scalanative.posix.errno.*
 import scalanative.posix.sys.stat
 import java.nio.file.Path
 
@@ -20,12 +20,10 @@ object FileInfo {
     val info = {
       val buf = alloc[stat.stat]()
       val err =
-        if (dereference)
-          stat.stat(toCString(path.toString), buf)
-        else
-          stat.lstat(toCString(path.toString), buf)
+        if dereference then stat.stat(toCString(path.toString), buf)
+        else stat.lstat(toCString(path.toString), buf)
 
-      if (err == 0) buf
+      if err == 0 then buf
       else {
         errno.errno match {
           case e if e == ENOENT => throw new IOException("No such file or directory")
@@ -58,9 +56,9 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
     val buf = stackalloc[grp.group]()
     errno.errno = 0
     val err = grp.getgrgid(info._5, buf)
-    if (err == 0) {
+    if err == 0 then {
       fromCString(buf._1)
-    } else if (errno.errno == 0) {
+    } else if errno.errno == 0 then {
       info._5.toString
     } else {
       throw new IOException(s"$path: ${errno.errno}")
@@ -70,9 +68,9 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
     val buf = stackalloc[pwd.passwd]()
     errno.errno = 0
     val err = pwd.getpwuid(info._4, buf)
-    if (err == 0) {
+    if err == 0 then {
       fromCString(buf._1)
-    } else if (errno.errno == 0) {
+    } else if errno.errno == 0 then {
       info._4.toString
     } else {
       throw new IOException(s"$path: ${errno.errno}")
@@ -85,14 +83,14 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
   @inline def lastAccessTime: Instant = Instant.ofEpochSecond(info._7)
   @inline def creationTime: Instant = Instant.ofEpochSecond(info._9)
   @inline def isExecutable = {
-    import scala.scalanative.unsigned._
+    import scala.scalanative.unsigned.*
     (info._13 & (stat.S_IXGRP | stat.S_IXOTH | stat.S_IXUSR)) != 0.toUInt
   }
 }
 
 object Core extends generic.Core {
-  import scala.scalanative.posix.sys.stat._
-  import scalanative.unsafe._
+  import scala.scalanative.posix.sys.stat.*
+  import scalanative.unsafe.*
 
   locale.setlocale(locale.LC_ALL, c"")
 
@@ -103,7 +101,7 @@ object Core extends generic.Core {
     .asInstanceOf[Ordering[generic.FileInfo]]
 
   final override def permissionString(imode: Int): String = {
-    import scala.scalanative.unsigned._
+    import scala.scalanative.unsigned.*
     val mode = imode.toUInt
 
     sb.clear()
@@ -129,21 +127,19 @@ object Core extends generic.Core {
 
       val date = cache.getOrElseUpdate(
         instant / 1000, {
-          import scalanative.unsafe._
+          import scalanative.unsafe.*
           import scalanative.posix.time
 
           Zone { implicit z =>
-            val format = if (instant > recentLimit) c"%b %e %R" else c"%b %e  %Y"
+            val format = if instant > recentLimit then c"%b %e %R" else c"%b %e  %Y"
             val str = alloc[CChar](70)
             val time_t = stackalloc[time.time_t]()
 
             !time_t = file.lastModifiedTime.toEpochMilli() / 1000
 
             val tm = time.localtime(time_t)
-            if (0.toULong == time.strftime(str, 70.toULong, format, tm))
-              "n/a" // buffer to small
-            else
-              fromCString(str)
+            if 0.toULong == time.strftime(str, 70.toULong, format, tm) then "n/a" // buffer to small
+            else fromCString(str)
           }
         }
       )

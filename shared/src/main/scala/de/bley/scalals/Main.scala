@@ -14,7 +14,6 @@ enum ColorMode:
 enum IndicatorStyle:
   case none, slash, classify, `file-type`
 
-
 object implicits {
   implicit val pathRead: scopt.Read[Path] = scopt.Read.reads(Paths.get(_: String))
   implicit val sortRead: scopt.Read[SortMode] = scopt.Read.reads(SortMode valueOf _)
@@ -46,7 +45,7 @@ final case class Config(
 )
 
 object Main {
-  import implicits._
+  import implicits.*
 
   val parser = new scopt.OptionParser[Config]("scalals") {
     head("scalals", BuildInfo.version)

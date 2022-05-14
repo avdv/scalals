@@ -1,11 +1,11 @@
 package de.bley.scalals
 
-import scalanative.unsigned._
-import scalanative.unsafe._
+import scalanative.unsigned.*
+import scalanative.unsafe.*
 import scalanative.posix.unistd.STDOUT_FILENO
-import scalanative.posix.fcntl._
+import scalanative.posix.fcntl.*
 import scalanative.posix.unistd.close
-import scalanative.posix.sys.ioctl._
+import scalanative.posix.sys.ioctl.*
 
 @extern
 object termios {
@@ -39,15 +39,15 @@ object Terminal {
 
     var tty = open(c"/dev/tty", O_RDWR, 0.toUInt)
     try {
-      if (tty == -1) tty = STDOUT_FILENO
+      if tty == -1 then tty = STDOUT_FILENO
 
-      if (ioctl(tty, termios.TIOCGWINSZ, winsz.asInstanceOf[Ptr[Byte]]) >= 0) {
+      if ioctl(tty, termios.TIOCGWINSZ, winsz.asInstanceOf[Ptr[Byte]]) >= 0 then {
         (winsz._2).toInt
       } else {
         sys.env.get("COLUMNS").map(_.toInt).getOrElse(80)
       }
     } finally {
-      val _ = if (tty != STDOUT_FILENO) close(tty)
+      val _ = if tty != STDOUT_FILENO then close(tty)
     }
   }
 }
