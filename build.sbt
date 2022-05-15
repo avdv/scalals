@@ -66,11 +66,14 @@ lazy val scalals =
       buildInfoPackage := "de.bley.scalals",
       libraryDependencies ++= Seq(
         "com.github.scopt" %%% "scopt" % "4.0.1"
-        // "org.scalameta" %%% "munit" % "0.7.29" % Test
       )
     )
     // configure JVM settings
     .jvmSettings(
+      // TODO: munit is not available for Scala 3 / Scala Native yet
+      //       see https://github.com/scalameta/munit/issues/524
+      libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
+
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue
