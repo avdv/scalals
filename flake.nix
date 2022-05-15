@@ -33,7 +33,7 @@
               pname = "scalals-native";
               version = "0.1.3";
 
-              depsSha256 = "sha256-aNLsdewEn/5dYNy/idRB/v9oxN2u+riByKMKnZMU0So=";
+              depsSha256 = "sha256-XnvUonTZa8fkVSshcdXrqWVUbmKiaL3IVxaob7o7qkM=";
 
               src = ./.;
 
@@ -45,6 +45,8 @@
 
                 sbt scalalsNative/nativeLink
               '';
+
+              dontPatchELF = true;
 
               depsWarmupCommand = "sbt scalalsNative/compile";
 
