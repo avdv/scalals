@@ -2,7 +2,9 @@ import scala.util.matching.Regex
 import scala.sys.process._
 import java.nio.file.Paths
 
-ThisBuild / scalaVersion := "2.13.8"
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
+ThisBuild / scalaVersion := "3.1.2"
 
 val sharedSettings = Seq(
   scalacOptions ++= Seq(
@@ -14,11 +16,11 @@ val sharedSettings = Seq(
     "-language:higherKinds",
     "-language:implicitConversions",
     "-unchecked",
-    "-Xfatal-warnings",
-    "-Xlint",
-    "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
-    "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard"
+    "-Xfatal-warnings"
+    // "-Xlint",
+    // "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
+    // "-Ywarn-numeric-widen",
+    // "-Ywarn-value-discard"
   )
 )
 
@@ -63,12 +65,15 @@ lazy val scalals =
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
       libraryDependencies ++= Seq(
-        "com.github.scopt" %%% "scopt" % "4.0.1",
-        "org.scalameta" %%% "munit" % "0.7.29" % Test
+        "com.github.scopt" %%% "scopt" % "4.0.1"
       )
     )
     // configure JVM settings
     .jvmSettings(
+      // TODO: munit is not available for Scala 3 / Scala Native yet
+      //       see https://github.com/scalameta/munit/issues/524
+      libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
+
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue

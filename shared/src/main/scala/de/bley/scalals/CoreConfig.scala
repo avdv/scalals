@@ -68,34 +68,30 @@ object Colors {
       if getType.isDefinedAt(lhs)
       fileType = getType(lhs)
     } yield {
-      fileType -> { if (rhs == "target") "" else ansiColor(rhs) }
+      fileType -> { if rhs == "target" then "" else ansiColor(rhs) }
     }
   }.toMap[AnyRef, String].withDefaultValue(ansiColor("00"))
 
   def colorFor(file: generic.FileInfo) = {
-    val color = if (file.isDirectory) {
+    val color = if file.isDirectory then {
       Directory
-    } else if (file.isSymlink) {
-      if (Files.notExists(file.path) && getColors.contains(Orphan))
-        Orphan
-      else
-        Symlink
-    } else if (file.isPipe) {
+    } else if file.isSymlink then {
+      if Files.notExists(file.path) && getColors.contains(Orphan) then Orphan
+      else Symlink
+    } else if file.isPipe then {
       Pipe
-    } else if (file.isSocket) {
+    } else if file.isSocket then {
       Socket
-    } else if (file.isRegularFile) {
-      if (file.isExecutable)
-        Executable
-      else
-        RegularFile
+    } else if file.isRegularFile then {
+      if file.isExecutable then Executable
+      else RegularFile
     } else {
       Special
     }
 
     // println("colors: #" + getColors.size.toString)
     // getColors.get(color)
-    val fileColor = if (color eq RegularFile) {
+    val fileColor = if color eq RegularFile then {
       getColors.collectFirst {
         case (k, v) if k == file.name => v
       }

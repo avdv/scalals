@@ -28,37 +28,41 @@
           nativeBuildInputs = with pkgs; [ git which ];
         in
         rec {
-          packages.scalals = pkgs.sbt.mkDerivation.override { stdenv = stdenvStatic; } {
-            pname = "scalals-native";
-            version = "0.1.3";
+          packages = rec {
+            scalals = pkgs.sbt.mkDerivation.override { stdenv = stdenvStatic; } {
+              pname = "scalals-native";
+              version = "0.1.3";
 
-            depsSha256 = "sha256-aNLsdewEn/5dYNy/idRB/v9oxN2u+riByKMKnZMU0So=";
+              depsSha256 = "sha256-XnvUonTZa8fkVSshcdXrqWVUbmKiaL3IVxaob7o7qkM=";
 
-            src = ./.;
+              src = ./.;
 
-            inherit nativeBuildInputs;
+              inherit nativeBuildInputs;
 
-            buildPhase = ''
-              export CLANG_PATH="$NIX_CC/bin/$CC"
-              export CLANGPP_PATH="$NIX_CC/bin/$CXX"
+              buildPhase = ''
+                export CLANG_PATH="$NIX_CC/bin/$CC"
+                export CLANGPP_PATH="$NIX_CC/bin/$CXX"
 
-              sbt scalalsNative/nativeLink
-            '';
+                sbt scalalsNative/nativeLink
+              '';
 
-            depsWarmupCommand = "sbt scalalsNative/compile";
+              dontPatchELF = true;
 
-            passthru = {
-              exePath = "/bin/scalals";
+              depsWarmupCommand = "sbt scalalsNative/compile";
+
+              passthru = {
+                exePath = "/bin/scalals";
+              };
+
+              installPhase = ''
+                mkdir --parents $out/bin
+                cp native/target/scala-*/scalals-out $out/bin/scalals
+              '';
             };
-
-            installPhase = ''
-              mkdir --parents $out/bin
-              cp native/target/scala-*/scalals-out $out/bin/scalals
-            '';
+            default = scalals;
           };
 
-          defaultApp = flake-utils.lib.mkApp { drv = defaultPackage; };
-          defaultPackage = packages.scalals;
+          apps.default = flake-utils.lib.mkApp { drv = packages.default; };
 
           checks = {
             pre-commit-check = pre-commit-hooks.lib.${system}.run {
@@ -74,7 +78,7 @@
             };
           };
 
-          devShell = mkShell {
+          devShells.default = mkShell {
             shellHook = ''
               export CLANG_PATH="$NIX_CC/bin/$CC"
               export CLANGPP_PATH="$NIX_CC/bin/$CXX"
@@ -83,6 +87,11 @@
             '';
             nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
           };
+
+          # compatibility for nix < 2.7.0
+          defaultApp = apps.default;
+          defaultPackage = packages.default;
+          devShell = devShells.default;
         }
       );
 }

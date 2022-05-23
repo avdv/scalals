@@ -34,14 +34,14 @@ trait Decorator {
 
   // TODO:
   // def colored(color: String): Decorator = ColorDecorator(color, this)
-  def colored(mode: ColorMode.ColorMode): Decorator = mode match {
+  def colored(mode: ColorMode): Decorator = mode match {
     case ColorMode.never                         => this
     case ColorMode.auto if !Terminal.isTTYOutput => this
     case _                                       => ColorDecorator(this)
   }
 
   def cond(p: Boolean)(d: => Decorator): Decorator = {
-    if (p) this + d else this
+    if p then this + d else this
   }
 }
 
@@ -72,26 +72,20 @@ object ColorDecorator {
   }
 }
 
-final case class IndicatorDecorator(style: IndicatorStyle.IndicatorStyle) extends Decorator {
+final case class IndicatorDecorator(style: IndicatorStyle) extends Decorator {
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
 
     val indicator = style match {
-      case IndicatorStyle.slash => if (subject.isDirectory) "/" else ""
+      case IndicatorStyle.slash => if subject.isDirectory then "/" else ""
       case IndicatorStyle.none  => ""
-      case IndicatorStyle.classify | IndicatorStyle.fileType =>
-        if (subject.isDirectory)
-          "/"
-        else if (subject.isSymlink)
-          "@"
-        else if (subject.isSocket)
-          "="
-        else if (subject.isPipe) // FIFO
+      case IndicatorStyle.classify | IndicatorStyle.`file-type` =>
+        if subject.isDirectory then "/"
+        else if subject.isSymlink then "@"
+        else if subject.isSocket then "="
+        else if subject.isPipe then // FIFO
           "|"
-        else if (subject.isExecutable && style == IndicatorStyle.classify)
-          "*"
-        else
-          ""
-      case _ => ""
+        else if subject.isExecutable && style == IndicatorStyle.classify then "*"
+        else ""
     }
     builder.append(indicator)
     indicator.length
@@ -115,7 +109,7 @@ object HyperlinkDecorator {
 }
 
 object GitDecorator extends Decorator {
-  import scala.io.AnsiColor._
+  import scala.io.AnsiColor.*
 
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
     GitDecorator(subject.path).toOption.fold(0) { info =>
@@ -150,7 +144,7 @@ object GitDecorator extends Decorator {
     val status = for {
       prefix <- Try(Source.fromInputStream(proc.getInputStream()).mkString.trim)
       if {
-        while (!proc.waitFor(10, TimeUnit.MILLISECONDS)) ()
+        while !proc.waitFor(10, TimeUnit.MILLISECONDS) do ()
         proc.exitValue() == 0
       }
       gitStatus = new ProcessBuilder(
@@ -171,24 +165,24 @@ object GitDecorator extends Decorator {
     } yield {
       def getc(): Boolean = {
         val ch = iter.next()
-        if (ch == '\u0000') false
+        if ch == '\u0000' then false
         else {
           sb append ch
           true
         }
       }
 
-      while (iter.hasNext) {
+      while iter.hasNext do {
         sb.clear()
-        while (getc()) {}
+        while getc() do {}
         val line = sb.toString
         val mode = line.substring(0, 2).trim
         val file = line.substring(3)
 
         // skip next line for renames
-        if (mode.contains('R')) {
-          while (iter.hasNext && iter.next() != '\u0000') {}
-          if (iter.hasNext) iter.next() // discard NUL byte
+        if mode.contains('R') then {
+          while iter.hasNext && iter.next() != '\u0000' do {}
+          if iter.hasNext then iter.next() // discard NUL byte
         }
 
         val f = Paths.get(file.stripPrefix(prefix)).subpath(0, 1).toString
@@ -214,14 +208,14 @@ object IconDecorator extends Decorator {
     val ext = {
       val e = subject.name.dropWhile(_ == '.')
       val dot = e.lastIndexOf('.')
-      if (dot > 0) e.substring(dot + 1).toLowerCase() // FIXME: Locale.ENGLISH
+      if dot > 0 then e.substring(dot + 1).toLowerCase() // FIXME: Locale.ENGLISH
       else ""
     }
     // val key = if (files.contains(ext)) ext else aliases.getOrElse(ext, ext)
     // val symbol = files.getOrElse(key,  ) //
     val symbol = files.getOrElse(
       ext, {
-        aliases.get(ext).fold(if (subject.isDirectory) '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
+        aliases.get(ext).fold(if subject.isDirectory then '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
       }
     )
     builder.append(' ').append(symbol).append("  ")
