@@ -2,7 +2,7 @@
   description = "scalals";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
     flake-compat = {
       url = github:edolstra/flake-compat;
       flake = false;
