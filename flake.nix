@@ -26,6 +26,15 @@
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
 
           nativeBuildInputs = with pkgs; [ git which ];
+
+          empty-gcc-eh = pkgs.runCommand "empty-gcc-eh" { } ''
+            if $CC -Wno-unused-command-line-argument -x c - -o /dev/null <<< 'int main() {}'; then
+              echo "linking succeeded; please remove empty-gcc-eh workaround" >&2
+              exit 3
+            fi
+            mkdir -p $out/lib
+            ${pkgs.binutils-unwrapped}/bin/ar r $out/lib/libgcc_eh.a
+          '';
         in
         rec {
           packages = rec {
@@ -42,6 +51,7 @@
               buildPhase = ''
                 export CLANG_PATH="$NIX_CC/bin/$CC"
                 export CLANGPP_PATH="$NIX_CC/bin/$CXX"
+                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
                 sbt scalalsNative/nativeLink
               '';
@@ -82,6 +92,7 @@
             shellHook = ''
               export CLANG_PATH="$NIX_CC/bin/$CC"
               export CLANGPP_PATH="$NIX_CC/bin/$CXX"
+              export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
               ${checks.pre-commit-check.shellHook}
             '';
