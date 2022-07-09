@@ -73,7 +73,6 @@ lazy val scalals =
       // TODO: munit is not available for Scala 3 / Scala Native yet
       //       see https://github.com/scalameta/munit/issues/524
       libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
-
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue
