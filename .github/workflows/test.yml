@@ -43,8 +43,9 @@ jobs:
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git branch PR-${{ github.event.number }}
     - run: nix flake check
-    - run: nix run --print-build-logs
-#    - run: nix-shell --pure --run "sbt 'show scalalsNative/nativeConfig'"
-#    - run: nix-shell --pure --run "sbt scalafmtCheckAll"
-#    - run: nix-shell --pure --run "sbt -batch -Dfile.encoding=UTF8 test"
-#    - run: nix-shell --pure --run "sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"
+    - run: nix build --print-build-logs
+    - run: nix run
+    - uses: actions/upload-artifact@v3
+      with:
+        name: scalals-${{ runner.os }}-${{ runner.arch }}
+        path: result/bin/scalals
