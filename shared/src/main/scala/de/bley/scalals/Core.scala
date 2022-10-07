@@ -41,7 +41,7 @@ trait Core {
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 
-    listAll(list(filePaths.toArray, config), config, decorators)
+    listAll(list(filePaths, config), config, decorators)
 
     for {
       path <- dirPaths
@@ -53,7 +53,7 @@ trait Core {
           path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
         } yield path
 
-        listAll(list(entries.toArray, config), config, decorators)
+        listAll(list(entries, config), config, decorators)
       } recover {
         case e: NoSuchFileException =>
           Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
@@ -84,7 +84,7 @@ trait Core {
             path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
           yield path
 
-          val items = list(entries.toArray, config)
+          val items = list(entries, config)
 
           if items.nonEmpty then
             for
@@ -134,18 +134,19 @@ trait Core {
     if config.groupDirectoriesFirst then groupDirsFirst(orderDirection) else orderDirection
   end orderingFor
 
-  protected def list(items: Array[Path], config: Config)(using @unused z: Env) = {
+  protected def list(items: IterableOnce[Path], config: Config)(using @unused z: Env) = {
     given Ordering[FileInfo] = orderingFor(config)
 
     val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
-    for {
-      path <- items
-    }
-      try {
+
+    for
+      path <- items.iterator
+    do
+      try
         listingBuffer += FileInfo(path, config.dereference)
-      } catch {
+      catch
         case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
-      }
+
     listingBuffer
   }
 
