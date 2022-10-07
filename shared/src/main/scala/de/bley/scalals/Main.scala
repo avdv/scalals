@@ -35,6 +35,8 @@ final case class Config(
     long: Boolean = false,
     oneLine: Boolean = false,
     showGitStatus: Boolean = false,
+    tree: Boolean = false,
+    maxDepth: Option[Int] = None,
     printSize: Boolean = false,
     paths: List[Path] = List.empty,
     colorMode: ColorMode = ColorMode.auto,
@@ -89,6 +91,10 @@ object Main {
       .unbounded()
       .text("reverse order while sorting")
       .action((_, c) => c.copy(reverse = true))
+    opt[Option[Int]]("tree")
+      .unbounded()
+      .text("show tree")
+      .action((depth, c) => c.copy(tree = true, maxDepth = depth))
     opt[Unit]("hyperlink")
       .unbounded()
       .text("hyperlink file names")
