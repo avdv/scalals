@@ -134,7 +134,7 @@ object GitDecorator extends Decorator {
   private val gitStatus = mutable.HashMap.empty[Path, Try[Map[String, Set[Char]]]]
 
   private def apply(path: Path): Try[Map[String, Set[Char]]] = {
-    val parent = path.getParent()
+    val parent = path.toAbsolutePath.getParent()
 
     gitStatus.getOrElseUpdate(parent, getStatus(parent))
   }
