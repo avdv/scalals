@@ -38,15 +38,21 @@
         in
         rec {
           packages = rec {
-            scalals = pkgs.sbt.mkDerivation.override { stdenv = stdenvStatic; } {
+            scalals = pkgs.sbt.mkDerivation.override { stdenv = stdenvStatic; } rec {
               pname = "scalals-native";
-              version = "0.1.3";
+              # read the first non-empty string from the VERSION file
+              version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
               depsSha256 = "sha256-XZTF7DFOOTT0JG3+8I+qN5owyKjDFxAQuRcjQHmWUeM=";
 
               src = ./.;
 
               inherit nativeBuildInputs;
+
+              # explicitly override version from sbt-dynver which does not work within a nix build
+              patchPhase = ''
+                echo 'ThisBuild / version := "${version}"' > version.sbt
+              '';
 
               buildPhase = ''
                 export CLANG_PATH="$NIX_CC/bin/$CC"
