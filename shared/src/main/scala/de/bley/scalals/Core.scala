@@ -65,32 +65,34 @@ trait Core {
     }
   }
 
-  protected def traverse(fileInfo: FileInfo, config: Config, prefix: String = "", subdirPrefix: String = "", depth: Int = 0)(using @unused z: Env): Unit =
+  protected def traverse(
+      fileInfo: FileInfo,
+      config: Config,
+      prefix: String = "",
+      subdirPrefix: String = "",
+      depth: Int = 0
+  )(using @unused z: Env): Unit =
     val keepGoing = !config.maxDepth.exists(depth > _)
 
     if keepGoing then
       val decorators = layout(config)
       val builder = new StringBuilder()
 
-      for
-        decorator <- decorators // there should be only one decorator
+      for decorator <- decorators // there should be only one decorator
       do
         decorator.decorate(fileInfo, builder ++= prefix)
         println(builder)
 
       if fileInfo.isDirectory then
         Using(Files.newDirectoryStream(fileInfo.path)) { dirstream =>
-          val entries = for
-            path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
+          val entries = for path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
           yield path
 
           val items = list(entries, config)
 
           if items.nonEmpty then
-            for
-              fileInfo <- items.init
-            do
-              traverse(fileInfo, config, subdirPrefix + " ├── ", subdirPrefix + " │   ", depth + 1)
+            for fileInfo <- items.init
+            do traverse(fileInfo, config, subdirPrefix + " ├── ", subdirPrefix + " │   ", depth + 1)
 
             traverse(items.last, config, subdirPrefix + " └── ", subdirPrefix + "     ", depth + 1)
           end if
@@ -106,13 +108,10 @@ trait Core {
   end traverse
 
   protected def tree(config: Config, items: List[Path])(using @unused z: Env) =
-    for
-      path <- items
+    for path <- items
     do
-      try
-        traverse(FileInfo(path, config.dereference), config)
-      catch
-        case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
+      try traverse(FileInfo(path, config.dereference), config)
+      catch case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
   end tree
 
   protected def orderingFor(config: Config) =
@@ -139,13 +138,10 @@ trait Core {
 
     val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
 
-    for
-      path <- items.iterator
+    for path <- items.iterator
     do
-      try
-        listingBuffer += FileInfo(path, config.dereference)
-      catch
-        case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
+      try listingBuffer += FileInfo(path, config.dereference)
+      catch case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
 
     listingBuffer
   }
