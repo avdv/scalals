@@ -6,6 +6,8 @@ on:
   push:
     branches:
       - main
+  release:
+    types: [published]
 
 jobs:
   tests:
@@ -43,8 +45,26 @@ jobs:
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git branch PR-${{ github.event.number }}
     - run: nix flake check
-    - run: nix run --print-build-logs
-#    - run: nix-shell --pure --run "sbt 'show scalalsNative/nativeConfig'"
-#    - run: nix-shell --pure --run "sbt scalafmtCheckAll"
-#    - run: nix-shell --pure --run "sbt -batch -Dfile.encoding=UTF8 test"
-#    - run: nix-shell --pure --run "sbt -batch -Dfile.encoding=UTF8 scalalsNative/run"
+    - run: nix build --print-build-logs
+    - run: nix run
+    - uses: actions/upload-artifact@v3
+      with:
+        name: scalals-${{ runner.os }}-${{ runner.arch }}
+        path: result/bin/scalals
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+      - run: |
+          mv scalals-Linux-X64/scalals scalals-x86_64-linux
+          mv scalals-macOS-X64/scalals scalals-x86_64-darwin
+      - name: Upload binaries
+        uses: softprops/action-gh-release@v1
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            scalals-x86_64-linux
+            scalals-x86_64-darwin

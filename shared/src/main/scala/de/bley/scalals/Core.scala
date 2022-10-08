@@ -29,13 +29,19 @@ trait Core {
   def permissionString(imode: Int): String
 
   def ls(config: Config) = Env { implicit z =>
-    val linkOptions = if config.dereferenceArgs then Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
     val items = if config.paths.isEmpty then List(Paths.get(".")) else config.paths
+
+    if config.tree then tree(config, items)
+    else lsNormal(config, items)
+  }
+
+  private def lsNormal(config: Config, items: List[Path]) = Env { implicit z =>
+    val linkOptions = if config.dereferenceArgs then Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
     val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions*))
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 
-    listAll(list(filePaths.toArray, config), config, decorators)
+    listAll(list(filePaths, config), config, decorators)
 
     for {
       path <- dirPaths
@@ -47,7 +53,7 @@ trait Core {
           path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
         } yield path
 
-        listAll(list(entries.toArray, config), config, decorators)
+        listAll(list(entries, config), config, decorators)
       } recover {
         case e: NoSuchFileException =>
           Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
@@ -59,35 +65,88 @@ trait Core {
     }
   }
 
-  protected def list(items: Array[Path], config: Config)(using @unused z: Env) = {
-    given Ordering[FileInfo] = {
-      val orderBy = config.sort match {
-        case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
-        case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
-        case SortMode.extension =>
-          Ordering.by { (f: generic.FileInfo) =>
-            val e = f.name.dropWhile(_ == '.')
-            val dot = e.lastIndexOf('.')
-            if dot > 0 then e.splitAt(dot).swap
-            else ("", f.name)
-          }
-        case _ => orderByName
-      }
+  protected def traverse(fileInfo: FileInfo, config: Config, prefix: String = "", subdirPrefix: String = "", depth: Int = 0)(using @unused z: Env): Unit =
+    val keepGoing = !config.maxDepth.exists(depth > _)
 
-      val orderDirection = if config.reverse then orderBy.reverse else orderBy
+    if keepGoing then
+      val decorators = layout(config)
+      val builder = new StringBuilder()
 
-      if config.groupDirectoriesFirst then groupDirsFirst(orderDirection) else orderDirection
+      for
+        decorator <- decorators // there should be only one decorator
+      do
+        decorator.decorate(fileInfo, builder ++= prefix)
+        println(builder)
+
+      if fileInfo.isDirectory then
+        Using(Files.newDirectoryStream(fileInfo.path)) { dirstream =>
+          val entries = for
+            path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
+          yield path
+
+          val items = list(entries, config)
+
+          if items.nonEmpty then
+            for
+              fileInfo <- items.init
+            do
+              traverse(fileInfo, config, subdirPrefix + " ├── ", subdirPrefix + " │   ", depth + 1)
+
+            traverse(items.last, config, subdirPrefix + " └── ", subdirPrefix + "     ", depth + 1)
+          end if
+        } recover {
+          case e: NoSuchFileException =>
+            Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
+          case e: AccessDeniedException =>
+            Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
+          case e =>
+            Console.err.println(s"scalals: ${fileInfo.path}: error $e - ${e.getCause}")
+        }
+      end if
+  end traverse
+
+  protected def tree(config: Config, items: List[Path])(using @unused z: Env) =
+    for
+      path <- items
+    do
+      try
+        traverse(FileInfo(path, config.dereference), config)
+      catch
+        case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
+  end tree
+
+  protected def orderingFor(config: Config) =
+    val orderBy = config.sort match {
+      case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
+      case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
+      case SortMode.extension =>
+        Ordering.by { (f: generic.FileInfo) =>
+          val e = f.name.dropWhile(_ == '.')
+          val dot = e.lastIndexOf('.')
+          if dot > 0 then e.splitAt(dot).swap
+          else ("", f.name)
+        }
+      case _ => orderByName
     }
+
+    val orderDirection = if config.reverse then orderBy.reverse else orderBy
+
+    if config.groupDirectoriesFirst then groupDirsFirst(orderDirection) else orderDirection
+  end orderingFor
+
+  protected def list(items: IterableOnce[Path], config: Config)(using @unused z: Env) = {
+    given Ordering[FileInfo] = orderingFor(config)
 
     val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
-    for {
-      path <- items
-    }
-      try {
+
+    for
+      path <- items.iterator
+    do
+      try
         listingBuffer += FileInfo(path, config.dereference)
-      } catch {
+      catch
         case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
-      }
+
     listingBuffer
   }
 
