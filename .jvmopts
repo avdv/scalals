@@ -3,4 +3,4 @@
 -Xss2m
 -XX:MaxInlineLevel=18
 -XX:+UnlockExperimentalVMOptions
--XX:+UseJVMCICompiler
+-XX:-UseJVMCICompiler
