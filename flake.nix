@@ -16,11 +16,35 @@
     flake-utils.lib.eachSystem [ "aarch64-linux" "x86_64-darwin" "x86_64-linux" ]
       (system:
         let
-          sbtHeadlessOverlay = _: prev: {
-            sbt = prev.sbt.override { jre = prev.openjdk11_headless; };
+          jreHeadlessOverlay = _: prev: {
+            jre = prev.openjdk11_headless;
           };
 
-          pkgs = import nixpkgs { inherit system; overlays = [ sbtHeadlessOverlay sbt-derivation.overlay ]; };
+          scalafmtOverlay = final: prev: {
+            scalafmt =
+              let
+                version = "3.5.9";
+                deps = final.stdenv.mkDerivation {
+                  name = "scalafmt-deps-${version}";
+                  buildCommand = ''
+                    export COURSIER_CACHE=$(pwd)
+                    ${final.coursier}/bin/cs fetch org.scalameta:scalafmt-cli_2.13:${version} > deps
+                    mkdir -p $out/share/java
+                    cp $(< deps) $out/share/java/
+                  '';
+                  outputHashMode = "recursive";
+                  outputHash = "sha256-C9h/i1rfqJ9TY4YgShq/KLhf5qeHkJuwtQjc2v6/fj8=";
+                };
+              in
+              prev.scalafmt.overrideAttrs (_: {
+                inherit version;
+                buildInputs = [ deps ];
+                # need to repeat the nativeBuildInputs here, otherwise the setJavaClassPath setup hook did not run
+                nativeBuildInputs = [ final.makeWrapper final.setJavaClassPath ];
+              });
+          };
+
+          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay sbt-derivation.overlay scalafmtOverlay ]; };
           pkgsStatic = pkgs.pkgsStatic;
           stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
@@ -86,11 +110,13 @@
               hooks = {
                 nixpkgs-fmt.enable = true;
                 nix-linter.enable = true;
+                scalafmt = {
+                  enable = true;
+                  name = "scalafmt";
+                  entry = "${pkgs.scalafmt}/bin/scalafmt --list --reportError";
+                  types = [ "scala" ];
+                };
               };
-              # generated files / submodules
-              excludes = [
-                "^modules/"
-              ];
             };
           };
 
