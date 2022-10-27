@@ -70,7 +70,7 @@ object Main {
         "append indicator with style WORD to entry names: none (default), slash (-p), file-type (--file-type), classify (-F)"
       )
       .valueName("STYLE")
-      .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.`file-type`))
+      .action((s, c) => c.copy(indicatorStyle = s))
     opt[Unit]('p', "indicator-style=slash")
       .unbounded()
       .text("append / indicator to directories")
