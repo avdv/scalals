@@ -150,22 +150,17 @@ object Main {
       .unbounded()
       .text("list one file per line")
       .action((_, c) => c.copy(oneLine = true))
-    opt[Unit]("version")
-      .unbounded()
-      .text("output version information and exit")
-      .action { (_, c) =>
-        println(s"scalals ${BuildInfo.version}")
-        sys.exit(0)
-      }
+
+    help("help").text("show this help and exit")
+    version("version").text("show version information")
+
     arg[Path]("...")
+      .hidden()
       .unbounded()
       .optional()
-      // .withFallback(() => "someFallback")
       .action { (x, c) =>
         c.copy(paths = c.paths :+ x)
       }
-      .text("path entries")
-    help("help")
   }
 
   def main(args: Array[String]): Unit = {
