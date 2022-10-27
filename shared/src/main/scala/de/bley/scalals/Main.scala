@@ -156,6 +156,12 @@ object Main {
         .action((_, c) => c.copy(oneLine = true)),
       help("help").text("show this help and exit"),
       version("version").text("show version information"),
+      note("""|
+              |Exit status:
+              | 0  if OK,
+              | 1  if minor problems (e.g., cannot access subdirectory),
+              | 2  if serious trouble (e.g., parsing command line options).
+              |""".stripMargin),
       arg[Path]("...")
         .hidden()
         .unbounded()
