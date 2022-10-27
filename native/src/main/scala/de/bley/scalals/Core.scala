@@ -24,13 +24,11 @@ object FileInfo {
         else stat.lstat(toCString(path.toString), buf)
 
       if err == 0 then buf
-      else {
-        errno.errno match {
+      else
+        errno.errno match
           case e if e == ENOENT => throw new IOException("No such file or directory")
           case e if e == EACCES => throw new IOException("Permission denied")
           case _                => throw new IOException("I/O error")
-        }
-      }
     }
     new FileInfo(path, toCString(path.getFileName.toString), info)
   }
