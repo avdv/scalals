@@ -8,11 +8,23 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    pre-commit-hooks.url = "github:cachix/pre-commit-hooks.nix";
-    sbt-derivation.url = "github:zaninime/sbt-derivation";
+    pre-commit-hooks = {
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+      url = "github:cachix/pre-commit-hooks.nix";
+    };
+    sbt = {
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+      url = "github:zaninime/sbt-derivation";
+    };
   };
 
-  outputs = { nixpkgs, flake-utils, pre-commit-hooks, sbt-derivation, ... }:
+  outputs = { nixpkgs, flake-utils, pre-commit-hooks, sbt, ... }:
     flake-utils.lib.eachSystem [ "aarch64-linux" "x86_64-darwin" "x86_64-linux" ]
       (system:
         let
@@ -44,7 +56,7 @@
               });
           };
 
-          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay sbt-derivation.overlay scalafmtOverlay ]; };
+          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
           pkgsStatic = pkgs.pkgsStatic;
           stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
@@ -62,16 +74,19 @@
         in
         rec {
           packages = rec {
-            scalals = pkgs.sbt.mkDerivation.override { stdenv = stdenvStatic; } rec {
+            scalals = sbt.lib.mkSbtDerivation rec {
+              inherit pkgs nativeBuildInputs;
+
+              overrides = { stdenv = stdenvStatic; };
+
               pname = "scalals-native";
+
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-XZTF7DFOOTT0JG3+8I+qN5owyKjDFxAQuRcjQHmWUeM=";
+              depsSha256 = "sha256-sw/KnnAqV189k0Q6mJ2GYrTTjqFU6FzXrjcVeRtiQ9s=";
 
               src = ./.;
-
-              inherit nativeBuildInputs;
 
               # explicitly override version from sbt-dynver which does not work within a nix build
               patchPhase = ''
