@@ -105,10 +105,6 @@
 
               depsWarmupCommand = "sbt scalalsNative/compile";
 
-              passthru = {
-                exePath = "/bin/scalals";
-              };
-
               installPhase = ''
                 mkdir --parents $out/bin
                 cp native/target/scala-*/scalals-out $out/bin/scalals
@@ -117,7 +113,7 @@
             default = scalals;
           };
 
-          apps.default = flake-utils.lib.mkApp { drv = packages.default; };
+          apps.default = flake-utils.lib.mkApp { drv = packages.default; exePath = "/bin/scalals"; };
 
           checks = {
             pre-commit-check = pre-commit-hooks.lib.${system}.run {
