@@ -35,7 +35,7 @@
           scalafmtOverlay = final: prev: {
             scalafmt =
               let
-                version = "3.5.9";
+                version = builtins.head (builtins.match ''[ \n]*version *= *"([^ \n]+)".*'' (builtins.readFile ./.scalafmt.conf));
                 deps = final.stdenv.mkDerivation {
                   name = "scalafmt-deps-${version}";
                   buildCommand = ''
