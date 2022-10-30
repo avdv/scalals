@@ -84,7 +84,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-sw/KnnAqV189k0Q6mJ2GYrTTjqFU6FzXrjcVeRtiQ9s=";
+              depsSha256 = "sha256-8e3iQyKIxmWo8s04QQqyuFV8AgF/rmMks7TA1osvkJo=";
 
               src = ./.;
 
@@ -103,6 +103,9 @@
 
               dontPatchELF = true;
 
+              # FIXME: optimizing produces different output hashes on macos and linux due to
+              #        different permissions of symlinks
+              depsOptimize = false;
               depsWarmupCommand = "sbt scalalsNative/compile";
 
               installPhase = ''
