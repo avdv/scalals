@@ -93,12 +93,15 @@
                 echo 'ThisBuild / version := "${version}"' > version.sbt
               '';
 
+              SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
+              SCALANATIVE_LTO = "thin"; # {none, full, thin}
+
               buildPhase = ''
                 export CLANG_PATH="$NIX_CC/bin/$CC"
                 export CLANGPP_PATH="$NIX_CC/bin/$CXX"
                 export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
-                sbt scalalsNative/nativeLink
+                sbt 'project scalalsNative' 'show nativeConfig' nativeLink
               '';
 
               dontPatchELF = true;
