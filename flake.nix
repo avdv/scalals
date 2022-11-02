@@ -59,9 +59,10 @@
           pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
           pkgsStatic = pkgs.pkgsStatic;
           stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
+          lld = pkgs.lld_13;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
 
-          nativeBuildInputs = with pkgs; [ git which ninja ];
+          nativeBuildInputs = with pkgs; [ git lld ninja which ];
 
           empty-gcc-eh = pkgs.runCommand "empty-gcc-eh" { } ''
             if $CC -Wno-unused-command-line-argument -x c - -o /dev/null <<< 'int main() {}'; then
@@ -97,8 +98,6 @@
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
 
               buildPhase = ''
-                export CLANG_PATH="$NIX_CC/bin/$CC"
-                export CLANGPP_PATH="$NIX_CC/bin/$CXX"
                 export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
                 sbt 'project scalalsNative' 'show nativeConfig' nativeLink
@@ -139,8 +138,6 @@
 
           devShells.default = mkShell {
             shellHook = ''
-              export CLANG_PATH="$NIX_CC/bin/$CC"
-              export CLANGPP_PATH="$NIX_CC/bin/$CXX"
               export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
               ${checks.pre-commit-check.shellHook}
