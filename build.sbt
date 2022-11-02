@@ -27,7 +27,7 @@ val sharedSettings = Seq(
 def generateConstants(base: File): File = {
   base.mkdirs()
   val outputFile = base / "constants.scala"
-  val cc = sys.env.get("CLANG_PATH").getOrElse("clang")
+  val cc = sys.env.get("CC").getOrElse("clang")
   val output = scala.io.Source.fromString(s"$cc -E -P jvm/src/main/c/constants.scala.c".!!)
   val definition = "_(S_[^ ]+) = ([0-9]+)".r
 
@@ -80,16 +80,20 @@ lazy val scalals =
     // configure Scala-Native settings
     .nativeSettings(
       nativeConfig ~= { config =>
+        val nixCC = sys.env.get("NIX_CC")
+        val cc = for {
+          n <- nixCC
+          c <- sys.env.get("CC")
+        } yield s"$n/bin/$c"
+        val cxx = for {
+          n <- nixCC
+          c <- sys.env.get("CXX")
+        } yield s"$n/bin/$c"
+
         config
-          .withClang(
-            sys.env.get("CLANG_PATH").fold(config.clang)(Paths.get(_))
-          )
-          .withClangPP(
-            sys.env.get("CLANGPP_PATH").fold(config.clangPP)(Paths.get(_))
-          )
-      //  _.withLTO(LTO.thin)
-      //    .withMode(Mode.releaseFast)
-      //    .withGC(GC.commix)
+          .withLinkingOptions(List("-fuse-ld=lld"))
+          .withClang(cc.fold(config.clang)(Paths.get(_)))
+          .withClangPP(cxx.fold(config.clangPP)(Paths.get(_)))
       },
       nativeCompileOptions += "-Wall",
       nativeLinkStubs := false
