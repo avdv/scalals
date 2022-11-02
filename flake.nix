@@ -61,7 +61,7 @@
           stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
 
-          nativeBuildInputs = with pkgs; [ git which ];
+          nativeBuildInputs = with pkgs; [ git which ninja ];
 
           empty-gcc-eh = pkgs.runCommand "empty-gcc-eh" { } ''
             if $CC -Wno-unused-command-line-argument -x c - -o /dev/null <<< 'int main() {}'; then
@@ -84,7 +84,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-Dat1a66pTh+e/IwfU1JiytRRB8ZH9WNyYNFgqmVcHI0=";
+              depsSha256 = "sha256-XxVGdj1srweyQlMJkCIXjowCNkGx28a3nQQavMi6mIQ=";
 
               src = ./.;
 
