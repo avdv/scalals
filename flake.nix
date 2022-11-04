@@ -45,7 +45,7 @@
                     cp $(< deps) $out/share/java/
                   '';
                   outputHashMode = "recursive";
-                  outputHash = "sha256-M6dkz2dWwL3F2qvRRmI5I0xTLnQSgyaNfCugjgDlfqo=";
+                  outputHash = "sha256-o9T/vEG3JL+UYY+KDLUgYmn0GyJR9R85IToUPVlSK60=";
                 };
               in
               prev.scalafmt.overrideAttrs (_: {
