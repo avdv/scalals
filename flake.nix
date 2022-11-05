@@ -20,7 +20,7 @@
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
       };
-      url = "github:zaninime/sbt-derivation";
+      url = "github:avdv/sbt-derivation/hardlinks";
     };
   };
 
@@ -85,7 +85,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-gQ1dtAOlAKk7GchE2z03Ycpa+CWcLTfDbMQXfTeOnYU=";
+              depsSha256 = "sha256-rX+l+NrK40vvon5HebIOAH4Tn+eqlj0ZClz7vaW1nKI=";
 
               src = ./.;
 
@@ -93,6 +93,8 @@
               patchPhase = ''
                 echo 'ThisBuild / version := "${version}"' > version.sbt
               '';
+
+              postInstall = ''ls -lh $SBT_DEPS'';
 
               SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
@@ -107,7 +109,7 @@
 
               # FIXME: optimizing produces different output hashes on macos and linux due to
               #        different permissions of symlinks
-              depsOptimize = false;
+              depsOptimize = true;
               depsWarmupCommand = "sbt scalalsNative/compile";
 
               installPhase = ''
