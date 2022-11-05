@@ -129,7 +129,7 @@
                 scalafmt = {
                   enable = true;
                   name = "scalafmt";
-                  entry = "${pkgs.scalafmt}/bin/scalafmt --list --reportError";
+                  entry = "${pkgs.scalafmt}/bin/scalafmt --respect-project-filters";
                   types = [ "scala" ];
                 };
               };
