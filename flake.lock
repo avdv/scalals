@@ -89,15 +89,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1661851117,
-        "narHash": "sha256-B+VK8hu1PIg6n54Sz7sVFM3LclRAzu+lJPwe9JAK8RI=",
-        "owner": "zaninime",
+        "lastModified": 1667667819,
+        "narHash": "sha256-qHZzRp/gpoY+JJpSXUzd41OTSfJHNUYhK7yH6F2DcGo=",
+        "owner": "avdv",
         "repo": "sbt-derivation",
-        "rev": "fe0044d2cd351f4d6257956cde3a2ef633d33616",
+        "rev": "050b77ba060dc6650e1e338a03bb3745d5f03acb",
         "type": "github"
       },
       "original": {
-        "owner": "zaninime",
+        "owner": "avdv",
+        "ref": "umask",
         "repo": "sbt-derivation",
         "type": "github"
       }
