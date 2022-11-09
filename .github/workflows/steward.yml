@@ -1,0 +1,35 @@
+name: Update deps hash
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  update-hash:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository_owner == 'scala-steward' }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v18
+    - uses: cachix/cachix-action@v12
+      with:
+        name: cbley
+        extraPullNames: pre-commit-hooks
+    - name: Update fixed output hash
+      run: |
+        outputHash=$( nix eval --raw '.#scalals.dependencies.outputHash' )
+        sed -i'' -e "s,$outputHash,," flake.nix
+        ! output=$( nix build --no-link --print-build-logs '.#scalals.dependencies' 2>&1 )
+        if [[ "$output" != *'error: hash mismatch in fixed-output derivation'* ]]; then
+           echo "build problem: $output" >&2 ; exit 1
+        fi
+        git restore flake.nix
+        got=$( sed -ne 's,.*got: *\([^ ]*\),\1,p' <<< "$output" )
+        sed -i'' -e "s,$outputHash,$got," flake.nix
+        git diff
+    - name: Push changes
+      uses: devops-infra/action-commit-push@v0.9.1
+      with:
+        amend: true
+        force: true
+        github_token: "${{ secrets.PR_TOKEN }}"
