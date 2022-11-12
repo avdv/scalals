@@ -57,7 +57,9 @@
           };
 
           pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
-          pkgsStatic = pkgs.pkgsStatic;
+
+          inherit (pkgs) lib pkgsStatic;
+
           stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
           lld = pkgs.lld_13;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
@@ -97,8 +99,10 @@
               SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
 
-              buildPhase = ''
-                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
+              buildPhase = lib.optionalString (stdenvStatic.isLinux) ''
+                NIX_LDFLAGS="-static $NIX_LDFLAGS"
+              '' + ''
+                NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
                 sbt 'project scalalsNative' 'show nativeConfig' nativeLink
               '';
