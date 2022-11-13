@@ -99,10 +99,8 @@
               SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
 
-              buildPhase = lib.optionalString (stdenvStatic.isLinux) ''
-                NIX_LDFLAGS="-static $NIX_LDFLAGS"
-              '' + ''
-                NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
+              buildPhase = ''
+                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
                 sbt 'project scalalsNative' 'show nativeConfig' nativeLink
               '';
