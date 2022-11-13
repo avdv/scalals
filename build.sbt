@@ -81,17 +81,24 @@ lazy val scalals =
     .nativeSettings(
       nativeConfig ~= { config =>
         val nixCC = sys.env.get("NIX_CC")
+
         val cc = for {
           n <- nixCC
           c <- sys.env.get("CC")
         } yield s"$n/bin/$c"
+
         val cxx = for {
           n <- nixCC
           c <- sys.env.get("CXX")
         } yield s"$n/bin/$c"
 
+        val nixCFlagsLink = for {
+          flags <- sys.env.get("NIX_CFLAGS_LINK").toList
+          flag <- flags.split(" +") if flag.nonEmpty
+        } yield flag
+
         config
-          .withLinkingOptions(List("-fuse-ld=lld"))
+          .withLinkingOptions("-fuse-ld=lld" +: nixCFlagsLink)
           .withClang(cc.fold(config.clang)(Paths.get(_)))
           .withClangPP(cxx.fold(config.clangPP)(Paths.get(_)))
       },
