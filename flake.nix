@@ -60,7 +60,7 @@
 
           inherit (pkgs) lib pkgsStatic;
 
-          stdenvStatic = pkgsStatic.llvmPackages_11.libcxxStdenv;
+          stdenvStatic = pkgsStatic.llvmPackages_13.libcxxStdenv;
           lld = pkgs.lld_13;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
 
