@@ -98,7 +98,7 @@ lazy val scalals =
         } yield flag
 
         config
-          .withLinkingOptions("-fuse-ld=lld" +: nixCFlagsLink)
+          .withLinkingOptions("-fuse-ld=lld" :: "-lc++abi" +: nixCFlagsLink)
           .withClang(cc.fold(config.clang)(Paths.get(_)))
           .withClangPP(cxx.fold(config.clangPP)(Paths.get(_)))
       },
