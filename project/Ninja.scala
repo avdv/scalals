@@ -1,5 +1,5 @@
 /*
- * Drop this into the `project` directory of your scala-native project (needs version 0.4.7+)
+ * Drop this into the `project` directory of your scala-native project (needs version 0.4.9+)
  *
  * Now, you can build your project with ninja: `sbt runNinja`
  *
