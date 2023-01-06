@@ -139,6 +139,7 @@
           };
 
           devShells.default = mkShell {
+            name = "scalals";
             shellHook = ''
               export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
