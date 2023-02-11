@@ -138,15 +138,24 @@
             };
           };
 
-          devShells.default = mkShell {
-            name = "scalals";
-            shellHook = ''
-              export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
+          devShells = {
+            default = mkShell {
+              name = "scalals";
+              shellHook = ''
+                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
-              ${checks.pre-commit-check.shellHook}
-            '';
-            nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
-          };
+                ${checks.pre-commit-check.shellHook}
+              '';
+              nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+            };
+          } // (lib.optionalAttrs (system == "x86_64-linux") {
+            aarch64-cross = pkgs.pkgsCross.aarch64-multiplatform-musl.mkShell
+              {
+                name = "scalals-arm64";
+
+                nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+              };
+          });
 
           # compatibility for nix < 2.7.0
           defaultApp = apps.default;
