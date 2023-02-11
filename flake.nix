@@ -60,8 +60,8 @@
 
           inherit (pkgs) lib pkgsStatic;
 
-          stdenvStatic = pkgsStatic.llvmPackages_13.libcxxStdenv;
-          lld = pkgs.lld_13;
+          stdenvStatic = pkgsStatic.llvmPackages_14.libcxxStdenv;
+          lld = pkgs.lld_14;
           mkShell = pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
 
           nativeBuildInputs = with pkgs; [ git lld ninja which ];
