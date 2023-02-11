@@ -148,14 +148,22 @@
               '';
               nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
             };
-          } // (lib.optionalAttrs (system == "x86_64-linux") {
-            aarch64-cross = pkgs.pkgsCross.aarch64-multiplatform-musl.mkShell
-              {
+          } // (lib.optionalAttrs (system == "x86_64-linux") (
+            let
+              stdenv = pkgs.pkgsCross.aarch64-multiplatform-musl.llvmPackages_13.libcxxStdenv;
+              mkShell = pkgs.pkgsCross.aarch64-multiplatform-musl.mkShell.override { inherit stdenv; };
+              lld = pkgs.pkgs.pkgsCross.aarch64-multiplatform-musl.lld_13;
+              nativeBuildInputs = [ lld pkgs.git pkgs.ninja pkgs.which ];
+            in
+            {
+              aarch64-cross = mkShell {
                 name = "scalals-arm64";
 
                 nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
               };
-          });
+            }
+          )
+          );
 
           # compatibility for nix < 2.7.0
           defaultApp = apps.default;
