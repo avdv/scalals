@@ -156,6 +156,7 @@
               aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
                 name = "scalals-arm64";
 
+                NIX_CFLAGS_LINK = "-static";
                 nativeBuildInputs = [ pkgs.lld_13 pkgs.git pkgs.ninja pkgs.which pkgs.sbt ];
               };
             }
