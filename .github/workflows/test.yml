@@ -28,10 +28,14 @@ jobs:
         extraPullNames: pre-commit-hooks
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         pushFilter: '[-](source|nixpkgs-src)$'
-        # Only needed for private caches
-        #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git branch PR-${{ github.event.number }}
     - run: nix develop '.#aarch64-cross' --command sbt 'project scalalsNative' 'show nativeConfig' nativeLink
+    - run: cp native/target/scala-*/scalals-out scalals
+    - run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 ./scalals
+    - uses: actions/upload-artifact@v3
+      with:
+        name: scalals-${{ runner.os }}-aarch64
+        path: scalals
 
   tests:
     strategy:
