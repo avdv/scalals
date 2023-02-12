@@ -162,10 +162,10 @@
             };
           } // (lib.optionalAttrs (system == "x86_64-linux") (
             let
-              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
+              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_14 mkShell;
             in
             {
-              aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
+              aarch64-cross = mkShell.override { stdenv = llvmPackages_14.libcxxStdenv; } {
                 name = "scalals-arm64";
 
                 NIX_CFLAGS_LINK = "-static";
