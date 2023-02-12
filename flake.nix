@@ -150,16 +150,13 @@
             };
           } // (lib.optionalAttrs (system == "x86_64-linux") (
             let
-              stdenv = pkgs.pkgsCross.aarch64-multiplatform-musl.llvmPackages_13.libcxxStdenv;
-              mkShell = pkgs.pkgsCross.aarch64-multiplatform-musl.mkShell.override { inherit stdenv; };
-              lld = pkgs.pkgs.pkgsCross.aarch64-multiplatform-musl.lld_13;
-              nativeBuildInputs = [ lld pkgs.git pkgs.ninja pkgs.which ];
+              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
             in
             {
-              aarch64-cross = mkShell {
+              aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
                 name = "scalals-arm64";
 
-                nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+                nativeBuildInputs = [ pkgs.git pkgs.ninja pkgs.which pkgs.sbt ];
               };
             }
           )
