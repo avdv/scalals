@@ -138,15 +138,30 @@
             };
           };
 
-          devShells.default = mkShell {
-            name = "scalals";
-            shellHook = ''
-              export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
+          devShells = {
+            default = mkShell {
+              name = "scalals";
+              shellHook = ''
+                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
 
-              ${checks.pre-commit-check.shellHook}
-            '';
-            nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
-          };
+                ${checks.pre-commit-check.shellHook}
+              '';
+              nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+            };
+          } // (lib.optionalAttrs (system == "x86_64-linux") (
+            let
+              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
+            in
+            {
+              aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
+                name = "scalals-arm64";
+
+                NIX_CFLAGS_LINK = "-static";
+                nativeBuildInputs = [ pkgs.lld_13 pkgs.git pkgs.ninja pkgs.which pkgs.sbt ];
+              };
+            }
+          )
+          );
 
           # compatibility for nix < 2.7.0
           defaultApp = apps.default;
