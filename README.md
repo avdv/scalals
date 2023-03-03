@@ -14,7 +14,7 @@ This is yet another [colorls](https://github.com/athityakumar/colorls) clone.
 
 # Install
 
-1. download a pre-built [binary](https://github.com/avdv/scalals/releases/latest) for your platform (currently only Linux and macOS 64bit supported)
+1. download a pre-built [binary](https://github.com/avdv/scalals/releases/latest) for your platform (currently Linux amd64 / arm64 and macOS amd64 supported)
 2. install a Nerd Font from [here](https://www.nerdfonts.com/font-downloads) and use it in your terminal emulator
 3. set up your dircolors (see https://www.nordtheme.com/ports/dircolors for example)
 
