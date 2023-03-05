@@ -195,7 +195,7 @@ trait Core {
       val sizes = output.map(_._1)
       // val minlen = sizes.min
       val columns =
-        if config.long || config.oneLine then decorators.size
+        if config.long || config.longWithoutGroup || config.oneLine then decorators.size
         else {
           val terminalMax = Terminal.width
           (terminalMax / (sizes.max + 1)) max 1
@@ -269,7 +269,7 @@ trait Core {
       if config.showGitStatus then GitDecorator + d else d
     }
 
-    if config.long then {
+    if config.long || config.longWithoutGroup then {
       val perms = new Decorator {
         override def decorate(file: FileInfo, builder: StringBuilder): Int = {
           val firstChar =
@@ -316,22 +316,21 @@ trait Core {
         }
       }
 
-      val group = new Decorator {
-        override def decorate(file: FileInfo, builder: StringBuilder): Int = {
-          val group =
-            try {
-              // val group = file.group
-              // principalCache.getOrElseUpdate(group, group.getName)
-              file.group
-            } catch {
-              case e: IOException => "-"
-            }
-          builder.append(group)
-          group.length()
-        }
-      }
+      val group: Decorator = (file: FileInfo, builder: StringBuilder) =>
+        val group =
+          try
+            // val group = file.group
+            // principalCache.getOrElseUpdate(group, group.getName)
+            file.group
+          catch case e: IOException => "-"
+        builder.append(group)
+        group.length()
 
-      Vector(perms, user, group, new SizeDecorator(config.blockSize), date, fileAndLink)
+      Vector(perms, user) ++ (if config.long then Vector(group) else Vector.empty) ++ Vector(
+        new SizeDecorator(config.blockSize),
+        date,
+        fileAndLink
+      )
     } else {
       if config.printSize then {
         Vector(SizeDecorator(config.blockSize) + decorator)

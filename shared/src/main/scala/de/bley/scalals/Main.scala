@@ -34,6 +34,7 @@ final case class Config(
     dereferenceArgsToDirectory: Boolean = false,
     indicatorStyle: IndicatorStyle = IndicatorStyle.none,
     long: Boolean = false,
+    longWithoutGroup: Boolean = false,
     oneLine: Boolean = false,
     showGitStatus: Boolean = false,
     tree: Boolean = false,
@@ -88,6 +89,10 @@ object Main {
         .unbounded()
         .text("use a long listing format")
         .action((_, c) => c.copy(long = true)),
+      opt[Unit]('o', "long-without-group-info")
+        .unbounded()
+        .text("like -l, but do not list group information")
+        .action((_, c) => c.copy(longWithoutGroup = true)),
       opt[Long]("block-size") // TODO: parse unit
         .unbounded()
         .text("scale sizes by SIZE when printing them")
