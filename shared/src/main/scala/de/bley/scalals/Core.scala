@@ -186,13 +186,11 @@ trait Core {
 
     if listingBuffer.nonEmpty then {
       val output =
-        for {
+        for
           fileInfo <- listingBuffer.toVector
           decorator <- decorators
-          builder = new StringBuilder()
-        } yield {
-          decorator.decorate(fileInfo, builder) -> builder
-        }
+          builder = StringBuilder()
+        yield decorator.decorate(fileInfo, builder) -> builder
 
       val sizes = output.map(_._1)
       // val minlen = sizes.min
