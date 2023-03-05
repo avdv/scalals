@@ -75,7 +75,9 @@ lazy val scalals =
       libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test,
       Compile / sourceGenerators += Def.task {
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
-      }.taskValue
+      }.taskValue,
+      Compile / run / fork := true,
+      run / javaOptions += "--illegal-access=permit"
     )
     // configure Scala-Native settings
     .nativeSettings(
