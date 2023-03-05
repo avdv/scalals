@@ -197,7 +197,7 @@ object GitDecorator extends Decorator {
 
 final case class SizeDecorator(scale: Long = 1L) extends Decorator {
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
-    val output = f"${subject.size.toDouble / scale}%.2f"
+    val output = (subject.size.toDouble / scale).round.toString
     builder.append(output)
     output.length
   }
