@@ -146,6 +146,7 @@
 
                 ${checks.pre-commit-check.shellHook}
               '';
+              packages = [ pkgs.metals ];
               nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
             };
           } // (lib.optionalAttrs (system == "x86_64-linux") (
