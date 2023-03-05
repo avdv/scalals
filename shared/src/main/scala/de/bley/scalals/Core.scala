@@ -36,7 +36,8 @@ trait Core {
   }
 
   private def lsNormal(config: Config, items: List[Path]) = Env { implicit z =>
-    val linkOptions = if config.dereferenceArgs then Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
+    val linkOptions =
+      if config.dereference || config.dereferenceArgs then Array.empty[LinkOption] else Array(LinkOption.NOFOLLOW_LINKS)
     val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions*))
     val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
