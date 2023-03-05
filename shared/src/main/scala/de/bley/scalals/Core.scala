@@ -78,12 +78,15 @@ trait Core {
 
     if keepGoing then
       val decorators = layout(config)
-      val builder = new StringBuilder()
+      val builder = StringBuilder(prefix)
+      val columns = decorators.size
 
-      for decorator <- decorators // there should be only one decorator
+      for (decorator, idx) <- decorators.zipWithIndex
       do
-        decorator.decorate(fileInfo, builder ++= prefix)
-        println(builder)
+        decorator.decorate(fileInfo, builder)
+        if idx < columns - 1 then builder += ' '
+
+      println(builder)
 
       if fileInfo.isDirectory then
         Using(Files.newDirectoryStream(fileInfo.path)) { dirstream =>
