@@ -31,6 +31,7 @@ final case class Config(
     hyperlink: Boolean = false,
     dereference: Boolean = false,
     dereferenceArgs: Boolean = false,
+    dereferenceArgsToDirectory: Boolean = false,
     indicatorStyle: IndicatorStyle = IndicatorStyle.none,
     long: Boolean = false,
     oneLine: Boolean = false,
@@ -64,6 +65,10 @@ object Main {
         .unbounded()
         .text("follow symbolic links listed on the command line")
         .action((_, c) => c.copy(dereferenceArgs = true)),
+      opt[Unit]("dereference-command-line-symlink-to-dir")
+        .unbounded()
+        .text("follow each command line symbolic link that points to a directory")
+        .action((_, c) => c.copy(dereferenceArgsToDirectory = true)),
       opt[Unit]("file-type")
         .unbounded()
         .text("likewise, except do not append '*'")
