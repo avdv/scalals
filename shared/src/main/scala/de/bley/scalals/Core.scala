@@ -110,9 +110,12 @@ trait Core {
   end traverse
 
   protected def tree(config: Config, items: List[Path])(using @unused z: Env) =
+    val dereference = config.dereference || config.dereferenceArgs
     for path <- items
     do
-      try traverse(FileInfo(path, config.dereference), config)
+      try
+        val dereferenceItem = dereference || (config.dereferenceArgsToDirectory && Files.isDirectory(path))
+        traverse(FileInfo(path, dereferenceItem), config)
       catch case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
   end tree
 
