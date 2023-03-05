@@ -199,7 +199,7 @@ final case class SizeDecorator(scale: Long = 1L) extends Decorator {
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int = {
     val output = (subject.size.toDouble / scale).round.toString
     builder.append(output)
-    output.length
+    -output.length // *hacky* negative size indicates right alignment
   }
 }
 

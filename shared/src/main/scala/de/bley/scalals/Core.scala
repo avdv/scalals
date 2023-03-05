@@ -192,7 +192,7 @@ trait Core {
           builder = StringBuilder()
         yield decorator.decorate(fileInfo, builder) -> builder
 
-      val sizes = output.map(_._1)
+      val sizes = output.map(_._1.abs)
       // val minlen = sizes.min
       val columns =
         if config.long || config.longWithoutGroup || config.oneLine then decorators.size
@@ -212,22 +212,20 @@ trait Core {
 
       // Console.err.println(s"$columns")
       // Console.err.println(maxColSize.mkString(", "))
-      for {
-        record <- output.grouped(columns)
-      } {
-        var i = 0
-        println(
-          record
-            .reduceLeft[(Int, StringBuilder)] { case ((width, builder), (width2, builder2)) =>
-              val colSize = maxColSize(i)
-              i += 1
-              width2 -> builder
-                .append(" " * (colSize - width + 1))
-                .append(builder2)
-            }
-            ._2
-        )
-      }
+      for record <- output.grouped(columns) do
+        for
+          ((width, builder), i) <- record.zipWithIndex
+          colSize = maxColSize(i)
+          padding = " " * (colSize - width.abs + 1)
+        do
+          if width < 0 then print(padding)
+
+          print(builder)
+
+          if i < record.size - 1 then print(if width >= 0 then padding else " ")
+          else println()
+        end for
+      end for
     }
   }
 
