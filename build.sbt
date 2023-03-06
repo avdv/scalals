@@ -77,7 +77,7 @@ lazy val scalals =
         Seq(generateConstants((Compile / sourceManaged).value / "de" / "bley" / "scalals"))
       }.taskValue,
       Compile / run / fork := true,
-      run / javaOptions += "--illegal-access=permit"
+      Compile / run / javaOptions += "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
     )
     // configure Scala-Native settings
     .nativeSettings(
