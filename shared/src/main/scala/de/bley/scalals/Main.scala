@@ -42,7 +42,7 @@ final case class Config(
     printSize: Boolean = false,
     paths: List[Path] = List.empty,
     colorMode: ColorMode = ColorMode.auto,
-    reverse: Boolean = false
+    reverse: Boolean = false,
 )
 
 object Main {
@@ -178,7 +178,7 @@ object Main {
         .optional()
         .action { (x, c) =>
           c.copy(paths = c.paths :+ x)
-        }
+        },
     )
   }
 

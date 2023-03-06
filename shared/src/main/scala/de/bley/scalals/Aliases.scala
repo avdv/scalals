@@ -90,6 +90,6 @@ object SAliases {
     "exe" -> "windows",
     "gslides" -> "ppt",
     "stylus" -> "styl",
-    "sh" -> "shell"
+    "sh" -> "shell",
   )
 }

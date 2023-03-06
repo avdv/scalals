@@ -16,7 +16,7 @@ val sharedSettings = Seq(
     "-language:higherKinds",
     "-language:implicitConversions",
     "-unchecked",
-    "-Xfatal-warnings"
+    "-Xfatal-warnings",
     // "-Xlint",
     // "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
     // "-Ywarn-numeric-widen",
@@ -49,7 +49,7 @@ def generateConstants(base: File): File = {
        |object UnixConstants {
        |  ${constants.mkString("\n  ")}
        |}
-       |""".stripMargin
+       |""".stripMargin,
   )
   outputFile
 }
@@ -81,8 +81,8 @@ lazy val scalals =
       Compile / run / javaOptions += "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
       graalVMNativeImageOptions ++= Seq(
         "--no-fallback",
-        s"-H:ReflectionConfigurationFiles=${baseDirectory.value / "graal-config.json" absolutePath}"
-      )
+        s"-H:ReflectionConfigurationFiles=${baseDirectory.value / "graal-config.json" absolutePath}",
+      ),
     )
     // configure Scala-Native settings
     .nativeSettings(
@@ -110,5 +110,5 @@ lazy val scalals =
           .withClangPP(cxx.fold(config.clangPP)(Paths.get(_)))
       },
       nativeCompileOptions += "-Wall",
-      nativeLinkStubs := false
+      nativeLinkStubs := false,
     )
