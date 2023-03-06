@@ -2,5 +2,23 @@
 # handled by pre-commit-hooks.nix
 /.pre-commit-config.yaml
 
-/.bsp
+/.bsp/
 
+### Bloop ###
+/.bloop
+/project/.bloop/
+
+### Metals ###
+.metals/
+/project/**/metals.sbt
+
+### sbt ###
+/target/
+/jvm/target/
+/native/target/
+/project/target/
+/project/boot/
+/shared/target/
+
+### direnv ###
+.direnv
