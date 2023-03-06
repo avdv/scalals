@@ -48,7 +48,7 @@ object Ninja extends AutoPlugin {
 
   override lazy val projectSettings = Seq(
     ninja := ninjaTask.value,
-    runNinja := runNinjaTask.value
+    runNinja := runNinjaTask.value,
   )
 
   lazy val runNinjaTask =

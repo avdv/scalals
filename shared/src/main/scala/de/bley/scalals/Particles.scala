@@ -156,7 +156,7 @@ object GitDecorator extends Decorator {
         "-z",
         "-unormal",
         "--ignored",
-        "."
+        ".",
       ).start()
       out <- Try(Source.fromInputStream(gitStatus.getInputStream()))
       gitInfo = mutable.HashMap.empty[String, mutable.HashSet[Char]].withDefault(m => mutable.HashSet.empty[Char])
@@ -216,7 +216,7 @@ object IconDecorator extends Decorator {
     val symbol = files.getOrElse(
       ext, {
         aliases.get(ext).fold(if subject.isDirectory then '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
-      }
+      },
     )
     builder.append(' ').append(symbol).append("  ")
 

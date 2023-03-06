@@ -72,7 +72,7 @@ trait Core {
       config: Config,
       prefix: String = "",
       subdirPrefix: String = "",
-      depth: Int = 0
+      depth: Int = 0,
   )(using @unused z: Env): Unit =
     val keepGoing = !config.maxDepth.exists(depth > _)
 
@@ -168,7 +168,7 @@ trait Core {
   def listAll(
       listingBuffer: scala.collection.mutable.Set[FileInfo],
       config: Config,
-      decorators: Vector[Decorator]
+      decorators: Vector[Decorator],
   ): Unit = {
     // import java.util.{ List => JList }
     // import java.util.function.Supplier
@@ -258,7 +258,7 @@ trait Core {
       val d = Decorator(
         IconDecorator,
         if config.hyperlink then HyperlinkDecorator(Decorator.name)
-        else Decorator.name
+        else Decorator.name,
       ).colored(config.colorMode)
         .cond(config.indicatorStyle `ne` IndicatorStyle.none)(
           IndicatorDecorator(config.indicatorStyle)
@@ -327,7 +327,7 @@ trait Core {
       Vector(perms, user) ++ (if config.long then Vector(group) else Vector.empty) ++ Vector(
         new SizeDecorator(config.blockSize),
         date,
-        fileAndLink
+        fileAndLink,
       )
     } else {
       if config.printSize then {

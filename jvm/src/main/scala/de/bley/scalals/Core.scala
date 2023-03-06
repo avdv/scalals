@@ -25,7 +25,7 @@ object Core extends generic.Core {
           val format = if instant > recentLimit then recentFormat else dateFormat
 
           format.format(file.lastModifiedTime)
-        }
+        },
       )
       builder.append(date)
       date.length
