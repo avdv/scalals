@@ -1,6 +1,6 @@
 package de.bley.scalals
 
-object SFiles {
+object SFiles:
   val map = Map(
     "rss" -> '',
     "video" -> '',
@@ -73,4 +73,3 @@ object SFiles {
     "c" -> '',
     "erl" -> '',
   )
-}

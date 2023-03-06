@@ -11,13 +11,13 @@ import scala.util.chaining.*
 import scala.util.Try
 import scala.collection.mutable
 
-object Core extends generic.Core {
-  def date: de.bley.scalals.Decorator = new Decorator {
+object Core extends generic.Core:
+  def date: de.bley.scalals.Decorator = new Decorator:
     private val cache = mutable.LongMap.empty[String]
     private val recentFormat = DateTimeFormatter.ofPattern("MMM ppd hh:mm").withZone(ZoneId.systemDefault())
     private val dateFormat = DateTimeFormatter.ofPattern("MMM ppd  yyyy").withZone(ZoneId.systemDefault())
 
-    override def decorate(file: generic.FileInfo, builder: StringBuilder): Int = {
+    override def decorate(file: generic.FileInfo, builder: StringBuilder): Int =
       val instant = file.lastModifiedTime.toEpochMilli()
 
       val date = cache.getOrElseUpdate(
@@ -29,8 +29,6 @@ object Core extends generic.Core {
       )
       builder.append(date)
       date.length
-    }
-  }
 
   private val collator = Collator.getInstance
 
@@ -40,7 +38,7 @@ object Core extends generic.Core {
 
   private val sb = new StringBuilder(3 * 3)
 
-  def permissionString(mode: Int): String = {
+  def permissionString(mode: Int): String =
     import UnixConstants.*
 
     sb.clear()
@@ -48,19 +46,15 @@ object Core extends generic.Core {
     format((mode & S_IRGRP).toInt, (mode & S_IWGRP).toInt, (mode & S_IXGRP).toInt, (mode & S_ISGID).toInt != 0, 's', sb)
     format((mode & S_IROTH).toInt, (mode & S_IWOTH).toInt, (mode & S_IXOTH).toInt, (mode & S_ISVTX).toInt != 0, 't', sb)
     sb.toString()
-  }
-}
 
-object Terminal {
+object Terminal:
   import sys.process.*
 
   val isTTYOutput: Boolean = System.console != null
-  val width: Int = {
+  val width: Int =
     sys.env.get("COLUMNS").orElse(Try("tput cols".!!).toOption).flatMap(_.toIntOption).getOrElse(80)
-  }
-}
 
-object FileInfo {
+object FileInfo:
 
   private val executableBits =
     Set(PosixFilePermission.GROUP_EXECUTE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.OTHERS_EXECUTE)
@@ -71,9 +65,8 @@ object FileInfo {
   private def mode(attr: PosixFileAttributes) = modeField.getInt(attr)
 
   def apply(path: Path, dereference: Boolean): FileInfo = new FileInfo(path, dereference)
-}
 
-final class FileInfo private (val path: Path, dereference: Boolean) extends generic.FileInfo {
+final class FileInfo private (val path: Path, dereference: Boolean) extends generic.FileInfo:
   import UnixConstants.*
 
   private val attributes =
@@ -97,4 +90,3 @@ final class FileInfo private (val path: Path, dereference: Boolean) extends gene
   @inline def isCharDev: Boolean = (permissions & S_IFMT) == S_IFCHR
   @inline def isPipe: Boolean = (permissions & S_IFMT) == S_IFIFO
   @inline def isSocket: Boolean = (permissions & S_IFMT) == S_IFSOCK
-}

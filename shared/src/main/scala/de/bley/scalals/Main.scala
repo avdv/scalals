@@ -45,10 +45,10 @@ final case class Config(
     reverse: Boolean = false,
 )
 
-object Main {
+object Main:
   import scopt.OParser
   val builder = OParser.builder[Config]
-  val parser = {
+  val parser =
     import builder.*
     OParser.sequence(
       programName("scalals"),
@@ -180,10 +180,8 @@ object Main {
           c.copy(paths = c.paths :+ x)
         },
     )
-  }
 
   def main(args: Array[String]): Unit =
     OParser.parse(parser, args, Config()).fold(sys.exit(2)) {
       Core.ls
     }
-}

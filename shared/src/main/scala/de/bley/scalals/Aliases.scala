@@ -1,6 +1,6 @@
 package de.bley.scalals
 
-object SAliases {
+object SAliases:
   val map = Map(
     "erb" -> "rubydoc",
     "yaml" -> "yml",
@@ -92,4 +92,3 @@ object SAliases {
     "stylus" -> "styl",
     "sh" -> "shell",
   )
-}

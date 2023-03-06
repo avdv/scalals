@@ -10,19 +10,16 @@ import scala.annotation.unused
 import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
-trait Core {
-  protected def format(r: Int, w: Int, x: Int, special: Boolean, ch: Char, builder: StringBuilder): Unit = {
+trait Core:
+  protected def format(r: Int, w: Int, x: Int, special: Boolean, ch: Char, builder: StringBuilder): Unit =
     val _ = builder
       .append(if r == 0 then '-' else 'r')
       .append(if w == 0 then '-' else 'w')
       .append(
-        if special then {
-          if x == 0 then ch.toUpper else ch
-        } else {
-          if x == 0 then '-' else 'x'
-        }
+        if special then if x == 0 then ch.toUpper else ch
+        else if x == 0 then '-'
+        else 'x'
       )
-  }
 
   protected def orderByName: Ordering[FileInfo]
 
@@ -45,15 +42,13 @@ trait Core {
 
     listAll(list(filePaths, config), config, decorators)
 
-    for {
-      path <- dirPaths
-    } {
+    for path <- dirPaths
+    do
       if config.listDirectories && showPrefix then println(s"\uf115 $path:")
 
       Using(Files.newDirectoryStream(path)) { dirstream =>
-        val entries = for {
-          path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
-        } yield path
+        val entries = for path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
+        yield path
 
         listAll(list(entries, config), config, decorators)
       } recover {
@@ -64,7 +59,7 @@ trait Core {
         case e =>
           Console.err.println(s"scalals: error $e")
       }
-    }
+    end for
   }
 
   protected def traverse(
@@ -123,7 +118,7 @@ trait Core {
   end tree
 
   protected def orderingFor(config: Config) =
-    val orderBy = config.sort match {
+    val orderBy = config.sort match
       case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
       case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
       case SortMode.extension =>
@@ -134,14 +129,13 @@ trait Core {
           else ("", f.name)
         }
       case _ => orderByName
-    }
 
     val orderDirection = if config.reverse then orderBy.reverse else orderBy
 
     if config.groupDirectoriesFirst then groupDirsFirst(orderDirection) else orderDirection
   end orderingFor
 
-  protected def list(items: IterableOnce[Path], config: Config)(using @unused z: Env) = {
+  protected def list(items: IterableOnce[Path], config: Config)(using @unused z: Env) =
     given Ordering[FileInfo] = orderingFor(config)
 
     val listingBuffer = scala.collection.mutable.TreeSet.empty[generic.FileInfo]
@@ -152,24 +146,19 @@ trait Core {
       catch case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
 
     listingBuffer
-  }
 
   protected def groupDirsFirst(underlying: Ordering[generic.FileInfo]): Ordering[generic.FileInfo] =
-    new Ordering[FileInfo] {
-      override def compare(a: generic.FileInfo, b: generic.FileInfo): Int = {
-        if a.isDirectory == b.isDirectory then {
-          underlying.compare(a, b)
-        } else {
-          if a.isDirectory then -1 else 1
-        }
-      }
-    }
+    new Ordering[FileInfo]:
+      override def compare(a: generic.FileInfo, b: generic.FileInfo): Int =
+        if a.isDirectory == b.isDirectory then underlying.compare(a, b)
+        else if a.isDirectory then -1
+        else 1
 
   def listAll(
       listingBuffer: scala.collection.mutable.Set[FileInfo],
       config: Config,
       decorators: Vector[Decorator],
-  ): Unit = {
+  ): Unit =
     // import java.util.{ List => JList }
     // import java.util.function.Supplier
     // scala.collection.mutable.ArrayBuffer.empty[FileInfo]
@@ -184,7 +173,7 @@ trait Core {
 //    timing("sort")(listing.sort(if (config.reverse) comparator.reversed() else comparator))
 //    val sorted = timing("sort")(listingBuffer.sortWith(if (config.reverse) { (a: FileInfo, b: FileInfo) => !comparator(a, b) } else comparator))
 
-    if listingBuffer.nonEmpty then {
+    if listingBuffer.nonEmpty then
       val output =
         for
           fileInfo <- listingBuffer.toVector
@@ -196,19 +185,15 @@ trait Core {
       // val minlen = sizes.min
       val columns =
         if config.long || config.longWithoutGroup || config.oneLine then decorators.size
-        else {
+        else
           val terminalMax = Terminal.width
           (terminalMax / (sizes.max + 1)) max 1
-        }
-      val maxColSize = {
+      val maxColSize =
         val g = sizes.grouped(columns).toList
-        val h = if sizes.size > columns then {
-          g.init :+ (g.last ++ List.fill(columns - g.last.size)(0))
-        } else {
-          g
-        }
+        val h =
+          if sizes.size > columns then g.init :+ (g.last ++ List.fill(columns - g.last.size)(0))
+          else g
         h.transpose.map(_.max)
-      }
 
       // Console.err.println(s"$columns")
       // Console.err.println(maxColSize.mkString(", "))
@@ -226,9 +211,6 @@ trait Core {
           else println()
         end for
       end for
-    }
-  }
-
   // lazy val dateFormat = DateTimeFormatter.ofPattern("MMM ppd  yyyy", Locale.getDefault())
   // val dateFormat = new SimpleDateFormat() //.ofPattern("MMM ppd  yyyy", Locale.getDefault())
   // lazy val recentFormat = DateTimeFormatter.ofPattern("MMM ppd HH:mm", Locale.getDefault())
@@ -239,7 +221,7 @@ trait Core {
 
   def date: Decorator
 
-  def layout(config: Config): Vector[Decorator] = {
+  def layout(config: Config): Vector[Decorator] =
 //    val ext = file.name.dropWhile(_ == '.').replaceFirst(".*[.]", "").toLowerCase(Locale.ENGLISH)
 //
 //    val key = if (files.contains(ext)) ext else aliases.getOrElse(ext, "file")v1
@@ -254,7 +236,7 @@ trait Core {
     // }
 
 //    val decorated = if (config.hyperlink) hyperlink(file.path.toUri.toURL.toString, file.name) else file.name
-    val decorator: Decorator = {
+    val decorator: Decorator =
       val d = Decorator(
         IconDecorator,
         if config.hyperlink then HyperlinkDecorator(Decorator.name)
@@ -265,11 +247,10 @@ trait Core {
         )
 
       if config.showGitStatus then GitDecorator + d else d
-    }
 
-    if config.long || config.longWithoutGroup then {
-      val perms = new Decorator {
-        override def decorate(file: FileInfo, builder: StringBuilder): Int = {
+    if config.long || config.longWithoutGroup then
+      val perms = new Decorator:
+        override def decorate(file: FileInfo, builder: StringBuilder): Int =
           val firstChar =
             if file.isBlockDev then 'b'
             else if file.isCharDev then 'c'
@@ -282,37 +263,28 @@ trait Core {
           builder.append(firstChar).append(permissionString(file.permissions))
 
           3 * 3 + 1
-        }
-      }
 
-      val fileAndLink = new Decorator {
-        override def decorate(file: FileInfo, builder: StringBuilder): Int = {
+      val fileAndLink = new Decorator:
+        override def decorate(file: FileInfo, builder: StringBuilder): Int =
           val n = decorator.decorate(file, builder)
 
-          if file.isSymlink then {
+          if file.isSymlink then
             val t = Files.readSymbolicLink(file.path)
             val target = s" → $t"
 
             builder.append(target)
 
             n + target.length()
-          } else n
-        }
-      }
+          else n
 
-      val user = new Decorator {
-        override def decorate(file: FileInfo, builder: StringBuilder): Int = {
+      val user = new Decorator:
+        override def decorate(file: FileInfo, builder: StringBuilder): Int =
           val owner =
-            try {
-              file.owner
-            } catch {
-              case e: IOException => "-"
-            }
+            try file.owner
+            catch case e: IOException => "-"
 
           builder.append(owner)
           owner.length()
-        }
-      }
 
       val group: Decorator = (file: FileInfo, builder: StringBuilder) =>
         val group =
@@ -329,12 +301,5 @@ trait Core {
         date,
         fileAndLink,
       )
-    } else {
-      if config.printSize then {
-        Vector(SizeDecorator(config.blockSize) + decorator)
-      } else {
-        Vector(decorator)
-      }
-    }
-  }
-}
+    else if config.printSize then Vector(SizeDecorator(config.blockSize) + decorator)
+    else Vector(decorator)
