@@ -1,0 +1,14 @@
+[
+    {
+       "name": "sun.misc.Unsafe",
+       "allDeclaredFields": true
+},
+    {
+    "name": "scopt.OParser$",
+    "fields": [
+        {
+            "name": "0bitmap$1"
+        }
+    ]
+    }
+]
