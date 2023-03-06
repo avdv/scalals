@@ -180,8 +180,10 @@ object Main:
           c.copy(paths = c.paths :+ x)
         },
     )
+  end parser
 
   def main(args: Array[String]): Unit =
     OParser.parse(parser, args, Config()).fold(sys.exit(2)) {
       Core.ls
     }
+end Main

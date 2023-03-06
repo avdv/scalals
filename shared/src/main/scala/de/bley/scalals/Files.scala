@@ -73,3 +73,4 @@ object SFiles:
     "c" -> '',
     "erl" -> '',
   )
+end SFiles

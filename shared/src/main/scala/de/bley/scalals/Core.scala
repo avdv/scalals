@@ -20,6 +20,7 @@ trait Core:
         else if x == 0 then '-'
         else 'x'
       )
+  end format
 
   protected def orderByName: Ordering[FileInfo]
 
@@ -105,6 +106,7 @@ trait Core:
             Console.err.println(s"scalals: ${fileInfo.path}: error $e - ${e.getCause}")
         }
       end if
+    end if
   end traverse
 
   protected def tree(config: Config, items: List[Path])(using @unused z: Env) =
@@ -146,6 +148,7 @@ trait Core:
       catch case e: IOException => Console.err.println(s"scalals: cannot access '$path': ${e.getMessage}")
 
     listingBuffer
+  end list
 
   protected def groupDirsFirst(underlying: Ordering[generic.FileInfo]): Ordering[generic.FileInfo] =
     new Ordering[FileInfo]:
@@ -247,6 +250,7 @@ trait Core:
         )
 
       if config.showGitStatus then GitDecorator + d else d
+    end decorator
 
     if config.long || config.longWithoutGroup then
       val perms = new Decorator:
@@ -263,6 +267,7 @@ trait Core:
           builder.append(firstChar).append(permissionString(file.permissions))
 
           3 * 3 + 1
+        end decorate
 
       val fileAndLink = new Decorator:
         override def decorate(file: FileInfo, builder: StringBuilder): Int =
@@ -276,6 +281,8 @@ trait Core:
 
             n + target.length()
           else n
+          end if
+        end decorate
 
       val user = new Decorator:
         override def decorate(file: FileInfo, builder: StringBuilder): Int =
@@ -285,6 +292,7 @@ trait Core:
 
           builder.append(owner)
           owner.length()
+        end decorate
 
       val group: Decorator = (file: FileInfo, builder: StringBuilder) =>
         val group =
@@ -303,3 +311,6 @@ trait Core:
       )
     else if config.printSize then Vector(SizeDecorator(config.blockSize) + decorator)
     else Vector(decorator)
+    end if
+  end layout
+end Core

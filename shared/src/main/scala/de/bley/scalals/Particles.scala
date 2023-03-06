@@ -36,6 +36,7 @@ trait Decorator:
 
   def cond(p: Boolean)(d: => Decorator): Decorator =
     if p then this + d else this
+end Decorator
 
 object Decorator:
   object name extends Decorator:
@@ -46,6 +47,7 @@ object Decorator:
   def apply(d: Decorator, ds: Decorator*): Decorator = ds.foldLeft(d) { case (lhs, rhs) =>
     lhs + rhs
   }
+end Decorator
 
 object ColorDecorator:
   import scala.io.AnsiColor.RESET
@@ -57,6 +59,7 @@ object ColorDecorator:
       builder.append(RESET)
       // inner.copy(text = s"$code${inner.text}$RESET")
       o
+end ColorDecorator
 
 final case class IndicatorDecorator(style: IndicatorStyle) extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
@@ -74,6 +77,8 @@ final case class IndicatorDecorator(style: IndicatorStyle) extends Decorator:
         else ""
     builder.append(indicator)
     indicator.length
+  end decorate
+end IndicatorDecorator
 
 object HyperlinkDecorator:
   def apply(d: Decorator): Decorator = new Decorator:
@@ -87,6 +92,8 @@ object HyperlinkDecorator:
       builder.append("\u001b]8;;\u0007")
 
       o
+    end decorate
+end HyperlinkDecorator
 
 object GitDecorator extends Decorator:
   import scala.io.AnsiColor.*
@@ -163,8 +170,11 @@ object GitDecorator extends Decorator:
         val f = Paths.get(file.stripPrefix(prefix)).subpath(0, 1).toString
 
         gitInfo(f) = gitInfo(f) ++= mode
+      end while
       gitInfo.view.mapValues(_.toSet).toMap
     status
+  end getStatus
+end GitDecorator
 
 final case class SizeDecorator(scale: Long = 1L) extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
@@ -189,3 +199,5 @@ object IconDecorator extends Decorator:
     builder.append(' ').append(symbol).append("  ")
 
     4
+  end decorate
+end IconDecorator
