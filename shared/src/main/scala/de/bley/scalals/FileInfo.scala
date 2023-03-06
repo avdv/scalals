@@ -4,7 +4,7 @@ package generic
 import java.time.Instant
 import java.nio.file.Path
 
-trait FileInfo {
+trait FileInfo:
   def name: String
   def path: Path
   def isDirectory: Boolean
@@ -22,4 +22,3 @@ trait FileInfo {
   def lastAccessTime: Instant
   def creationTime: Instant
   def isExecutable: Boolean
-}

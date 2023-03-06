@@ -2,7 +2,7 @@ package de.bley.scalals
 
 import java.nio.file.Files
 
-object CoreConfig {
+object CoreConfig:
   val files: Map[String, Char] = SFiles.map
 //    val p = new Properties()
 //    p.load(this.getClass.getClassLoader.getResourceAsStream("files.properties"))
@@ -12,10 +12,9 @@ object CoreConfig {
   val aliases: Map[String, String] = SAliases.map
   // val p = new Properties()
 //    p.load(this.getClass.getClassLoader.getResourceAsStream("aliases.properties"))
-  // p.load(new FileInputStream("aliases.properties"))
-  // p.asScala.toMap
-  // }
-}
+// p.load(new FileInputStream("aliases.properties"))
+// p.asScala.toMap
+// }
 
 sealed trait FileType
 case object RegularFile extends FileType
@@ -27,20 +26,17 @@ case object Symlink extends FileType
 case object Orphan extends FileType
 case object Executable extends FileType
 
-class Extension(val suffix: String) extends FileType {
-  override def equals(other: Any): Boolean = other match {
+class Extension(val suffix: String) extends FileType:
+  override def equals(other: Any): Boolean = other match
     case s: String if s != null    => s.endsWith(suffix)
     case e: Extension if e != null => suffix == e.suffix
     case _                         => false
-  }
   override def hashCode: Int = suffix.##
-}
 
-object Extension {
+object Extension:
   def apply(glob: String): Extension = new Extension(glob.stripPrefix("*."))
-}
 
-object Colors {
+object Colors:
   def ansiColor(str: String): String = "\u001b[" + str + "m"
 
   val getType: PartialFunction[String, FileType] = {
@@ -58,45 +54,37 @@ object Colors {
 
   lazy val getColors: Map[AnyRef, String] = {
     val Assign = raw"([^=]+)=([\d;]+|target)".r
-    for {
+    for
       definition <- sys.env.get("LS_COLORS").filterNot(_.isEmpty).toList
       assign <- definition.split(':')
-      (lhs, rhs) <- assign match {
+      (lhs, rhs) <- assign match
         case Assign(lhs, rhs) => Some(lhs -> rhs)
         case _                => None
-      }
       if getType.isDefinedAt(lhs)
       fileType = getType(lhs)
-    } yield {
-      fileType -> { if rhs == "target" then "" else ansiColor(rhs) }
-    }
+    yield fileType -> { if rhs == "target" then "" else ansiColor(rhs) }
   }.toMap[AnyRef, String].withDefaultValue(ansiColor("00"))
 
-  def colorFor(file: generic.FileInfo) = {
-    val color = if file.isDirectory then {
-      Directory
-    } else if file.isSymlink then {
-      if Files.notExists(file.path) && getColors.contains(Orphan) then Orphan
-      else Symlink
-    } else if file.isPipe then {
-      Pipe
-    } else if file.isSocket then {
-      Socket
-    } else if file.isRegularFile then {
-      if file.isExecutable then Executable
-      else RegularFile
-    } else {
-      Special
-    }
+  def colorFor(file: generic.FileInfo) =
+    val color =
+      if file.isDirectory then Directory
+      else if file.isSymlink then
+        if Files.notExists(file.path) && getColors.contains(Orphan) then Orphan
+        else Symlink
+      else if file.isPipe then Pipe
+      else if file.isSocket then Socket
+      else if file.isRegularFile then
+        if file.isExecutable then Executable
+        else RegularFile
+      else Special
 
     // println("colors: #" + getColors.size.toString)
     // getColors.get(color)
-    val fileColor = if color eq RegularFile then {
-      getColors.collectFirst {
-        case (k, v) if k == file.name => v
-      }
-    } else None
+    val fileColor =
+      if color eq RegularFile then
+        getColors.collectFirst {
+          case (k, v) if k == file.name => v
+        }
+      else None
 
     fileColor.getOrElse(getColors(color))
-  }
-}
