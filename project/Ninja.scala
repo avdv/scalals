@@ -231,5 +231,6 @@ object Ninja extends AutoPlugin {
       case Mode.Debug       => "-O0"
       case Mode.ReleaseFast => "-O2"
       case Mode.ReleaseFull => "-O3"
+      case Mode.ReleaseSize => "-Os"
     }
 }
