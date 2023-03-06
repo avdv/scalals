@@ -29,6 +29,7 @@ object Core extends generic.Core:
       )
       builder.append(date)
       date.length
+    end decorate
 
   private val collator = Collator.getInstance
 
@@ -46,6 +47,8 @@ object Core extends generic.Core:
     format((mode & S_IRGRP).toInt, (mode & S_IWGRP).toInt, (mode & S_IXGRP).toInt, (mode & S_ISGID).toInt != 0, 's', sb)
     format((mode & S_IROTH).toInt, (mode & S_IWOTH).toInt, (mode & S_IXOTH).toInt, (mode & S_ISVTX).toInt != 0, 't', sb)
     sb.toString()
+  end permissionString
+end Core
 
 object Terminal:
   import sys.process.*
@@ -53,6 +56,7 @@ object Terminal:
   val isTTYOutput: Boolean = System.console != null
   val width: Int =
     sys.env.get("COLUMNS").orElse(Try("tput cols".!!).toOption).flatMap(_.toIntOption).getOrElse(80)
+end Terminal
 
 object FileInfo:
 
@@ -65,6 +69,7 @@ object FileInfo:
   private def mode(attr: PosixFileAttributes) = modeField.getInt(attr)
 
   def apply(path: Path, dereference: Boolean): FileInfo = new FileInfo(path, dereference)
+end FileInfo
 
 final class FileInfo private (val path: Path, dereference: Boolean) extends generic.FileInfo:
   import UnixConstants.*
@@ -90,3 +95,4 @@ final class FileInfo private (val path: Path, dereference: Boolean) extends gene
   @inline def isCharDev: Boolean = (permissions & S_IFMT) == S_IFCHR
   @inline def isPipe: Boolean = (permissions & S_IFMT) == S_IFIFO
   @inline def isSocket: Boolean = (permissions & S_IFMT) == S_IFSOCK
+end FileInfo

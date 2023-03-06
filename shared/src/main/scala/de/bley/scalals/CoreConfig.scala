@@ -11,6 +11,7 @@ object CoreConfig:
   // }
   val aliases: Map[String, String] = SAliases.map
   // val p = new Properties()
+end CoreConfig
 //    p.load(this.getClass.getClassLoader.getResourceAsStream("aliases.properties"))
 // p.load(new FileInputStream("aliases.properties"))
 // p.asScala.toMap
@@ -32,6 +33,7 @@ class Extension(val suffix: String) extends FileType:
     case e: Extension if e != null => suffix == e.suffix
     case _                         => false
   override def hashCode: Int = suffix.##
+end Extension
 
 object Extension:
   def apply(glob: String): Extension = new Extension(glob.stripPrefix("*."))
@@ -63,6 +65,7 @@ object Colors:
       if getType.isDefinedAt(lhs)
       fileType = getType(lhs)
     yield fileType -> { if rhs == "target" then "" else ansiColor(rhs) }
+    end for
   }.toMap[AnyRef, String].withDefaultValue(ansiColor("00"))
 
   def colorFor(file: generic.FileInfo) =
@@ -88,3 +91,5 @@ object Colors:
       else None
 
     fileColor.getOrElse(getColors(color))
+  end colorFor
+end Colors

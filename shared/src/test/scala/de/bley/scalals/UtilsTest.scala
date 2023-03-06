@@ -6,3 +6,4 @@ class UtilsTests extends munit.FunSuite:
   test("glob - simple") {
     assert(glob("abc", "abc"))
   }
+end UtilsTests

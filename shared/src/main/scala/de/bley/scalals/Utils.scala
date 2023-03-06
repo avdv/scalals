@@ -32,6 +32,7 @@ object Utils:
               px += 1
               nx += 1
               handled = true
+      end if
 
       if handled then {
         // continue
@@ -40,4 +41,8 @@ object Utils:
         px = nextPx
         nx = nextNx
       else mismatch = true
+    end while
+
     !mismatch
+  end glob
+end Utils

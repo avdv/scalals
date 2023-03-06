@@ -22,3 +22,4 @@ trait FileInfo:
   def lastAccessTime: Instant
   def creationTime: Instant
   def isExecutable: Boolean
+end FileInfo

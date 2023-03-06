@@ -92,3 +92,4 @@ object SAliases:
     "stylus" -> "styl",
     "sh" -> "shell",
   )
+end SAliases
