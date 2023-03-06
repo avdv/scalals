@@ -69,6 +69,7 @@ lazy val scalals =
       )
     )
     // configure JVM settings
+    .jvmEnablePlugins(GraalVMNativeImagePlugin)
     .jvmSettings(
       // TODO: munit is not available for Scala 3 / Scala Native yet
       //       see https://github.com/scalameta/munit/issues/524
@@ -78,6 +79,10 @@ lazy val scalals =
       }.taskValue,
       Compile / run / fork := true,
       Compile / run / javaOptions += "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
+      graalVMNativeImageOptions ++= Seq(
+        "--no-fallback",
+        s"-H:ReflectionConfigurationFiles=${baseDirectory.value / "graal-config.json" absolutePath}"
+      )
     )
     // configure Scala-Native settings
     .nativeSettings(
