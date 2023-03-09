@@ -1,0 +1,9 @@
+# Enable trailing commas for multiple argument expressions
+4df8d0e5351edf7ffe6e32dc795a4ba8dc4c7fa6
+# Reformat with optional braces removed
+b918b7ac6be54ddc7586b71dc315150a2c1374cf
+# Add end markers for expressions spanning at least 7 lines
+2a249972e648f7ff1423a20b36039a1d07b97c7a
+# reformat with scalafmt
+713d7b1729c457c5d390bd20098c32957819db58
+
