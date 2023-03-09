@@ -3,7 +3,7 @@ package de.bley.scalals
 import scalanative.unsafe.*
 
 @extern
-object locale {
+object locale:
   @name("scalanative_locale_lc_all")
   def LC_ALL: CInt = extern
 
@@ -20,4 +20,4 @@ object locale {
 
   // int strcoll(const char *s1, const char *s2);
   def strcoll(a: CString, b: CString): CInt = extern
-}
+end locale

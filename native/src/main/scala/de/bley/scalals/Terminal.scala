@@ -8,18 +8,16 @@ import scalanative.posix.unistd.close
 import scalanative.posix.sys.ioctl.*
 
 @extern
-object termios {
+object termios:
   @name("scalanative_tiocgwinsize")
   def TIOCGWINSZ: CLongInt = extern
-}
 
 @extern
-object xunistd {
+object xunistd:
   @name("scalanative_isatty")
   def isatty(fileno: CInt): Boolean = extern
-}
 
-object types {
+object types:
   /*
    struct winsize {
    unsigned short ws_row;
@@ -29,25 +27,20 @@ object types {
    };
    */
   type winsize = CStruct4[UShort, UShort, UShort, UShort]
-}
+end types
 
-object Terminal {
+object Terminal:
   def isTTYOutput: Boolean = xunistd.isatty(STDOUT_FILENO)
 
-  def width: Int = {
+  def width: Int =
     val winsz = stackalloc[types.winsize]()
 
     var tty = open(c"/dev/tty", O_RDWR, 0.toUInt)
-    try {
+    try
       if tty == -1 then tty = STDOUT_FILENO
 
-      if ioctl(tty, termios.TIOCGWINSZ, winsz.asInstanceOf[Ptr[Byte]]) >= 0 then {
-        (winsz._2).toInt
-      } else {
-        sys.env.get("COLUMNS").map(_.toInt).getOrElse(80)
-      }
-    } finally {
-      val _ = if tty != STDOUT_FILENO then close(tty)
-    }
-  }
-}
+      if ioctl(tty, termios.TIOCGWINSZ, winsz.asInstanceOf[Ptr[Byte]]) >= 0 then (winsz._2).toInt
+      else sys.env.get("COLUMNS").map(_.toInt).getOrElse(80)
+    finally if tty != STDOUT_FILENO then close(tty)
+  end width
+end Terminal
