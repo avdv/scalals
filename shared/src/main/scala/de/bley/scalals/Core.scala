@@ -307,7 +307,7 @@ trait Core:
       val sizeDecorator = if config.humanReadable then HumanSizeDecorator(1024) else SizeDecorator(config.blockSize)
 
       Vector(perms, user) ++ (if config.long then Vector(group) else Vector.empty) ++ Vector(
-        sizeDecorator,
+        ToggleAlignment(sizeDecorator),
         date,
         fileAndLink,
       )
