@@ -176,17 +176,22 @@ object GitDecorator extends Decorator:
   end getStatus
 end GitDecorator
 
+final class ToggleAlignment(other: Decorator) extends Decorator:
+  // *hacky* negative size indicates right alignment
+  override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
+    -other.decorate(subject, builder)
+
 final class HumanSizeDecorator(power: Long) extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
     val output = Size.render(subject.size, power)
     builder.append(output)
-    -output.length // *hacky* negative size indicates right alignment
+    output.length
 
 final case class SizeDecorator(scale: Long = 1L) extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
     val output = (subject.size.toDouble / scale).round.toString
     builder.append(output)
-    -output.length // *hacky* negative size indicates right alignment
+    output.length
 
 object IconDecorator extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
