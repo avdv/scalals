@@ -8,7 +8,7 @@ enum SortMode:
   // TODO: version (-v)
   case name, none, size, time, extension
 
-enum ColorMode:
+enum When:
   case always, auto, never
 
 enum IndicatorStyle:
@@ -18,7 +18,7 @@ given scopt.Read[Path] = scopt.Read.reads(Paths.get(_: String))
 
 given scopt.Read[SortMode] = scopt.Read.reads(SortMode valueOf _)
 
-given scopt.Read[ColorMode] = scopt.Read.reads[ColorMode](ColorMode valueOf _)
+given scopt.Read[When] = scopt.Read.reads[When](When valueOf _)
 
 given scopt.Read[IndicatorStyle] = scopt.Read.reads(IndicatorStyle valueOf _)
 
@@ -29,7 +29,7 @@ final case class Config(
     listDirectories: Boolean = true,
     groupDirectoriesFirst: Boolean = false,
     humanReadable: Option[Int] = None,
-    hyperlink: Boolean = false,
+    hyperlink: When = When.auto,
     dereference: Boolean = false,
     dereferenceArgs: Boolean = false,
     dereferenceArgsToDirectory: Boolean = false,
@@ -42,7 +42,7 @@ final case class Config(
     maxDepth: Option[Int] = None,
     printSize: Boolean = false,
     paths: List[Path] = List.empty,
-    colorMode: ColorMode = ColorMode.auto,
+    colorMode: When = When.auto,
     reverse: Boolean = false,
 )
 
@@ -59,9 +59,10 @@ object Main:
         .text("sort by WORD instead of name: none (-U), size (-S), time (-t), extension (-X)")
         .valueName("WORD")
         .action((m, c) => c.copy(sort = m)),
-      opt[Unit]('F', "classify")
+      opt[Option[When]]('F', "classify")
         .unbounded()
         .text("append indicator (one of */=>@|) to entries")
+        .valueName("[WHEN]")
         .action((_, c) => c.copy(indicatorStyle = IndicatorStyle.classify)),
       opt[Unit]('H', "dereference-command-line")
         .unbounded()
@@ -109,11 +110,13 @@ object Main:
       opt[Option[Int]]("tree")
         .unbounded()
         .text("show tree")
+        .valueName("[DEPTH]")
         .action((depth, c) => c.copy(tree = true, maxDepth = depth)),
-      opt[Unit]("hyperlink")
+      opt[Option[When]]("hyperlink")
         .unbounded()
         .text("hyperlink file names")
-        .action((_, c) => c.copy(hyperlink = true)),
+        .valueName("[WHEN]")
+        .action((when, c) => c.copy(hyperlink = when.getOrElse(When.always))),
       opt[Unit]('d', "directory")
         .unbounded()
         .text("list directories themselves, not their contents")
@@ -126,10 +129,11 @@ object Main:
         .unbounded()
         .text("do not list . and ..")
         .action((_, c) => c),
-      opt[ColorMode]("color")
+      opt[Option[When]]("color")
         .unbounded()
         .text("colorize the output")
-        .action((mode, c) => c.copy(colorMode = mode)),
+        .valueName("[WHEN]")
+        .action((when, c) => c.copy(colorMode = when.getOrElse(When.always))),
       opt[Unit]("git-status")
         .unbounded()
         .text("show git status for each file")
@@ -189,7 +193,17 @@ object Main:
   end parser
 
   def main(args: Array[String]): Unit =
-    OParser.parse(parser, args, Config()).fold(sys.exit(2)) {
+    // scopt does not support options with optional parameters (see https://github.com/scopt/scopt/pull/273)
+    // it always requires a `=` after the option name with an empty string.
+    // Fix the options missing the `=` here, before passing them to scopts.
+    val (options, rest) = args.span(_ != "--")
+    val fixed = options.map { arg =>
+      arg match
+        case "--hyperlink" | "--color" | "--classify" | "--tree" => arg + '='
+        case _                                                   => arg
+    }
+    OParser.parse(parser, fixed ++ rest, Config()).fold(sys.exit(2)) {
       Core.ls
     }
+  end main
 end Main

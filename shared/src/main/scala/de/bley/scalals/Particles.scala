@@ -29,10 +29,10 @@ trait Decorator:
 
   // TODO:
   // def colored(color: String): Decorator = ColorDecorator(color, this)
-  def colored(mode: ColorMode): Decorator = mode match
-    case ColorMode.never                         => this
-    case ColorMode.auto if !Terminal.isTTYOutput => this
-    case _                                       => ColorDecorator(this)
+  def colored(mode: When): Decorator = mode match
+    case When.never                         => this
+    case When.auto if !Terminal.isTTYOutput => this
+    case _                                  => ColorDecorator(this)
 
   def cond(p: Boolean)(d: => Decorator): Decorator =
     if p then this + d else this

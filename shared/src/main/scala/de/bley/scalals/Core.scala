@@ -242,8 +242,10 @@ trait Core:
     val decorator: Decorator =
       val d = Decorator(
         IconDecorator,
-        if config.hyperlink then HyperlinkDecorator(Decorator.name)
-        else Decorator.name,
+        config.hyperlink match
+          case When.never                         => Decorator.name
+          case When.auto if !Terminal.isTTYOutput => Decorator.name
+          case _                                  => HyperlinkDecorator(Decorator.name),
       ).colored(config.colorMode)
         .cond(config.indicatorStyle `ne` IndicatorStyle.none)(
           IndicatorDecorator(config.indicatorStyle)
