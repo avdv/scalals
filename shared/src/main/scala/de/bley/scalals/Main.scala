@@ -28,6 +28,7 @@ final case class Config(
     showAll: Boolean = false,
     listDirectories: Boolean = true,
     groupDirectoriesFirst: Boolean = false,
+    humanReadable: Boolean = false,
     hyperlink: Boolean = false,
     dereference: Boolean = false,
     dereferenceArgs: Boolean = false,
@@ -139,7 +140,8 @@ object Main:
         .action((_, c) => c.copy(groupDirectoriesFirst = true)),
       opt[Unit]('h', "human-readable")
         .unbounded()
-        .text("print sizes in human readable format"),
+        .text("print sizes in human readable format")
+        .action((_, c) => c.copy(humanReadable = true)),
       opt[Unit]('s', "size")
         .unbounded()
         .text("print size of each file, in blocks")

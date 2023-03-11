@@ -304,12 +304,16 @@ trait Core:
         builder.append(group)
         group.length()
 
+      val sizeDecorator = if config.humanReadable then HumanSizeDecorator(1024) else SizeDecorator(config.blockSize)
+
       Vector(perms, user) ++ (if config.long then Vector(group) else Vector.empty) ++ Vector(
-        new SizeDecorator(config.blockSize),
+        sizeDecorator,
         date,
         fileAndLink,
       )
-    else if config.printSize then Vector(SizeDecorator(config.blockSize) + decorator)
+    else if config.printSize then
+      val sizeDecorator = if config.humanReadable then HumanSizeDecorator(1024) else SizeDecorator(config.blockSize)
+      Vector(sizeDecorator + decorator)
     else Vector(decorator)
     end if
   end layout
