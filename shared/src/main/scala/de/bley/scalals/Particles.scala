@@ -176,6 +176,12 @@ object GitDecorator extends Decorator:
   end getStatus
 end GitDecorator
 
+final class HumanSizeDecorator(power: Long) extends Decorator:
+  override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
+    val output = Size.render(subject.size, power)
+    builder.append(output)
+    -output.length // *hacky* negative size indicates right alignment
+
 final case class SizeDecorator(scale: Long = 1L) extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
     val output = (subject.size.toDouble / scale).round.toString
