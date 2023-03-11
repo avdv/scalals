@@ -304,7 +304,7 @@ trait Core:
         builder.append(group)
         group.length()
 
-      val sizeDecorator = if config.humanReadable then HumanSizeDecorator(1024) else SizeDecorator(config.blockSize)
+      val sizeDecorator = config.humanReadable.fold(SizeDecorator(config.blockSize))(HumanSizeDecorator(_))
 
       Vector(perms, user) ++ (if config.long then Vector(group) else Vector.empty) ++ Vector(
         ToggleAlignment(sizeDecorator),
@@ -312,7 +312,7 @@ trait Core:
         fileAndLink,
       )
     else if config.printSize then
-      val sizeDecorator = if config.humanReadable then HumanSizeDecorator(1024) else SizeDecorator(config.blockSize)
+      val sizeDecorator = config.humanReadable.fold(SizeDecorator(config.blockSize))(HumanSizeDecorator(_))
       Vector(sizeDecorator + decorator)
     else Vector(decorator)
     end if
