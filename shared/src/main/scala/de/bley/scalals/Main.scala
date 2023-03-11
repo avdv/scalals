@@ -28,7 +28,7 @@ final case class Config(
     showAll: Boolean = false,
     listDirectories: Boolean = true,
     groupDirectoriesFirst: Boolean = false,
-    humanReadable: Boolean = false,
+    humanReadable: Option[Int] = None,
     hyperlink: Boolean = false,
     dereference: Boolean = false,
     dereferenceArgs: Boolean = false,
@@ -141,7 +141,11 @@ object Main:
       opt[Unit]('h', "human-readable")
         .unbounded()
         .text("print sizes in human readable format")
-        .action((_, c) => c.copy(humanReadable = true)),
+        .action((_, c) => c.copy(humanReadable = Some(1024))),
+      opt[Unit]("si")
+        .unbounded()
+        .text("likewise, but use powers of 1000 not 1024")
+        .action((_, c) => c.copy(humanReadable = Some(1000))),
       opt[Unit]('s', "size")
         .unbounded()
         .text("print size of each file, in blocks")
