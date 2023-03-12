@@ -77,6 +77,14 @@ lazy val scalals =
       }.taskValue,
       Compile / run / fork := true,
       Compile / run / javaOptions += "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
+      Compile / packageSrc / mappings ~= { mappings =>
+        mappings.map { case mapping @ (from, to) =>
+          if (from.name == "Core.scala" && from.getPath.contains("/shared/"))
+            from -> to.replace("Core.scala", "CoreShared.scala")
+          else
+            mapping
+        }
+      },
       graalVMNativeImageOptions ++= Seq(
         "--no-fallback",
         s"-H:ReflectionConfigurationFiles=${baseDirectory.value / "graal-config.json" absolutePath}",
