@@ -146,6 +146,14 @@
               packages = [ pkgs.metals ];
               nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
             };
+
+            graalVM = pkgs.mkShell {
+              name = "scalals / graalvm";
+              shellHook = ''
+                ${checks.pre-commit-check.shellHook}
+              '';
+              nativeBuildInputs = [ pkgs.graalvm11 pkgs.sbt ];
+            };
           } // (lib.optionalAttrs (system == "x86_64-linux") (
             let
               inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
