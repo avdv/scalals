@@ -1,4 +1,5 @@
 import scala.util.matching.Regex
+import Regex.Groups
 import scala.sys.process._
 import java.nio.file.Paths
 
@@ -27,21 +28,27 @@ val sharedSettings = Seq(
 def generateConstants(base: File): File = {
   base.mkdirs()
   val outputFile = base / "constants.scala"
-  val cc = sys.env.get("CC").getOrElse("clang")
+  val cc = sys.env.getOrElse("CC", "clang")
   val output = scala.io.Source.fromString(s"$cc -E -P jvm/src/main/c/constants.scala.c".!!)
-  val definition = "_(S_[^ ]+) = ([0-9]+)".r
+  val definition = "_(S_[^ ]+) = ((?:0[xX])?[0-9]+)".r
+  val shift = "[(] *((?:0[xX])?[0-9]+) *>> *((?:0[xX])?[0-9]+) *[)]".r
 
-  def getRadix(s: String) =
-    if (s.startsWith("0x") || s.startsWith("0X")) 16
-    else if (s.startsWith("0")) 8
-    else 10
-
-  // might be an octal, hexadecimal or decimal integer literal
-  def readCNumber(s: String): Int = Integer.parseInt(s, getRadix(s))
-
-  val constants = output.getLines().collect { case definition(name, value) =>
-    f"val $name%s: Int = ${readCNumber(value)}%#x"
+  def evalShifts(s: String): String = {
+    val replaced = shift.replaceAllIn(
+      s,
+      _ match {
+        case Groups(CNumber(lhs), CNumber(rhs)) => (lhs >> rhs).toString
+      },
+    )
+    if (replaced == s) s
+    else evalShifts(replaced)
   }
+
+  val constants = for {
+    line <- output.getLines()
+    Groups(name, CNumber(value)) <- definition.findFirstMatchIn(evalShifts(line))
+  } yield f"val $name%s: Int = $value%#x"
+
   io.IO.write(
     outputFile,
     s"""package de.bley.scalals
