@@ -94,6 +94,7 @@ lazy val scalals =
       },
       graalVMNativeImageOptions ++= Seq(
         "--no-fallback",
+        "-H:-CheckToolchain",
         s"-H:ReflectionConfigurationFiles=${baseDirectory.value / "graal-config.json" absolutePath}",
       ),
     )
