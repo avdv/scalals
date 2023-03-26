@@ -55,7 +55,11 @@ object Terminal:
 
   val isTTYOutput: Boolean = System.console != null
   val width: Int =
-    sys.env.get("COLUMNS").orElse(Try("tput cols".!!).toOption).flatMap(_.toIntOption).getOrElse(80)
+    sys.env
+      .get("COLUMNS")
+      .orElse(Try("tput cols" !! ProcessLogger(_ => ())).toOption)
+      .flatMap(_.toIntOption)
+      .getOrElse(80)
 end Terminal
 
 object FileInfo:
