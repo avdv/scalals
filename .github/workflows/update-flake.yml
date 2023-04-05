@@ -22,7 +22,7 @@ jobs:
         git config user.name '${{ github.actor }}'
     - run: nix flake update --commit-lock-file
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@v5
       with:
         commit-message: "[automation] flake update"
         title: "[automation] flake update"
