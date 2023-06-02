@@ -124,7 +124,6 @@
               src = ./.;
               hooks = {
                 nixpkgs-fmt.enable = true;
-                nix-linter.enable = true;
                 scalafmt = {
                   enable = true;
                   name = "scalafmt";
