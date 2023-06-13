@@ -72,14 +72,14 @@
 
           inherit (pkgs) lib pkgsStatic;
 
-          lld = pkgs.lld_14;
+          lld = pkgs.lld_16;
 
           # pkgStatic is not yet supported on Darwin (see https://github.com/NixOS/nixpkgs/issues/270375)
           theStdenv =
             if pkgs.stdenv.isDarwin then
-              pkgs.llvmPackages_14.libcxxStdenv
+              pkgs.llvmPackages_16.libcxxStdenv
             else
-              pkgsStatic.llvmPackages_14.libcxxStdenv;
+              pkgsStatic.llvmPackages_16.libcxxStdenv;
 
           mkShell =
             (if pkgs.stdenv.isDarwin then
