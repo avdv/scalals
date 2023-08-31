@@ -94,7 +94,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-+uM04Gk40poJuzfb/mM+IZxGAUGIgAvHVpa6BujyWdc=";
+              depsSha256 = "sha256-vqb0mPUGu0no2j8L+ZgaR0YQkNoUr6yEJs3GwMKp5pI=";
 
               src = ./.;
 
