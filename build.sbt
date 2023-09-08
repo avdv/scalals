@@ -5,7 +5,7 @@ import java.nio.file.Paths
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion := "3.3.0"
+ThisBuild / scalaVersion := "3.3.1"
 
 val sharedSettings = Seq(
   scalacOptions ++= Seq(
