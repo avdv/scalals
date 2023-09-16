@@ -73,7 +73,7 @@ lazy val scalals =
       buildInfoPackage := "de.bley.scalals",
       libraryDependencies ++= Seq(
         "com.github.scopt" %%% "scopt" % "4.1.0",
-        "org.scalameta" %%% "munit" % "1.0.0-M8" % Test,
+        "org.scalameta" %%% "munit" % "1.0.0-M10" % Test,
       ),
     )
     // configure JVM settings
