@@ -71,10 +71,7 @@ jobs:
     - run: jvm/target/graalvm-native-image/scalals
 
   tests:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, macos-14]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - name: Cache SBT
@@ -107,6 +104,7 @@ jobs:
     - run: nix flake check
     - run: nix build --print-build-logs
     - run: nix run
+    - run: nix develop --ignore-environment --keep HOME --command '.github/crosscompile'
     - uses: actions/upload-artifact@v4
       with:
         name: scalals-${{ runner.os }}-${{ runner.arch }}

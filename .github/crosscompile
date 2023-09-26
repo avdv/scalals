@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+declare -ar TARGETS=(
+    x86_64-linux-musl
+    x86_64-macos-none
+    aarch64-linux-musl
+    aarch64-macos-none
+)
+
+sbt -client 'project scalalsNative'
+sbt -client 'ninjaCompile'
+
+for target in "${TARGETS[@]}"; do
+    echo "BUILD - $target"
+    sbt -client "set targetTriplet := Some(\"$target\")"
+    sbt -client "ninja"
+    ( cd native/target/scala-3.3.0/native ; ninja )
+    echo
+done
+
+
