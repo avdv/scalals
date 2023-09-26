@@ -1,7 +1,9 @@
 import scala.util.matching.Regex
 import Regex.Groups
 import scala.sys.process._
-import java.nio.file.Paths
+import java.nio.file.{ Files, Paths }
+import java.io.File
+import scala.scalanative.build.NativeConfig
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -61,6 +63,8 @@ def generateConstants(base: File): File = {
   outputFile
 }
 
+lazy val targetTriplet = settingKey[Option[String]]("describes target platform for native compilation")
+
 lazy val scalals =
   // select supported platforms
   crossProject(JVMPlatform, NativePlatform)
@@ -101,19 +105,9 @@ lazy val scalals =
     )
     // configure Scala-Native settings
     .nativeSettings(
-      nativeConfig ~= { config =>
-        val nixCC = sys.env.get("NIX_CC")
-
-        val cc = for {
-          n <- nixCC
-          c <- sys.env.get("CC")
-        } yield s"$n/bin/$c"
-
-        val cxx = for {
-          n <- nixCC
-          c <- sys.env.get("CXX")
-        } yield s"$n/bin/$c"
-
+      targetTriplet := None,
+      nativeConfig := {
+        val config = nativeConfig.value
         val nixCFlagsLink = for {
           flags <- sys.env.get("NIX_CFLAGS_LINK").toList
           flag <- flags.split(" +") if flag.nonEmpty
@@ -121,8 +115,15 @@ lazy val scalals =
 
         config
           .withLinkingOptions("-fuse-ld=lld" :: "-lc++abi" +: nixCFlagsLink)
-          .withClang(cc.fold(config.clang)(Paths.get(_)))
-          .withClangPP(cxx.fold(config.clangPP)(Paths.get(_)))
+          .withTargetTriple(targetTriplet.value)
+      },
+      Compile / nativeLink / artifactPath := {
+        val p = (Compile / nativeLink / artifactPath).value
+        val target = targetTriplet.value.fold("") { t =>
+          val Array(arch, os, _) = t.split("-", 3)
+          s"-$os-$arch"
+        }
+        p.getParentFile / (p.getName + target)
       },
       nativeCompileOptions += "-Wall",
       nativeLinkStubs := false,

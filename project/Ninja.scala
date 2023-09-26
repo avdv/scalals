@@ -42,12 +42,16 @@ object Ninja extends AutoPlugin {
   object autoImport {
     val ninja = taskKey[Path]("build ninja file")
     val runNinja = taskKey[Unit]("run ninja")
+    val ninjaCompileFile = settingKey[Path]("file with ninja build rules")
+    val ninjaCompile = taskKey[Unit]("generate ninja compile file")
   }
 
   import autoImport._
 
   override lazy val projectSettings = Seq(
     ninja := ninjaTask.value,
+    ninjaCompile := ninjaCompileTask.value,
+    ninjaCompileFile := (Compile / crossTarget).value.toPath / "compile.ninja",
     runNinja := runNinjaTask.value,
   )
 
@@ -58,10 +62,11 @@ object Ninja extends AutoPlugin {
       Process(Seq("ninja", "-f", ninjaFile.abs)) !
     }
 
-  lazy val ninjaTask =
+  lazy val ninjaCompileTask =
     Def.task {
-      val outpath = (Compile / nativeLink / artifactPath).value.toPath
+      val outfile = ninjaCompileFile.value
       val logger = streams.value.log.toLogger
+
       val config = {
         val mainClass = (Compile / selectMainClass).value.getOrElse {
           throw new MessageOnlyException("No main class detected.")
@@ -77,7 +82,9 @@ object Ninja extends AutoPlugin {
           .withWorkdir(cwd.toPath)
           .withCompilerConfig(nativeConfig.value)
       }
-      val ninjaBuild = config.workdir / "build.ninja"
+
+      val writer = Files.newBufferedWriter(outfile, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+      logger.info(s"generating $outfile")
 
       val fclasspath = NativeLib.filterClasspath(config.classPath)
       val fconfig = config.withClassPath(fclasspath)
@@ -92,11 +99,6 @@ object Ninja extends AutoPlugin {
 
       // find native libs
       val nativelibs = NativeLib.findNativeLibs(fconfig.classPath, workdir)
-
-      val writer = Files.newBufferedWriter(ninjaBuild, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
-      logger.info("generating build.ninja")
-
-      writer.write(addRules(config, linked, outpath))
 
       // compile all libs
       val objectPaths = {
@@ -117,23 +119,62 @@ object Ninja extends AutoPlugin {
         libObjectPaths ++ llObjectPaths
       }
 
-      writer.write(addExe(config, objectPaths, outpath))
-      writer.write(addDefaultTarget(outpath.abs))
+      writer.write(addExe(config, objectPaths))
+      writer.write(addDefaultTarget("$program"))
+      writer.close()
+    }
+
+  lazy val ninjaTask =
+    Def.task {
+      val logger = streams.value.log.toLogger
+      val outpath = (Compile / nativeLink / artifactPath).value.toPath
+      val config = {
+        val mainClass = (Compile / selectMainClass).value.getOrElse {
+          throw new MessageOnlyException("No main class detected.")
+        }
+        val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
+        val maincls = mainClass // + "$"
+        val cwd = (Compile / scala.scalanative.sbtplugin.ScalaNativePluginInternal.nativeWorkdir).value
+
+        scala.scalanative.build.Config.empty
+          .withLogger(logger)
+          .withMainClass(maincls)
+          .withClassPath(classpath)
+          .withWorkdir(cwd.toPath)
+          .withCompilerConfig(nativeConfig.value)
+      }
+      val ninjaBuild = config.workdir / "build.ninja"
+
+      val fclasspath = NativeLib.filterClasspath(config.classPath)
+      val fconfig = config.withClassPath(fclasspath)
+      val workdir = fconfig.workdir
+      val incdir = sourceDirectory.value / "main" / "c" / "include"
+
+      val entries = ScalaNative.entries(fconfig)
+      val linked = ScalaNative.link(fconfig, entries)(sharedScope)
+      ScalaNative.logLinked(fconfig, linked)
+
+      val writer = Files.newBufferedWriter(ninjaBuild, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+      logger.info("generating build.ninja")
+
+      writer.write(addRules(config, linked, outpath, incdir.toPath))
+
+      writer.write(s"include ${ninjaCompileFile.value}\n\n")
 
       writer.close()
 
       ninjaBuild
     }
 
-  def addExe(config: Config, objectsPaths: Seq[Path], outpath: Path): String = {
+  def addExe(config: Config, objectsPaths: Seq[Path]): String = {
     val paths = objectsPaths.map(_.abs)
 
-    s"build ${outpath.abs}: exe ${paths.mkString(" ")}\n\n"
+    s"build $$program: exe ${paths.mkString(" ")}\n\n"
   }
 
   def addDefaultTarget(name: String): String = s"default $name\n\n"
 
-  def addRules(config: Config, linkerResult: linker.Result, outpath: Path): String = {
+  def addRules(config: Config, linkerResult: linker.Result, outpath: Path, incdir: Path): String = {
     val flags = opt(config) +: flto(config) ++: target(config) :+ "-fvisibility=hidden"
 
     val links = {
@@ -156,6 +197,8 @@ object Ninja extends AutoPlugin {
         |ldflags = ${linkflags.mkString(" ")}
         |ldopts = ${linkopts.mkString(" ")}
         |
+        |program = $outpath
+        |
         |rule cc
         |  command = $$clang -std=gnu11 $$cflags $$auxflags -c $$in -o $$out
         |  description = compile object file (${config.gc.name} gc, $ltoName lto)
@@ -165,7 +208,7 @@ object Ninja extends AutoPlugin {
         |  description = compile ll file (${config.gc.name} gc, $ltoName lto)
         |
         |rule cpp
-        |  command = $$clangpp -std=c++11 $$cflags $$auxflags -c $$in -o $$out
+        |  command = $$clangpp -std=c++11 $$cflags $$auxflags -isystem $incdir -c $$in -o $$out
         |  description = compile c++ file (${config.gc.name} gc, $ltoName lto)
         |
         |rule exe

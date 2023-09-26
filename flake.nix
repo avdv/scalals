@@ -63,34 +63,19 @@
 
           pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
 
-          inherit (pkgs) lib pkgsStatic;
+          inherit (pkgs) lib zig stdenvNoCC;
 
-          lld = pkgs.lld_14;
+          mkShell = pkgs.mkShell.override { stdenv = stdenvNoCC; };
 
-          # pkgStatic is not yet supported on Darwin (see https://github.com/NixOS/nixpkgs/issues/270375)
-          theStdenv =
-            if pkgs.stdenv.isDarwin then
-              pkgs.llvmPackages_14.libcxxStdenv
-            else
-              pkgsStatic.llvmPackages_14.libcxxStdenv;
-
-          mkShell =
-            (if pkgs.stdenv.isDarwin then
-              pkgs.mkShell
-            else
-              pkgsStatic.mkShell
-            ).override { stdenv = theStdenv; };
-
-          nativeBuildInputs = with pkgs; [ git lld ninja which ];
-
-          empty-gcc-eh = pkgs.runCommand "empty-gcc-eh" { } ''
-            if $CC -Wno-unused-command-line-argument -x c - -o /dev/null <<< 'int main() {}'; then
-              echo "linking succeeded; please remove empty-gcc-eh workaround" >&2
-              exit 3
-            fi
-            mkdir -p $out/lib
-            ${pkgs.binutils-unwrapped}/bin/ar r $out/lib/libgcc_eh.a
+          clang = pkgs.writeScriptBin "clang" ''
+            exec ${zig}/bin/zig cc "$@"
           '';
+
+          clangpp = pkgs.writeScriptBin "clang++" ''
+            exec ${zig}/bin/zig c++ "$@"
+          '';
+
+          nativeBuildInputs = with pkgs; [ git ninja zig which clang clangpp ];
         in
         rec {
           packages = rec {
@@ -99,7 +84,7 @@
             scalals = sbt.lib.mkSbtDerivation rec {
               inherit pkgs nativeBuildInputs;
 
-              overrides = { stdenv = theStdenv; };
+              overrides = { stdenv = stdenvNoCC; };
 
               pname = "scalals-native";
 
@@ -119,8 +104,6 @@
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
 
               buildPhase = ''
-                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
-
                 sbt 'project scalalsNative' 'show nativeConfig' nativeLink
               '';
 
@@ -157,8 +140,6 @@
             default = mkShell {
               name = "scalals";
               shellHook = ''
-                export NIX_LDFLAGS="$NIX_LDFLAGS -L${empty-gcc-eh}/lib"
-
                 ${checks.pre-commit-check.shellHook}
               '';
               packages = [ pkgs.metals ];
