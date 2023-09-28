@@ -102,9 +102,11 @@
 
               SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
+              XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
               buildPhase = ''
-                sbt 'project scalalsNative' 'show nativeConfig' nativeLink
+                sbt 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
+                ninja -f native/target/scala-3.3.0/native/build.ninja
               '';
 
               dontPatchELF = true;
