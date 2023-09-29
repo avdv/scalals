@@ -185,7 +185,7 @@ object Ninja extends AutoPlugin {
       // * libpthread for process APIs and parallel garbage collection.
       "pthread" +: "dl" +: srclinks ++: gclinks
     }
-    val linkopts = config.linkingOptions ++ links.map("-l" + _)
+    val linkopts = linkOpts(config) ++ links.map("-l" + _)
     val linkflags = flto(config) ++ Seq("-rdynamic") ++ target(config)
     val ltoName = lto(config).getOrElse("none")
 
@@ -250,6 +250,14 @@ object Ninja extends AutoPlugin {
 
   /** List of source patterns used: ".c, .cpp, .S" */
   val srcExtensions = Seq(".c", cppExt, ".S")
+
+  private def linkOpts(config: Config): Seq[String] =
+    config.linkingOptions ++ {
+      config.mode match {
+        case Mode.ReleaseFull => Seq("-s")
+        case _                => Seq.empty
+      }
+    }
 
   private def lto(config: Config): Option[String] =
     (config.mode, config.LTO) match {
