@@ -9,6 +9,9 @@ declare -ar TARGETS=(
     aarch64-macos-none
 )
 
+export SCALANATIVE_MODE="release-full"; # {debug, release-fast, release-full}
+export SCALANATIVE_LTO="thin"; # {none, full, thin}
+
 sbt -client 'project scalalsNative'
 sbt -client 'ninjaCompile'
 
