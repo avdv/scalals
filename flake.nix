@@ -32,6 +32,20 @@
             jre = prev.openjdk11_headless;
           };
 
+          gcceh-overlay = final: prev:
+            let
+              libcxxabi = prev.pkgsStatic.llvmPackages_16.libcxxabi.overrideAttrs (old: {
+                buildInputs = old.buildInputs ++ [ empty-gcc-eh ];
+              });
+            in
+            {
+              pkgsStatic = prev.pkgsStatic // {
+                llvmPackages_16 = prev.pkgsStatic.llvmPackages_16 // {
+                  inherit libcxxabi;
+                };
+              };
+            };
+
           scalafmtOverlay = final: prev: {
             scalafmt = prev.scalafmt.overrideAttrs (old:
               let
@@ -68,7 +82,7 @@
             });
           };
 
-          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay strip-nondet-overlay ]; };
+          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay strip-nondet-overlay gcceh-overlay ]; };
 
           inherit (pkgs) lib pkgsStatic;
 
@@ -102,6 +116,8 @@
         rec {
           packages = rec {
             inherit (pkgs) scalafmt;
+
+            llvm = pkgsStatic.llvmPackages_16.libcxxStdenv;
 
             scalals = sbt.lib.mkSbtDerivation rec {
               inherit pkgs nativeBuildInputs;
