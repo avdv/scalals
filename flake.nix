@@ -33,26 +33,31 @@
           };
 
           scalafmtOverlay = final: prev: {
-            scalafmt =
+            scalafmt = prev.scalafmt.overrideAttrs (old:
               let
                 version = builtins.head (builtins.match ''[ \n]*version *= *"([^ \n]+)".*'' (builtins.readFile ./.scalafmt.conf));
-                deps = final.stdenv.mkDerivation {
-                  name = "scalafmt-deps-${version}";
-                  buildCommand = ''
-                    export COURSIER_CACHE=$(pwd)
-                    ${final.coursier}/bin/cs fetch org.scalameta:scalafmt-cli_2.13:${version} > deps
-                    mkdir -p $out/share/java
-                    cp $(< deps) $out/share/java/
-                  '';
-                  outputHashMode = "recursive";
-                  outputHash = "sha256-B5WuzygdgvcCGGVHBnHLP4cXT5zwzbKfNwLXwCkNi3k=";
-                };
+                outputHash = "sha256-B5WuzygdgvcCGGVHBnHLP4cXT5zwzbKfNwLXwCkNi3k=";
               in
-              prev.scalafmt.overrideAttrs (_: {
+              {
                 inherit version;
-                buildInputs = [ deps ];
-                # need to repeat the nativeBuildInputs here, otherwise the setJavaClassPath setup hook did not run
-                nativeBuildInputs = [ final.makeWrapper final.setJavaClassPath ];
+                passthru =
+                  {
+                    inherit outputHash;
+                  };
+                buildInputs = [
+                  (prev.stdenv.mkDerivation {
+                    name = "scalafmt-deps-${version}";
+                    buildCommand = ''
+                      export COURSIER_CACHE=$(pwd)
+                      ${prev.coursier}/bin/cs fetch org.scalameta:scalafmt-cli_2.13:${version} > deps
+                      mkdir -p $out/share/java
+                      cp $(< deps) $out/share/java/
+                    '';
+                    outputHashMode = "recursive";
+                    inherit outputHash;
+                    outputHashAlgo = if outputHash == "" then "sha256" else null;
+                  })
+                ];
               });
           };
 
@@ -84,6 +89,8 @@
         in
         rec {
           packages = rec {
+            inherit (pkgs) scalafmt;
+
             scalals = sbt.lib.mkSbtDerivation rec {
               inherit pkgs nativeBuildInputs;
 
