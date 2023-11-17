@@ -36,7 +36,7 @@
             scalafmt = prev.scalafmt.overrideAttrs (old:
               let
                 version = builtins.head (builtins.match ''[ \n]*version *= *"([^ \n]+)".*'' (builtins.readFile ./.scalafmt.conf));
-                outputHash = "sha256-/HYUTtQHpyITdV5QqkuY1daxWt+utKHuf8gcuBfXpDc=";
+                outputHash = "sha256-8gK+fOnqwPFBbSWltNKInzXRJQ3WZxPlLqpvuTxF4fk=";
               in
               {
                 inherit version;
