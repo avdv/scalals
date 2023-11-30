@@ -165,7 +165,7 @@
               shellHook = ''
                 ${checks.pre-commit-check.shellHook}
               '';
-              nativeBuildInputs = [ pkgs.graalvm11 pkgs.sbt ];
+              nativeBuildInputs = [ pkgs.graalvm-ce pkgs.sbt ];
             };
           } // (lib.optionalAttrs (system == "x86_64-linux") (
             let
