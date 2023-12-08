@@ -75,8 +75,18 @@
           lld = pkgs.lld_14;
 
           # pkgStatic is not yet supported on Darwin (see https://github.com/NixOS/nixpkgs/issues/270375)
-          stdenvStatic = pkgsStatic.llvmPackages_14.libcxxStdenv;
-          mkShell = if pkgs.stdenv.isDarwin then pkgs.mkShell else pkgsStatic.mkShell.override { stdenv = stdenvStatic; };
+          theStdenv =
+            if pkgs.stdenv.isDarwin then
+              pkgs.llvmPackages_14.libcxxStdenv
+            else
+              pkgsStatic.llvmPackages_14.libcxxStdenv;
+
+          mkShell =
+            (if pkgs.stdenv.isDarwin then
+              pkgs.mkShell
+            else
+              pkgsStatic.mkShell
+            ).override { stdenv = theStdenv; };
 
           nativeBuildInputs = with pkgs; [ git lld ninja which ];
 
@@ -96,7 +106,7 @@
             scalals = sbt.lib.mkSbtDerivation rec {
               inherit pkgs nativeBuildInputs;
 
-              overrides = if pkgs.stdenv.isDarwin then { } else { stdenv = stdenvStatic; };
+              overrides = { stdenv = theStdenv; };
 
               pname = "scalals-native";
 
