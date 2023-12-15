@@ -32,7 +32,7 @@ jobs:
     - run: nix develop '.#aarch64-cross' --command sbt 'project scalalsNative' 'show nativeConfig' nativeLink
     - run: cp native/target/scala-*/scalals-out scalals
     - run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 ./scalals
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: scalals-${{ runner.os }}-aarch64
         path: scalals
@@ -107,7 +107,7 @@ jobs:
     - run: nix flake check
     - run: nix build --print-build-logs
     - run: nix run
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: scalals-${{ runner.os }}-${{ runner.arch }}
         path: result/bin/scalals
