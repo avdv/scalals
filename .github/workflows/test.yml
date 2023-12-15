@@ -119,7 +119,7 @@ jobs:
       - tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - run: |
           mv scalals-Linux-aarch64/scalals scalals-arm64-linux
           mv scalals-Linux-X64/scalals scalals-x86_64-linux
