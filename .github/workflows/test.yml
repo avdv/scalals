@@ -45,7 +45,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Cache SBT
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/coursier
@@ -78,7 +78,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Cache SBT
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cache/coursier
