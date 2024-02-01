@@ -25,7 +25,7 @@
   };
 
   outputs = { nixpkgs, flake-utils, pre-commit-hooks, sbt, ... }:
-    flake-utils.lib.eachSystem [ "aarch64-linux" "x86_64-darwin" "x86_64-linux" ]
+    flake-utils.lib.eachSystem [ "aarch64-linux" "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ]
       (system:
         let
           jreHeadlessOverlay = _: prev: {
