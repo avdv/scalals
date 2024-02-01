@@ -123,6 +123,7 @@ jobs:
       - run: |
           mv scalals-Linux-aarch64/scalals scalals-arm64-linux
           mv scalals-Linux-X64/scalals scalals-x86_64-linux
+          mv scalals-macOS-ARM64 scalals-arm64-darwin
           mv scalals-macOS-X64/scalals scalals-x86_64-darwin
       - name: Upload binaries
         uses: softprops/action-gh-release@v1
@@ -130,5 +131,6 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             scalals-arm64-linux
+            scalals-arm64-darwin
             scalals-x86_64-linux
             scalals-x86_64-darwin
