@@ -106,7 +106,7 @@
 
               buildPhase = ''
                 sbt 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
-                ninja -f native/target/scala-3.3.0/native/build.ninja
+                ninja -f native/target/scala-3.3.1/native/build.ninja
               '';
 
               dontPatchELF = true;
