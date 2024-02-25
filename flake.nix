@@ -61,14 +61,7 @@
               });
           };
 
-          # temporary workaround for darwin https://github.com/NixOS/nixpkgs/issues/235757
-          strip-nondet-overlay = final: prev: {
-            strip-nondeterminism = prev.strip-nondeterminism.overrideAttrs (old: {
-              buildInputs = old.buildInputs ++ [ prev.perlPackages.SubOverride ];
-            });
-          };
-
-          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay strip-nondet-overlay ]; };
+          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
 
           inherit (pkgs) lib pkgsStatic;
 
