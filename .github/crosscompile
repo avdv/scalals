@@ -19,10 +19,10 @@ for target in "${TARGETS[@]}"; do
     echo "BUILD - $target"
     sbt -client "set targetTriplet := Some(\"$target\")"
     sbt -client "ninja"
-    ninja -f native/target/scala-3.3.0/native/build.ninja
+    ninja -f native/target/scala-3.3.1/native/build.ninja
     echo
 done
 
-mv -v native/target/scala-3.3.0/scalals-* .
+mv -v native/target/scala-3.3.1/scalals-* .
 
 
