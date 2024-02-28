@@ -178,7 +178,7 @@ object Ninja extends AutoPlugin {
   def addDefaultTarget(name: String): String = s"default $name\n\n"
 
   def addRules(config: Config, linkerResult: linker.Result, outpath: Path, incdir: Path): String = {
-    val flags = opt(config) +: flto(config) ++: target(config) :+ "-fvisibility=hidden"
+    val flags = opt(config) ++: flto(config) ++: target(config) :+ "-fvisibility=hidden"
 
     val links = {
       val srclinks = linkerResult.links.map(_.name)
@@ -280,11 +280,11 @@ object Ninja extends AutoPlugin {
       case None     => Seq("-Wno-override-module")
     }
 
-  private def opt(config: Config): String =
+  private def opt(config: Config): Seq[String] =
     config.mode match {
-      case Mode.Debug       => "-O0"
-      case Mode.ReleaseFast => "-O2"
-      case Mode.ReleaseFull => "-O3"
-      case Mode.ReleaseSize => "-Os"
+      case Mode.Debug       => List("-O0")
+      case Mode.ReleaseFast => List("-O2", "-Xclang", "-O2")
+      case Mode.ReleaseFull => List("-O3", "-Xclang", "-Ofast")
+      case Mode.ReleaseSize => List("-Os", "-Xclang", "-Oz")
     }
 }
