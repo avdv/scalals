@@ -114,7 +114,7 @@ lazy val scalals =
         } yield flag
 
         config
-          .withLinkingOptions("-fuse-ld=lld" :: "-lc++abi" +: nixCFlagsLink)
+          .withLinkingOptions("-fuse-ld=lld" :: nixCFlagsLink)
           .withTargetTriple(targetTriplet.value)
       },
       Compile / nativeLink / artifactPath := {
