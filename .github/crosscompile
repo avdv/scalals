@@ -9,12 +9,14 @@ declare -ar TARGETS=(
     aarch64-macos-none
 )
 
+echo '::group::compile'
 sbt -client 'project scalalsNative'
 
 # Mode: {debug, release-fast, release-full, release-size}
 
 sbt -client 'set nativeConfig ~= { _.withMode(scala.scalanative.build.Mode.releaseFull) }'
 sbt -client 'ninjaCompile'
+echo '::endgroup::'
 
 for target in "${TARGETS[@]}"; do
     # LTO: {none, full, thin}
@@ -23,12 +25,12 @@ for target in "${TARGETS[@]}"; do
         *macos*) LTO=none ;;
         *)       LTO=full ;;
     esac
-    echo "BUILD - $target"
+    echo "::group::build $target"
     sbt -client "set nativeConfig ~= { _.withLTO(scala.scalanative.build.LTO.$LTO) }"
     sbt -client "set targetTriplet := Some(\"$target\")"
     sbt -client "ninja"
     ninja -f native/target/scala-3.3.1/native/build.ninja
-    echo
+    echo '::endgroup::'
 done
 
 mv -v native/target/scala-3.3.1/scalals-* .
