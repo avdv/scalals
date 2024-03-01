@@ -9,14 +9,22 @@ declare -ar TARGETS=(
     aarch64-macos-none
 )
 
-export SCALANATIVE_MODE="release-full"; # {debug, release-fast, release-full}
-export SCALANATIVE_LTO="thin"; # {none, full, thin}
-
 sbt -client 'project scalalsNative'
+
+# Mode: {debug, release-fast, release-full, release-size}
+
+sbt -client 'set nativeConfig ~= { _.withMode(scala.scalanative.build.Mode.releaseFull) }'
 sbt -client 'ninjaCompile'
 
 for target in "${TARGETS[@]}"; do
+    # LTO: {none, full, thin}
+    case "$target" in
+        # zig ld does not yet support LTO for mach-O see https://github.com/ziglang/zig/issues/8680
+        *macos*) LTO=none ;;
+        *)       LTO=full ;;
+    esac
     echo "BUILD - $target"
+    sbt -client "set nativeConfig ~= { _.withLTO(scala.scalanative.build.LTO.$LTO) }"
     sbt -client "set targetTriplet := Some(\"$target\")"
     sbt -client "ninja"
     ninja -f native/target/scala-3.3.1/native/build.ninja
