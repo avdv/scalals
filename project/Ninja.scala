@@ -189,7 +189,7 @@ object Ninja extends AutoPlugin {
       "pthread" +: "dl" +: srclinks ++: gclinks
     }
     val linkopts = linkOpts(config) ++ links.map("-l" + _)
-    val linkflags = flto(config) ++ Seq("-rdynamic") ++ target(config)
+    val linkflags = flto(config) ++ target(config)
     val ltoName = lto(config).getOrElse("none")
 
     s"""|clang = ${config.clang.abs}
