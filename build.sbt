@@ -7,7 +7,7 @@ import scala.scalanative.build.NativeConfig
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion := "3.3.1"
+ThisBuild / scalaVersion := "3.3.3"
 
 val sharedSettings = Seq(
   scalacOptions ++= Seq(
