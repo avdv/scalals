@@ -7,6 +7,7 @@ declare -ar TARGETS=(
     x86_64-macos-none
     aarch64-linux-musl
     aarch64-macos-none
+    riscv64-linux-musl
 )
 
 echo '::group::compile'
@@ -23,6 +24,9 @@ for target in "${TARGETS[@]}"; do
     case "$target" in
         # zig ld does not yet support LTO for mach-O see https://github.com/ziglang/zig/issues/8680
         *macos*) LTO=none ;;
+        # zig 11 currently fails with LTO on riscv with a SmallDataLimit mismatch error
+        # (cf. https://reviews.llvm.org/D131230)
+        *riscv*) LTO=none ;;
         *)       LTO=full ;;
     esac
     echo "::group::build $target"
