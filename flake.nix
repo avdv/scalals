@@ -91,7 +91,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-2x3emAmdSHM3otEv9On8cX1j4rMV9cdmGP5p6FUJhe8=";
+              depsSha256 = "sha256-gZPMmznAaFqJHMiokZuNHMZwXL0ulRxP5Vm5UyH475Y=";
 
               src = ./.;
 
@@ -106,7 +106,7 @@
 
               buildPhase = ''
                 sbt 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
-                ninja -f native/target/scala-3.3.1/native/build.ninja
+                ninja -f native/target/scala-3.3.3/native/build.ninja
               '';
 
               dontPatchELF = true;
