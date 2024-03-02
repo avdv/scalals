@@ -7,6 +7,7 @@ declare -ar TARGETS=(
     x86_64-apple-darwin-none
     aarch64-unknown-linux-musl
     aarch64-apple-darwin-none
+    riscv64-unknown-linux-musl
 )
 
 echo '::group::configure'
