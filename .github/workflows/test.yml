@@ -95,6 +95,7 @@ jobs:
     - run: git branch PR-${{ github.event.number }}
     - run: nix develop --ignore-environment --keep HOME --command '.github/crosscompile'
     - run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
+    - run: nix shell 'nixpkgs#qemu' --command qemu-riscv64 scalals-out-linux-riscv64
     - uses: actions/upload-artifact@v4
       with:
         path: scalals-*
