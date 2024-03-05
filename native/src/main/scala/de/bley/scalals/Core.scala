@@ -6,6 +6,8 @@ import scala.collection.mutable
 import java.io.IOException
 
 import scalanative.libc.errno
+import scalanative.libc.locale
+import scalanative.libc.string.strcoll
 import scalanative.unsafe.*
 import scalanative.unsigned.*
 import scalanative.posix.errno.*
@@ -87,7 +89,7 @@ object Core extends generic.Core:
   private val sb = new StringBuilder(3 * 3)
 
   protected val orderByName = Ordering
-    .fromLessThan[FileInfo]((a, b) => locale.strcoll(a.cstr, b.cstr) < 0)
+    .fromLessThan[FileInfo]((a, b) => strcoll(a.cstr, b.cstr) < 0)
     .asInstanceOf[Ordering[generic.FileInfo]]
 
   final override def permissionString(imode: Int): String =
