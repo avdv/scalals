@@ -43,6 +43,25 @@ jobs:
     - run: nix develop '.#graalVM' --command sbt 'scalalsJVM / GraalVMNativeImage / packageBin'
     - run: jvm/target/graalvm-native-image/scalals
 
+  package:
+    name: Nix ❄
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: "Install Nix ❄"
+      uses: cachix/install-nix-action@v26
+    - name: "Install Cachix ❄"
+      uses: cachix/cachix-action@v14
+      with:
+        name: cbley
+        extraPullNames: pre-commit-hooks
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+        pushFilter: '[-](source|nixpkgs-src)$'
+    - run: git branch PR-${{ github.event.number }}
+    - run: nix flake check
+    - run: nix build --print-build-logs
+    - run: nix run
+
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -74,9 +93,6 @@ jobs:
         # Only needed for private caches
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git branch PR-${{ github.event.number }}
-    - run: nix flake check
-    - run: nix build --print-build-logs
-    - run: nix run
     - run: nix develop --ignore-environment --keep HOME --command '.github/crosscompile'
     - run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
     - uses: actions/upload-artifact@v4
