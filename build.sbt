@@ -108,12 +108,18 @@ lazy val scalals =
       targetTriplet := None,
       nativeConfig := {
         val config = nativeConfig.value
+        val nixCFlagsCompile = for {
+          flags <- sys.env.get("NIX_CFLAGS_COMPILE").toList
+          flag <- flags.split(" +") if flag.nonEmpty
+        } yield flag
+
         val nixCFlagsLink = for {
           flags <- sys.env.get("NIX_CFLAGS_LINK").toList
           flag <- flags.split(" +") if flag.nonEmpty
         } yield flag
 
         config
+          .withCompileOptions(nixCFlagsCompile)
           .withLinkingOptions("-fuse-ld=lld" :: nixCFlagsLink)
           .withTargetTriple(targetTriplet.value)
       },

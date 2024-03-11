@@ -104,6 +104,8 @@
               SCALANATIVE_LTO = "thin"; # {none, full, thin}
               XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
+              NIX_CFLAGS_COMPILE = pkgs.lib.optional (with pkgs.stdenv; isLinux && isx86_64) "-march=sandybridge";
+
               buildPhase = ''
                 sbt 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
                 ninja -f native/target/scala-3.3.3/native/build.ninja
