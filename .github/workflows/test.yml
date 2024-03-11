@@ -116,7 +116,7 @@ jobs:
           mv scalals-macOS-ARM64 scalals-arm64-darwin
           mv scalals-macOS-X64/scalals scalals-x86_64-darwin
       - name: Upload binaries
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           fail_on_unmatched_files: true
           files: |
