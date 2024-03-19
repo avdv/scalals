@@ -2,4 +2,3 @@
 -Xmx2G
 -Xss2m
 -XX:MaxInlineLevel=18
---show-version
