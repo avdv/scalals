@@ -24,7 +24,8 @@ val sharedSettings = Seq(
     // "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
     // "-Ywarn-numeric-widen",
     // "-Ywarn-value-discard"
-  )
+  ),
+  publish / skip := true,
 )
 
 def generateConstants(base: File): File = {
