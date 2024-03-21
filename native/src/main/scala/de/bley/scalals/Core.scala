@@ -110,32 +110,4 @@ object Core extends generic.Core:
     // Console.err.println(marker + " " + (end - start).toString)
     r
   end timing
-
-  val date = new Decorator:
-    private val cache = mutable.LongMap.empty[String]
-
-    override def decorate(file: generic.FileInfo, builder: StringBuilder): Int =
-      val instant = file.lastModifiedTime.toEpochMilli()
-
-      val date = cache.getOrElseUpdate(
-        instant / 1000, {
-          import scalanative.unsafe.*
-          import scalanative.posix.time
-
-          Zone { implicit z =>
-            val format = if instant > recentLimit then c"%b %e %R" else c"%b %e  %Y"
-            val str = alloc[CChar](70)
-            val time_t = stackalloc[time.time_t]()
-
-            !time_t = file.lastModifiedTime.toEpochMilli() / 1000
-
-            val tm = time.localtime(time_t)
-            if 0.toULong == time.strftime(str, 70.toULong, format, tm) then "n/a" // buffer to small
-            else fromCString(str)
-          }
-        },
-      )
-      builder.append(date)
-      date.length
-    end decorate
 end Core
