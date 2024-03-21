@@ -6,7 +6,11 @@ import java.io.IOException
 import java.nio.file.{ Path, Paths }
 import java.nio.file.LinkOption
 import java.nio.file.{ AccessDeniedException, NoSuchFileException }
+import java.time.{ Instant, ZoneId }
+import java.time.format.DateTimeFormatter
+
 import scala.annotation.unused
+import scala.collection.mutable
 import scala.jdk.CollectionConverters.*
 import scala.util.Using
 
@@ -214,15 +218,28 @@ trait Core:
           else println()
         end for
       end for
-  // lazy val dateFormat = DateTimeFormatter.ofPattern("MMM ppd  yyyy", Locale.getDefault())
-  // val dateFormat = new SimpleDateFormat() //.ofPattern("MMM ppd  yyyy", Locale.getDefault())
-  // lazy val recentFormat = DateTimeFormatter.ofPattern("MMM ppd HH:mm", Locale.getDefault())
-  // lazy val currentZone = ZoneId.systemDefault()
-  val halfayear: Long = ((31556952L / 2) * 1000)
-  val recentLimit = System.currentTimeMillis - halfayear
-  // Instant.now.minusSeconds(31556952 / 2).toEpochMilli()
 
-  def date: Decorator
+  final def date: Decorator = new Decorator:
+    private val halfayear: Long = 31556952L / 2
+    private val recentLimit = Instant.now.minusSeconds(halfayear).toEpochMilli()
+    private val cache = mutable.LongMap.empty[String]
+    private val recentFormat = DateTimeFormatter.ofPattern("MMM ppd hh:mm").withZone(ZoneId.systemDefault())
+    private val dateFormat = DateTimeFormatter.ofPattern("MMM ppd  yyyy").withZone(ZoneId.systemDefault())
+
+    override def decorate(file: generic.FileInfo, builder: StringBuilder): Int =
+      val instant = file.lastModifiedTime.toEpochMilli()
+
+      val date = cache.getOrElseUpdate(
+        instant / 1000, {
+          val format = if instant > recentLimit then recentFormat else dateFormat
+
+          format.format(file.lastModifiedTime)
+        },
+      )
+      builder.append(date)
+      date.length
+    end decorate
+  end date
 
   def layout(config: Config): Vector[Decorator] =
 //    val ext = file.name.dropWhile(_ == '.').replaceFirst(".*[.]", "").toLowerCase(Locale.ENGLISH)

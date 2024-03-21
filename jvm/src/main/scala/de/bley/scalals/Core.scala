@@ -12,25 +12,6 @@ import scala.util.Try
 import scala.collection.mutable
 
 object Core extends generic.Core:
-  def date: de.bley.scalals.Decorator = new Decorator:
-    private val cache = mutable.LongMap.empty[String]
-    private val recentFormat = DateTimeFormatter.ofPattern("MMM ppd hh:mm").withZone(ZoneId.systemDefault())
-    private val dateFormat = DateTimeFormatter.ofPattern("MMM ppd  yyyy").withZone(ZoneId.systemDefault())
-
-    override def decorate(file: generic.FileInfo, builder: StringBuilder): Int =
-      val instant = file.lastModifiedTime.toEpochMilli()
-
-      val date = cache.getOrElseUpdate(
-        instant / 1000, {
-          val format = if instant > recentLimit then recentFormat else dateFormat
-
-          format.format(file.lastModifiedTime)
-        },
-      )
-      builder.append(date)
-      date.length
-    end decorate
-
   private val collator = Collator.getInstance
 
   protected val orderByName = Ordering
