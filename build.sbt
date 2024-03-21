@@ -107,6 +107,7 @@ lazy val scalals =
     // configure Scala-Native settings
     .nativeSettings(
       targetTriplet := None,
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
       nativeConfig := {
         val config = nativeConfig.value
         val nixCFlagsCompile = for {
