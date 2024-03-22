@@ -38,33 +38,39 @@ trait Core:
   }
 
   private def lsNormal(config: Config, items: List[Path]) = Env { implicit z =>
-    val linkOptions =
-      if config.dereference || config.dereferenceArgs || config.dereferenceArgsToDirectory then Array.empty[LinkOption]
-      else Array(LinkOption.NOFOLLOW_LINKS)
-    val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions*))
-    val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
     val decorators = layout(config)
 
-    listAll(list(filePaths, config), config, decorators)
+    if config.listDirectories then
+      val linkOptions =
+        Option.unless(config.dereference || config.dereferenceArgs || config.dereferenceArgsToDirectory)(
+          LinkOption.NOFOLLOW_LINKS
+        )
+      val (dirPaths, filePaths) = items.partition(Files.isDirectory(_, linkOptions.toSeq*))
 
-    for path <- dirPaths
-    do
-      if config.listDirectories && showPrefix then println(s"\uf115 $path:")
+      listAll(list(filePaths, config), config, decorators)
 
-      Using(Files.newDirectoryStream(path)) { dirstream =>
-        val entries = for path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
-        yield path
+      val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
 
-        listAll(list(entries, config), config, decorators)
-      } recover {
-        case e: NoSuchFileException =>
-          Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
-        case e: AccessDeniedException =>
-          Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
-        case e =>
-          Console.err.println(s"scalals: error $e")
-      }
-    end for
+      for path <- dirPaths
+      do
+        if showPrefix then println(s"\uf115  $path:")
+
+        Using(Files.newDirectoryStream(path)) { dirstream =>
+          val entries = for path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
+          yield path
+
+          listAll(list(entries, config), config, decorators)
+        } recover {
+          case e: NoSuchFileException =>
+            Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
+          case e: AccessDeniedException =>
+            Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
+          case e =>
+            Console.err.println(s"scalals: error $e")
+        }
+      end for
+    else listAll(list(items, config), config, decorators)
+    end if
   }
 
   protected def traverse(
