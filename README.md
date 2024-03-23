@@ -14,22 +14,33 @@ This is yet another [colorls](https://github.com/athityakumar/colorls) clone.
 
 # Install
 
-1. download a pre-built [binary](https://github.com/avdv/scalals/releases/latest) for your platform (currently Linux amd64 / arm64 and macOS amd64 supported)
-2. install a Nerd Font from [here](https://www.nerdfonts.com/font-downloads) and use it in your terminal emulator
-3. set up your dircolors (see https://www.nordtheme.com/ports/dircolors for example)
+_Note_: scalals binaries are currently available for Linux and MacOS on amd64 and arm64.
+
+## Using [coursier](https://get-coursier.io/)
+
+1. run `cs install --contrib scalals`
+
+(run this again to install the latest version)
 
 ## With nix flakes
 
-Simply run `nix run github:avdv/scalals`. (_Hint_: `cachix use cbley` to avoid re-building)
+1. `cachix use cbley` (optional, avoids re-building)
+2. run `nix profile install github:avdv/scalals`
+
+## Manually
+
+1. download a pre-built [binary](https://github.com/avdv/scalals/releases/latest) for your platform
+2. ensure it is found in your `PATH`
+3. run `chmod +x path/to/scalals`
+
+# Setup
+
+1. install a Nerd Font from [here](https://www.nerdfonts.com/font-downloads) and use it in your terminal emulator
+2. set up your dircolors (see https://www.nordtheme.com/ports/dircolors for example)
 
 # Building
 
-## Using nix
+1. run `cachix use cbley` (optional)
+2. run `nix-build` or `nix build` (flake)
+3. binary is in `result/bin/`
 
-1. run `cachix use cbley` (optional, but reduces build time significantly)
-2. run `nix-shell --run sbt`
-
-## Using nix flakes
-
-1. run `cachix use cbley` (optional, but reduces build time significantly)
-2. run `nix build`
