@@ -92,6 +92,17 @@ jobs:
         pushFilter: '[-](source|nixpkgs-src)$'
         # Only needed for private caches
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - name: Determine zig path
+      run: echo "path=$( nix develop --ignore-environment --command which zig )" >> $GITHUB_OUTPUT
+      id: nix-zig
+    - name: Cache zig
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/zig
+        key: zig-${{ steps.nix-zig.outputs.path }}
+        restore-keys: |
+          zig-
     - run: git branch PR-${{ github.event.number }}
     - run: nix develop --ignore-environment --keep HOME --command '.github/crosscompile'
     - run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
