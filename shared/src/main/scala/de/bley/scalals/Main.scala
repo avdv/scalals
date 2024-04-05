@@ -29,7 +29,7 @@ final case class Config(
     listDirectories: Boolean = true,
     groupDirectoriesFirst: Boolean = false,
     humanReadable: Option[Int] = None,
-    hyperlink: When = When.auto,
+    hyperlink: When = When.never,
     dereference: Boolean = false,
     dereferenceArgs: Boolean = false,
     dereferenceArgsToDirectory: Boolean = false,
