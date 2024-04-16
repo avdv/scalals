@@ -1,5 +1,6 @@
 package de.bley.scalals
 
+import scalanative.libc.stdio.perror
 import scalanative.unsigned.*
 import scalanative.unsafe.*
 import scalanative.posix.unistd.STDOUT_FILENO
@@ -41,6 +42,10 @@ object Terminal:
 
       if ioctl(tty, termios.TIOCGWINSZ, winsz.asInstanceOf[Ptr[Byte]]) >= 0 then (winsz._2).toInt
       else sys.env.get("COLUMNS").map(_.toInt).getOrElse(80)
-    finally if tty != STDOUT_FILENO then close(tty)
+    finally
+      if tty != STDOUT_FILENO then
+        val ret = close(tty)
+        if ret != 0 then perror(c"close tty")
+    end try
   end width
 end Terminal
