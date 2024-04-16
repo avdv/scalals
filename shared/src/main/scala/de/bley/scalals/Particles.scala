@@ -8,11 +8,13 @@ import de.bley.scalals.CoreConfig.{ aliases, files }
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
+import scala.annotation.unused
 
 sealed trait FileSizeMode
 final case class ScaleSize(factor: Int)
 
-class FileSize(mode: FileSizeMode):
+// TODO: implement file size mode
+class FileSize(@unused mode: FileSizeMode):
   def format(fileInfo: FileInfo) =
     fileInfo.size.toString
 
