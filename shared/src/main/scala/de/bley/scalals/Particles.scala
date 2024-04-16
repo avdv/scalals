@@ -163,9 +163,7 @@ object GitDecorator extends Decorator:
         val file = line.substring(3)
 
         // skip next line for renames
-        if mode.contains('R') then
-          while iter.hasNext && iter.next() != '\u0000' do {}
-          if iter.hasNext then iter.next() // discard NUL byte
+        if mode.contains('R') then while iter.hasNext && iter.next() != '\u0000' do {}
 
         val f = Paths.get(file.stripPrefix(prefix)).subpath(0, 1).toString
 
