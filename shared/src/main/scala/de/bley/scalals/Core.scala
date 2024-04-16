@@ -107,7 +107,7 @@ trait Core:
 
             traverse(items.last, config, subdirPrefix + " └── ", subdirPrefix + "     ", depth + 1)
           end if
-        } recover {
+        }.failed.foreach {
           case e: NoSuchFileException =>
             Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
           case e: AccessDeniedException =>
