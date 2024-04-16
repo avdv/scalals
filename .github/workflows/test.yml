@@ -93,8 +93,12 @@ jobs:
         # Only needed for private caches
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: git branch PR-${{ github.event.number }}
-    - run: nix develop --ignore-environment --keep HOME --command '.github/crosscompile'
-    - run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
+    - name: Test
+      run: nix develop --ignore-environment --keep HOME --command sbt tpolecatCiMode 'scalalsNative / test'
+    - name: Cross Compile
+      run: nix develop --ignore-environment --keep HOME --command '.github/crosscompile'
+    - name: qemu-aarch64 scalals
+      run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
     - uses: actions/upload-artifact@v4
       with:
         path: scalals-*
