@@ -10,22 +10,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / scalaVersion := "3.3.3"
 
 val sharedSettings = Seq(
-  scalacOptions ++= Seq(
-    "-deprecation",
-    "-encoding",
-    "UTF-8",
-    "-feature",
-    "-language:existentials",
-    "-language:higherKinds",
-    "-language:implicitConversions",
-    "-unchecked",
-    "-Xfatal-warnings",
-    // "-Xlint",
-    // "-Ywarn-dead-code", // N.B. doesn't work well with the ??? hole
-    // "-Ywarn-numeric-widen",
-    // "-Ywarn-value-discard"
-  ),
-  publish / skip := true,
+  publish / skip := true
 )
 
 def generateConstants(base: File): File = {
