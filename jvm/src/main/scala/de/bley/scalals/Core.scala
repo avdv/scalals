@@ -2,8 +2,7 @@ package de.bley.scalals
 
 import java.nio.file.attribute.*
 import java.nio.file.{ Files, LinkOption, Path }
-import java.time.{ Instant, ZoneId }
-import java.time.format.DateTimeFormatter
+import java.time.Instant
 import java.text.Collator
 
 import scala.jdk.CollectionConverters.*
