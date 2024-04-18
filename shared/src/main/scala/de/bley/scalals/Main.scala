@@ -16,11 +16,11 @@ enum IndicatorStyle:
 
 given scopt.Read[Path] = scopt.Read.reads(Paths.get(_: String))
 
-given scopt.Read[SortMode] = scopt.Read.reads(SortMode valueOf _)
+given scopt.Read[SortMode] = scopt.Read.reads(SortMode `valueOf` _)
 
-given scopt.Read[When] = scopt.Read.reads[When](When valueOf _)
+given scopt.Read[When] = scopt.Read.reads[When](When `valueOf` _)
 
-given scopt.Read[IndicatorStyle] = scopt.Read.reads(IndicatorStyle valueOf _)
+given scopt.Read[IndicatorStyle] = scopt.Read.reads(IndicatorStyle `valueOf` _)
 
 final case class Config(
     blockSize: Long = 1,
