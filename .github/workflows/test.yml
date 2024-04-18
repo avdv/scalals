@@ -101,7 +101,7 @@ jobs:
       run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
     - uses: actions/upload-artifact@v4
       with:
-        path: scalals-*
+        path: scalals-out-*
 
   run:
     name: Run
@@ -135,10 +135,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          mv scalals-Linux-aarch64/scalals scalals-arm64-linux
-          mv scalals-Linux-X64/scalals scalals-x86_64-linux
-          mv scalals-macOS-ARM64 scalals-arm64-darwin
-          mv scalals-macOS-X64/scalals scalals-x86_64-darwin
+          mv artifact/scalals-out-linux-aarch64 scalals-arm64-linux
+          mv artifact/scalals-out-linux-x86_64 scalals-x86_64-linux
+          mv artifact/scalals-out-macos-aarch64 scalals-arm64-darwin
+          mv artifact/scalals-out-macos-x86_64 scalals-x86_64-darwin
       - name: Upload binaries
         uses: softprops/action-gh-release@v2
         with:
