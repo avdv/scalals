@@ -4,13 +4,24 @@ import scala.sys.process._
 import java.nio.file.{ Files, Paths }
 import java.io.File
 import scala.scalanative.build.NativeConfig
+import org.typelevel.scalacoptions.{ ScalacOption, ScalacOptions }
+import org.typelevel.scalacoptions.ScalaVersion
+import org.typelevel.scalacoptions.ScalaVersion.V3_0_0
+import scala.Ordering.Implicits._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / scalaVersion := "3.4.1"
 
 val sharedSettings = Seq(
-  publish / skip := true
+  publish / skip := true,
+  tpolecatDevModeOptions ++= Set(
+    ScalacOption("-rewrite", _ => true),
+    // TODO use ScalacOptions.newSyntax instead
+    ScalacOption("-new-syntax", List.empty, _ >= V3_0_0),
+    // TODO use ScalaVersion.V3_4_0 instead
+    ScalacOptions.scala3Source("3.4-migration", _ >= ScalaVersion(3, 4, 0)),
+  ),
 )
 
 def generateConstants(base: File): File = {
