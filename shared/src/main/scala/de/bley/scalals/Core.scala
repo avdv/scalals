@@ -89,7 +89,7 @@ trait Core:
 
       for (decorator, idx) <- decorators.zipWithIndex
       do
-        decorator.decorate(fileInfo, builder)
+        val _ = decorator.decorate(fileInfo, builder)
         if idx < columns - 1 then builder += ' '
 
       println(builder)
@@ -289,7 +289,7 @@ trait Core:
             else if file.isSocket then 's'
             else '-'
 
-          builder.append(firstChar).append(permissionString(file.permissions))
+          val _ = builder.append(firstChar).append(permissionString(file.permissions))
 
           3 * 3 + 1
         end decorate
