@@ -113,7 +113,7 @@
 
               dontPatchELF = true;
 
-              depsWarmupCommand = "sbt scalalsNative/compile";
+              depsWarmupCommand = "sbt tpolecatDevMode scalalsNative/compile";
 
               installPhase = ''
                 mkdir --parents $out/bin
@@ -143,6 +143,9 @@
           devShells = {
             default = mkShell {
               name = "scalals";
+
+              SBT_TPOLECAT_DEV = "1";
+
               shellHook = ''
                 ${checks.pre-commit-check.shellHook}
               '';
