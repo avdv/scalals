@@ -85,7 +85,7 @@ end IndicatorDecorator
 object HyperlinkDecorator:
   def apply(d: Decorator): Decorator = new Decorator:
     override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
-      builder
+      val _ = builder
         .append("\u001b]8;;file://")
         .append(subject.path.toString)
         .append('\u0007')
@@ -102,7 +102,7 @@ object GitDecorator extends Decorator:
 
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
     GitDecorator(subject.path).toOption.fold(0) { info =>
-      info.get(subject.name).fold(builder.append(s"  $GREEN✓$RESET ")) { modes =>
+      val _ = info.get(subject.name).fold(builder.append(s"  $GREEN✓$RESET ")) { modes =>
         val m = modes.map {
           case 'M' => BLUE + 'M' + RESET
           case 'D' => RED + 'D' + RESET
@@ -207,7 +207,7 @@ object IconDecorator extends Decorator:
         aliases.get(ext).fold(if subject.isDirectory then '\uf115' else '\uf15b')(files.getOrElse(_, ' '))
       },
     )
-    builder.append(' ').append(symbol).append("  ")
+    val _ = builder.append(' ').append(symbol).append("  ")
 
     4
   end decorate

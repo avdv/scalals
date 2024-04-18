@@ -84,7 +84,7 @@ object Core extends generic.Core:
   import scala.scalanative.posix.sys.stat.*
   import scalanative.unsafe.*
 
-  locale.setlocale(locale.LC_ALL, c"")
+  if locale.setlocale(locale.LC_ALL, c"") == null then Console.err.println("setlocale: LC_ALL: cannot change locale")
 
   private val sb = new StringBuilder(3 * 3)
 
