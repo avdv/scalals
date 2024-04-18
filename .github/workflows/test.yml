@@ -148,3 +148,6 @@ jobs:
             scalals-arm64-darwin
             scalals-x86_64-linux
             scalals-x86_64-darwin
+      - name: Trigger build on jitpack
+        run: |
+          curl -L https://jitpack.io/com/github/avdv/scalals/${{ github.ref_name }}/scalals-${{ github.ref_name }}.pom
