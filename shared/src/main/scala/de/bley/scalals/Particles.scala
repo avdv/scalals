@@ -103,14 +103,13 @@ object GitDecorator extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
     GitDecorator(subject.path).toOption.fold(0) { info =>
       val _ = info.get(subject.name).fold(builder.append(s"  $GREEN✓$RESET ")) { modes =>
-        val m = modes.map {
+        val m = modes.map:
           case 'M' => BLUE + 'M' + RESET
           case 'D' => RED + 'D' + RESET
           case 'A' => YELLOW + 'A' + RESET
           case '?' => MAGENTA + '?' + RESET
           case '!' => " "
           case c   => c.toString
-        }
         builder
           .append(" " * (3 - modes.size))
           .append(m.mkString)

@@ -41,7 +41,7 @@ object Extension:
 object Colors:
   def ansiColor(str: String): String = "\u001b[" + str + "m"
 
-  val getType: PartialFunction[String, FileType] = {
+  val getType: PartialFunction[String, FileType] =
     case "fi"               => RegularFile
     case "di"               => Directory
     case "ln"               => Symlink
@@ -52,7 +52,7 @@ object Colors:
     case "do" | "bd" | "cd" => Special // door, block device, char device
     // case "mh" => multi hardlink
     case s if s.startsWith("*.") => Extension(s)
-  }
+  end getType
 
   lazy val getColors: Map[AnyRef, String] = {
     val Assign = raw"([^=]+)=([\d;]+|target)".r
@@ -85,9 +85,8 @@ object Colors:
     // getColors.get(color)
     val fileColor =
       if color eq RegularFile then
-        getColors.collectFirst {
+        getColors.collectFirst:
           case (k, v) if k == file.name => v
-        }
       else None
 
     fileColor.getOrElse(getColors(color))
