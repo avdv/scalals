@@ -202,8 +202,9 @@ object Main:
         case "--hyperlink" | "--color" | "--classify" | "--tree" => arg + '='
         case _                                                   => arg
     }
-    OParser.parse(parser, fixed ++ rest, Config()).fold(sys.exit(2)) {
-      Core.ls
-    }
+    OParser
+      .parse(parser, fixed ++ rest, Config())
+      .fold(sys.exit(2)):
+        Core.ls
   end main
 end Main

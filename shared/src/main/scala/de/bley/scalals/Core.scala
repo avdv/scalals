@@ -60,14 +60,13 @@ trait Core:
           yield path
 
           listAll(list(entries, config), config, decorators)
-        } recover {
+        } recover:
           case e: NoSuchFileException =>
             Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
           case e: AccessDeniedException =>
             Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
           case e =>
             Console.err.println(s"scalals: error $e")
-        }
       end for
     else listAll(list(items, config), config, decorators)
     end if
@@ -107,14 +106,13 @@ trait Core:
 
             traverse(items.last, config, subdirPrefix + " └── ", subdirPrefix + "     ", depth + 1)
           end if
-        }.failed.foreach {
+        }.failed.foreach:
           case e: NoSuchFileException =>
             Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
           case e: AccessDeniedException =>
             Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
           case e =>
             Console.err.println(s"scalals: ${fileInfo.path}: error $e - ${e.getCause}")
-        }
       end if
     end if
   end traverse

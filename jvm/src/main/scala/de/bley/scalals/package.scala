@@ -1,8 +1,7 @@
 package de.bley
 
-package scalals {
+package scalals:
   sealed trait Env
-}
 
 package object scalals:
   object EmptyEnv extends Env
