@@ -49,25 +49,33 @@ trait Core:
 
       listAll(list(filePaths, config), config, decorators)
 
-      val showPrefix = dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
+      val showPrefix = config.recursive || dirPaths.lengthCompare(1) > 0 || filePaths.nonEmpty
 
-      for path <- dirPaths
-      do
-        if showPrefix then println(s"\uf115  $path:")
+      val dirStack = mutable.Queue(dirPaths*)
 
-        Using(Files.newDirectoryStream(path)) { dirstream =>
+      while dirStack.nonEmpty do
+        val dir = dirStack.dequeue
+
+        if showPrefix then println(s"\uf115  $dir:")
+
+        Using(Files.newDirectoryStream(dir)) { dirstream =>
           val entries = for path <- dirstream.asScala if config.showAll || !Files.isHidden(path)
-          yield path
+          yield
+            if config.recursive && Files.isDirectory(path, linkOptions.toSeq*) then dirStack += path
+
+            path
 
           listAll(list(entries, config), config, decorators)
-        } recover:
+        }.failed.foreach:
           case e: NoSuchFileException =>
             Console.err.println(s"scalals: no such file or directory: '${e.getMessage}'")
           case e: AccessDeniedException =>
             Console.err.println(s"scalals: access denied: '${e.getMessage()}'")
           case e =>
             Console.err.println(s"scalals: error $e")
-      end for
+
+        println()
+      end while
     else listAll(list(items, config), config, decorators)
     end if
   }

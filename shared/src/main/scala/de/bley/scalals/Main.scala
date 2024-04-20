@@ -44,6 +44,7 @@ final case class Config(
     paths: List[Path] = List.empty,
     colorMode: When = When.auto,
     reverse: Boolean = false,
+    recursive: Boolean = false,
 )
 
 object Main:
@@ -107,6 +108,10 @@ object Main:
         .unbounded()
         .text("reverse order while sorting")
         .action((_, c) => c.copy(reverse = true)),
+      opt[Unit]('R', "recursive")
+        .unbounded()
+        .text("list subdirectories recursively")
+        .action((_, c) => c.copy(recursive = true)),
       opt[Option[Int]]("tree")
         .unbounded()
         .text("show tree")
