@@ -65,9 +65,9 @@
 
           pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
 
-          inherit (pkgs) lib stdenvNoCC zig_0_11;
+          inherit (pkgs) lib stdenvNoCC zig_0_12;
 
-          zig = zig_0_11;
+          zig = zig_0_12;
 
           mkShell = pkgs.mkShell.override { stdenv = stdenvNoCC; };
 
