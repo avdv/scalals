@@ -101,7 +101,7 @@
               '';
 
               SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
-              SCALANATIVE_LTO = "thin"; # {none, full, thin}
+              SCALANATIVE_LTO = if stdenvNoCC.isLinux then "thin" else "none"; # {none, full, thin}
               XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
               NIX_CFLAGS_COMPILE = pkgs.lib.optional (with pkgs.stdenv; isLinux && isx86_64) "-march=sandybridge";
