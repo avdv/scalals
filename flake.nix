@@ -104,7 +104,11 @@
               SCALANATIVE_LTO = if stdenvNoCC.isLinux then "thin" else "none"; # {none, full, thin}
               XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
-              NIX_CFLAGS_COMPILE = pkgs.lib.optional (with pkgs.stdenv; isLinux && isx86_64) "-march=sandybridge";
+              NIX_CFLAGS_COMPILE = (
+                pkgs.lib.optional (stdenvNoCC.isLinux && stdenvNoCC.isx86_64) "-march=sandybridge"
+              ) ++ (
+                pkgs.lib.optional stdenvNoCC.isDarwin "-mmacosx-version-min=10.12"
+              );
 
               buildPhase = ''
                 sbt tpolecatReleaseMode 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
