@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nix-filter.url = "github:numtide/nix-filter";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -24,10 +25,12 @@
     };
   };
 
-  outputs = { nixpkgs, flake-utils, pre-commit-hooks, sbt, ... }:
+  outputs = { self, nixpkgs, nix-filter, flake-utils, pre-commit-hooks, sbt, ... }:
     flake-utils.lib.eachSystem [ "aarch64-linux" "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ]
       (system:
         let
+          filter = nix-filter.lib;
+
           jreHeadlessOverlay = _: prev: {
             jre = prev.openjdk11_headless;
           };
@@ -93,7 +96,16 @@
 
               depsSha256 = "sha256-hp/idEadNq424gofOI9NSRcDOP4GWgL3d5UlSDxPFus=";
 
-              src = ./.;
+              src = filter {
+                root = self;
+                include = [
+                  "native"
+                  "project"
+                  "shared"
+                  ./.jvmopts
+                  ./build.sbt
+                ];
+              };
 
               # explicitly override version from sbt-dynver which does not work within a nix build
               patchPhase = ''
