@@ -107,7 +107,8 @@
               NIX_CFLAGS_COMPILE = (
                 pkgs.lib.optional (stdenvNoCC.isLinux && stdenvNoCC.isx86_64) "-march=sandybridge"
               ) ++ (
-                pkgs.lib.optional stdenvNoCC.isDarwin "-mmacosx-version-min=10.12"
+                # need to set target explicitly, see https://github.com/ziglang/zig/issues/14651
+                pkgs.lib.optional stdenvNoCC.isDarwin "-target ${stdenvNoCC.hostPlatform.qemuArch}-macos.11.0-none"
               );
 
               buildPhase = ''
