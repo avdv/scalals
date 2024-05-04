@@ -14,7 +14,6 @@ sbt -client 'project scalalsNative'
 
 # Mode: {debug, release-fast, release-full, release-size}
 
-sbt -client 'set nativeConfig ~= { _.withMode(scala.scalanative.build.Mode.releaseFull) }'
 sbt -client 'ninjaCompile'
 echo '::endgroup::'
 
