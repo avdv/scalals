@@ -1,0 +1,13 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger build on jitpack
+        run: |
+          curl -L https://jitpack.io/com/github/avdv/scalals/${{ github.ref_name }}/scalals-${{ github.ref_name }}.pom
