@@ -112,7 +112,7 @@ jobs:
     - name: Cross Compile
       run: nix develop --ignore-environment --keep HOME --keep SCALANATIVE_MODE --command '.github/crosscompile'
       env:
-        SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-full' || 'debug' }}
+        SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-full' || 'release-fast' }}
     - name: qemu-aarch64 scalals
       run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
     - uses: actions/upload-artifact@v4
