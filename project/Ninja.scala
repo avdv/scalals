@@ -257,6 +257,8 @@ object Ninja extends AutoPlugin {
   private def linkOpts(config: Config): Seq[String] =
     config.linkingOptions ++ {
       config.mode match {
+        // disable trap mode for UB sanitizer in debug mode
+        case Mode.Debug       => Seq("-fno-sanitize-trap=undefined")
         case Mode.ReleaseFull => Seq("-s")
         case _                => Seq.empty
       }
