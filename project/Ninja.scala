@@ -285,7 +285,7 @@ object Ninja extends AutoPlugin {
       // disable trap mode for UB sanitizer in debug mode
       case Mode.Debug       => List("-O0", "-fno-sanitize-trap=undefined")
       case Mode.ReleaseFast => List("-O2", "-Xclang", "-O2")
-      case Mode.ReleaseFull => List("-O3", "-Xclang", "-Ofast")
+      case Mode.ReleaseFull => List("-O3", "-Xclang", "-O3")
       case Mode.ReleaseSize => List("-Os", "-Xclang", "-Oz")
     }
 }
