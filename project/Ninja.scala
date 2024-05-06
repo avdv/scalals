@@ -282,7 +282,8 @@ object Ninja extends AutoPlugin {
 
   private def opt(config: Config): Seq[String] =
     config.mode match {
-      case Mode.Debug       => List("-O0")
+      // disable trap mode for UB sanitizer in debug mode
+      case Mode.Debug       => List("-O0", "-fno-sanitize-trap=undefined")
       case Mode.ReleaseFast => List("-O2", "-Xclang", "-O2")
       case Mode.ReleaseFull => List("-O3", "-Xclang", "-Ofast")
       case Mode.ReleaseSize => List("-Os", "-Xclang", "-Oz")
