@@ -28,10 +28,10 @@ for target in "${TARGETS[@]}"; do
     sbt -client "set nativeConfig ~= { _.withLTO(scala.scalanative.build.LTO.$LTO) }"
     sbt -client "set targetTriplet := Some(\"$target\")"
     sbt -client "ninja"
-    ninja -f native/target/scala-3.4.1/native/build.ninja
+    ninja -f native/target/scala-3.4.2/native/build.ninja
     echo '::endgroup::'
 done
 
-mv -v native/target/scala-3.4.1/scalals-* .
+mv -v native/target/scala-3.4.2/scalals-* .
 
 
