@@ -31,7 +31,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
     - name: "Install Cachix ❄"
-      uses: cachix/cachix-action@v14
+      uses: cachix/cachix-action@v15
       with:
         name: cbley
         extraPullNames: pre-commit-hooks
@@ -52,7 +52,7 @@ jobs:
     - name: "Install Nix ❄"
       uses: cachix/install-nix-action@V27
     - name: "Install Cachix ❄"
-      uses: cachix/cachix-action@v14
+      uses: cachix/cachix-action@v15
       with:
         name: cbley
         extraPullNames: pre-commit-hooks
@@ -85,7 +85,7 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
     - name: "Install Cachix ❄"
-      uses: cachix/cachix-action@v14
+      uses: cachix/cachix-action@v15
       with:
         name: cbley
         extraPullNames: pre-commit-hooks
