@@ -30,14 +30,14 @@ trait Core:
 
   def permissionString(imode: Int): String
 
-  def ls(config: Config) = Env { implicit z =>
+  def ls(config: Config) = Env {
     val items = if config.paths.isEmpty then List(Paths.get(".")) else config.paths
 
     if config.tree then tree(config, items)
     else lsNormal(config, items)
   }
 
-  private def lsNormal(config: Config, items: List[Path]) = Env { implicit z =>
+  private def lsNormal(config: Config, items: List[Path]) = Env {
     val decorators = layout(config)
 
     if config.listDirectories then

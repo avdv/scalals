@@ -1,12 +1,12 @@
 package de.bley.scalals
 
-import scalanative.libc.stdio.perror
-import scalanative.unsigned.*
-import scalanative.unsafe.*
-import scalanative.posix.unistd.STDOUT_FILENO
-import scalanative.posix.fcntl.*
-import scalanative.posix.unistd.close
-import scalanative.posix.sys.ioctl.*
+import scala.scalanative.libc.stdio.perror
+import scala.scalanative.unsigned.*
+import scala.scalanative.unsafe.*
+import scala.scalanative.posix.unistd.STDOUT_FILENO
+import scala.scalanative.posix.fcntl.*
+import scala.scalanative.posix.unistd.close
+import scala.scalanative.posix.sys.ioctl.*
 
 @extern
 object termios:
