@@ -12,24 +12,24 @@ package scala.scalanative
 package build
 
 import scala.scalanative.build._
-import scala.scalanative.build.core._
-import scala.scalanative.linker
 import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport._
 import scala.scalanative.sbtplugin.Utilities._
+import scala.scalanative.linker.ReachabilityAnalysis
 
 import sbt._
 import Keys._
 import java.nio.file.{ Files, Path, Paths }
 import scala.scalanative.sbtplugin.ScalaNativePlugin
 import scala.sys.process._
-import java.nio.file.OpenOption
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 import java.nio.file.StandardOpenOption
-import java.io.OutputStream
 import java.io.Writer
 
 /** Internal utilities to interact with Ninja. */
 object Ninja extends AutoPlugin {
-  private var sharedScope = scala.scalanative.util.Scope.unsafe()
+  implicit private val sharedScope = scala.scalanative.util.Scope.unsafe()
 
   override def requires = ScalaNativePlugin
 
@@ -59,8 +59,46 @@ object Ninja extends AutoPlugin {
     Def.task {
       val ninjaFile = ninja.value
 
-      Process(Seq("ninja", "-f", ninjaFile.abs)) !
+      Process(Seq("ninja", "-f", ninjaFile.abs)).!
     }
+
+  import scala.reflect.runtime.{ universe => ru }
+
+  private val m = ru.runtimeMirror(getClass.getClassLoader)
+  private val nativeLibMod = ru.typeOf[NativeLib.type].termSymbol.asModule
+  private val mm = m.reflectModule(nativeLibMod)
+  private val im = m.reflect(mm.instance)
+
+  private def unpackNativeCode(nativelib: NativeLib): Path = {
+    unpackNativeCodeMethod(nativelib).asInstanceOf[Path]
+  }
+
+  private val unpackNativeCodeMethod = {
+    val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("unpackNativeCode")).asMethod
+    im.reflectMethod(nlm)
+  }
+
+  private def findNativePaths(destPath: Path): Seq[Path] = {
+    findNativePathsMethod(destPath).asInstanceOf[Seq[Path]]
+  }
+
+  private val findNativePathsMethod = {
+    val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("findNativePaths")).asMethod
+    im.reflectMethod(nlm)
+  }
+
+  private def configureNativeLibrary(
+      initialConfig: Config,
+      analysis: ReachabilityAnalysis.Result,
+      destPath: Path,
+  ): Config = {
+    configureNativeLibraryMethod(initialConfig, analysis, destPath).asInstanceOf[Config]
+  }
+
+  private val configureNativeLibraryMethod = {
+    val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("configureNativeLibrary")).asMethod
+    im.reflectMethod(nlm)
+  }
 
   lazy val ninjaCompileTask =
     Def.task {
@@ -68,19 +106,16 @@ object Ninja extends AutoPlugin {
       val logger = streams.value.log.toLogger
 
       val config = {
-        val mainClass = (Compile / selectMainClass).value.getOrElse {
-          throw new MessageOnlyException("No main class detected.")
-        }
+        val mainClass = (Compile / selectMainClass).value
         val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
-        val maincls = mainClass // + "$"
-        val cwd = (Compile / scala.scalanative.sbtplugin.ScalaNativePluginInternal.nativeWorkdir).value
+        val baseDir = crossTarget.value
 
         scala.scalanative.build.Config.empty
           .withLogger(logger)
-          .withMainClass(maincls)
+          .withMainClass(mainClass)
           .withClassPath(classpath)
-          .withWorkdir(cwd.toPath)
           .withCompilerConfig(nativeConfig.value)
+          .withBaseDir(baseDir.toPath())
       }
 
       val writer = Files.newBufferedWriter(outfile, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
@@ -88,85 +123,87 @@ object Ninja extends AutoPlugin {
 
       val fclasspath = NativeLib.filterClasspath(config.classPath)
       val fconfig = config.withClassPath(fclasspath)
-      val workdir = fconfig.workdir
 
       // create optimized code and generate ll
       val entries = ScalaNative.entries(fconfig)
-      val linked = ScalaNative.link(fconfig, entries)(sharedScope)
-      ScalaNative.logLinked(fconfig, linked)
-      val optimized = ScalaNative.optimize(fconfig, linked)
-      val generated = ScalaNative.codegen(fconfig, optimized)
 
-      // find native libs
-      val nativelibs = NativeLib.findNativeLibs(fconfig.classPath, workdir)
+      val result = for {
+        linked <- ScalaNative.link(fconfig, entries)
+        _ = ScalaNative.logLinked(fconfig, linked, "ninja")
+        optimized <- ScalaNative.optimize(fconfig, linked)
+        codegen <- ScalaNative.codegen(fconfig, optimized)
+        generated <- Future.sequence(codegen)
+      } yield {
+        // find native libs
+        val nativelibs = NativeLib.findNativeLibs(fconfig)
 
-      // compile all libs
-      val objectPaths = {
-        val libObjectPaths = nativelibs
-          .map { NativeLib.unpackNativeCode }
-          .map { destPath =>
-            val paths = NativeLib.findNativePaths(workdir, destPath)
-            val (projPaths, projConfig) =
-              Filter.filterNativelib(fconfig, linked, destPath, paths)
+        // compile all libs
+        val objectPaths = {
+          val libObjectPaths = nativelibs
+            .map { unpackNativeCode }
+            .map { destPath =>
+              val paths = findNativePaths(destPath)
+              val projConfig = configureNativeLibrary(config, optimized, destPath)
+              addBuildStatements(writer, projConfig, paths)
+            }
+            .flatten
 
-            addBuildStatements(writer, projConfig, projPaths)
-          }
-          .flatten
+          // compile generated ll
+          val llObjectPaths = addBuildStatements(writer, fconfig, generated)
 
-        // compile generated ll
-        val llObjectPaths = addBuildStatements(writer, fconfig, generated)
+          libObjectPaths ++ llObjectPaths
+        }
 
-        libObjectPaths ++ llObjectPaths
+        writer.write(addExe(objectPaths))
+        writer.write(addDefaultTarget("$program"))
+        writer.close()
       }
-
-      writer.write(addExe(config, objectPaths))
-      writer.write(addDefaultTarget("$program"))
-      writer.close()
+      Await.result(result, Duration.Inf)
     }
 
   lazy val ninjaTask =
     Def.task {
       val logger = streams.value.log.toLogger
-      val outpath = (Compile / nativeLink / artifactPath).value.toPath
+      val baseDir = crossTarget.value
       val config = {
-        val mainClass = (Compile / selectMainClass).value.getOrElse {
-          throw new MessageOnlyException("No main class detected.")
-        }
+        val mainClass = (Compile / selectMainClass).value
         val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
-        val maincls = mainClass // + "$"
-        val cwd = (Compile / scala.scalanative.sbtplugin.ScalaNativePluginInternal.nativeWorkdir).value
 
         scala.scalanative.build.Config.empty
           .withLogger(logger)
-          .withMainClass(maincls)
+          .withBaseDir(baseDir.toPath)
+          .withMainClass(mainClass)
           .withClassPath(classpath)
-          .withWorkdir(cwd.toPath)
           .withCompilerConfig(nativeConfig.value)
       }
-      val ninjaBuild = config.workdir / "build.ninja"
+      val outpath = config.artifactPath
+      val ninjaBuild = (baseDir / "build.ninja").toPath
 
       val fclasspath = NativeLib.filterClasspath(config.classPath)
       val fconfig = config.withClassPath(fclasspath)
-      val workdir = fconfig.workdir
       val incdir = sourceDirectory.value / "main" / "c" / "include"
 
       val entries = ScalaNative.entries(fconfig)
-      val linked = ScalaNative.link(fconfig, entries)(sharedScope)
-      ScalaNative.logLinked(fconfig, linked)
 
-      val writer = Files.newBufferedWriter(ninjaBuild, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
-      logger.info("generating build.ninja")
+      val linkResult = ScalaNative.link(fconfig, entries).map { linked =>
+        ScalaNative.logLinked(fconfig, linked, "ninja")
 
-      writer.write(addRules(config, linked, outpath, incdir.toPath))
+        val writer =
+          Files.newBufferedWriter(ninjaBuild, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
+        logger.info(s"generating $ninjaBuild")
 
-      writer.write(s"include ${ninjaCompileFile.value}\n\n")
+        writer.write(addRules(config, linked, outpath, incdir.toPath))
 
-      writer.close()
+        writer.write(s"include ${ninjaCompileFile.value}\n\n")
+        writer.close()
 
-      ninjaBuild
+        ninjaBuild
+      }
+
+      Await.result(linkResult, Duration.Inf)
     }
 
-  def addExe(config: Config, objectsPaths: Seq[Path]): String = {
+  def addExe(objectsPaths: Seq[Path]): String = {
     val paths = for {
       p <- objectsPaths
       if !p.toString.contains("/scala-native/windows/")
@@ -177,8 +214,8 @@ object Ninja extends AutoPlugin {
 
   def addDefaultTarget(name: String): String = s"default $name\n\n"
 
-  def addRules(config: Config, linkerResult: linker.Result, outpath: Path, incdir: Path): String = {
-    val flags = opt(config) ++: flto(config) ++: target(config) :+ "-fvisibility=hidden"
+  def addRules(config: Config, linkerResult: ReachabilityAnalysis.Result, outpath: Path, incdir: Path): String = {
+    val flags = opt(config) ++: flto(config) ++: ninja_target(config) :+ "-fvisibility=hidden"
 
     val links = {
       val srclinks = linkerResult.links.map(_.name)
@@ -189,7 +226,7 @@ object Ninja extends AutoPlugin {
       "pthread" +: "dl" +: srclinks ++: gclinks
     }
     val linkopts = linkOpts(config) ++ links.map("-l" + _)
-    val linkflags = flto(config) ++ target(config)
+    val linkflags = flto(config) ++ ninja_target(config)
     val ltoName = lto(config).getOrElse("none")
 
     s"""|clang = ${config.clang.abs}
@@ -276,7 +313,7 @@ object Ninja extends AutoPlugin {
       Seq()
     } { name => Seq(s"-flto=$name") }
 
-  private def target(config: Config): Seq[String] =
+  private def ninja_target(config: Config): Seq[String] =
     config.compilerConfig.targetTriple match {
       case Some(tt) => Seq("-target", tt)
       case None     => Seq("-Wno-override-module")
