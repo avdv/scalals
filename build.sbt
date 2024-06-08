@@ -103,7 +103,7 @@ lazy val scalals =
     // configure Scala-Native settings
     .nativeSettings(
       targetTriplet := None,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
       nativeConfig := {
         val config = nativeConfig.value
         val nixCFlagsCompile = for {
@@ -117,18 +117,15 @@ lazy val scalals =
         } yield flag
 
         config
-          .withCompileOptions(nixCFlagsCompile)
+          .withCompileOptions("-Wall" :: nixCFlagsCompile ++ config.compileOptions)
+          .withBaseName {
+            val target = targetTriplet.value.fold("") { t =>
+              val Array(arch, os, _) = t.split("-", 3)
+              s"-$os-$arch"
+            }
+            "scalals" + target
+          }
           .withLinkingOptions("-fuse-ld=lld" :: nixCFlagsLink)
           .withTargetTriple(targetTriplet.value)
       },
-      Compile / nativeLink / artifactPath := {
-        val p = (Compile / nativeLink / artifactPath).value
-        val target = targetTriplet.value.fold("") { t =>
-          val Array(arch, os, _) = t.split("-", 3)
-          s"-$os-$arch"
-        }
-        p.getParentFile / (p.getName + target)
-      },
-      nativeCompileOptions += "-Wall",
-      nativeLinkStubs := false,
     )
