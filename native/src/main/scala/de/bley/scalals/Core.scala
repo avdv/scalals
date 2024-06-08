@@ -5,13 +5,14 @@ import java.time.Instant
 import scala.collection.mutable
 import java.io.IOException
 
-import scalanative.libc.errno
-import scalanative.libc.locale
-import scalanative.libc.string.strcoll
-import scalanative.unsafe.*
-import scalanative.unsigned.*
-import scalanative.posix.errno.*
-import scalanative.posix.sys.stat
+import scala.scalanative.libc.errno
+import scala.scalanative.libc.locale
+import scala.scalanative.libc.string.strcoll
+import scala.scalanative.unsafe.*
+import scala.scalanative.posix.time.timespec
+import scala.scalanative.posix.errno.*
+import scala.scalanative.posix.sys.stat
+import scala.scalanative.posix.sys.statOps.statOps
 import java.nio.file.Path
 
 object FileInfo:
@@ -39,10 +40,9 @@ end FileInfo
 
 final class FileInfo private (val path: Path, val cstr: CString, private val info: Ptr[stat.stat])
     extends generic.FileInfo:
-  import scalanative.posix.{ grp, pwd }
-  // FIXME: reimplement stat with better resolution
-  // import scalanative.posix.timeOps._
-  import scalanative.libc.errno
+  import scala.scalanative.posix.{ grp, pwd }
+  import scala.scalanative.posix.timeOps.*
+  import scala.scalanative.libc.errno
 
   val name = fromCString(cstr)
 
@@ -71,18 +71,23 @@ final class FileInfo private (val path: Path, val cstr: CString, private val inf
   end owner
   @inline def permissions: Int = info._13.toInt
   @inline def size: Long = info._6
-  // Still not fixed in scala-native: timestamps only have seconds resolution
-  @inline def lastModifiedTime: Instant = Instant.ofEpochSecond(info._8)
-  @inline def lastAccessTime: Instant = Instant.ofEpochSecond(info._7)
-  @inline def creationTime: Instant = Instant.ofEpochSecond(info._9)
+  @inline def lastModifiedTime: Instant = timespecToInstant(info.st_mtimespec)
+  @inline def lastAccessTime: Instant = timespecToInstant(info.st_atimespec)
+  @inline def creationTime: Instant = timespecToInstant(info.st_ctimespec)
   @inline def isExecutable =
     import scala.scalanative.unsigned.*
     (info._13 & (stat.S_IXGRP | stat.S_IXOTH | stat.S_IXUSR)) != 0.toUInt
+
+  private def timespecToInstant(time: timespec) =
+    val tptr = time.toPtr
+    val secs: Long = tptr.tv_sec.toLong
+    val nsecs: Long = tptr.tv_nsec.toLong
+    Instant.ofEpochSecond(secs, nsecs)
 end FileInfo
 
 object Core extends generic.Core:
   import scala.scalanative.posix.sys.stat.*
-  import scalanative.unsafe.*
+  import scala.scalanative.unsafe.*
 
   if locale.setlocale(locale.LC_ALL, c"") == null then Console.err.println("setlocale: LC_ALL: cannot change locale")
 
