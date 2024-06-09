@@ -215,7 +215,12 @@ object Ninja extends AutoPlugin {
   def addDefaultTarget(name: String): String = s"default $name\n\n"
 
   def addRules(config: Config, linkerResult: ReachabilityAnalysis.Result, outpath: Path, incdir: Path): String = {
-    val flags = opt(config) ++: flto(config) ++: ninja_target(config) :+ "-fvisibility=hidden"
+    val configFlags = {
+      if (config.compilerConfig.multithreadingSupport)
+        Seq("-DSCALANATIVE_MULTITHREADING_ENABLED")
+      else Nil
+    }
+    val cflags = opt(config) ++: flto(config) ++: ninja_target(config) ++: configFlags :+ "-fvisibility=hidden"
 
     val links = {
       val srclinks = linkerResult.links.map(_.name)
@@ -232,7 +237,7 @@ object Ninja extends AutoPlugin {
     s"""|clang = ${config.clang.abs}
         |clangpp = ${config.clangPP.abs}
         |
-        |cflags = ${flags.mkString(" ")}
+        |cflags = ${cflags.mkString(" ")}
         |
         |ldflags = ${linkflags.mkString(" ")}
         |ldopts = ${linkopts.mkString(" ")}
