@@ -3,10 +3,10 @@
 set -euo pipefail
 
 declare -ar TARGETS=(
-    x86_64-linux-musl
-    x86_64-macos-none
-    aarch64-linux-musl
-    aarch64-macos-none
+    x86_64-unknown-linux-musl
+    x86_64-apple-darwin-none
+    aarch64-unknown-linux-musl
+    aarch64-apple-darwin-none
 )
 
 echo '::group::compile'
@@ -24,9 +24,11 @@ for target in "${TARGETS[@]}"; do
         *macos*) LTO=none ;;
         *)       LTO=full ;;
     esac
+
     echo "::group::build $target"
+
     sbt -client "set nativeConfig ~= { _.withLTO(scala.scalanative.build.LTO.$LTO) }"
-    sbt -client "set targetTriplet := Some(\"$target\")"
+    sbt -client "set targetTriplet:= Some(\"$target\")"
     sbt -client "ninja"
     ninja -f native/target/scala-3.4.2/native/build.ninja
     echo '::endgroup::'
