@@ -19,7 +19,7 @@ object FileInfo:
   // FIXME: crashes with a scala.scalanative.runtime.UndefinedBehaviorError
   // val lookupService = FileSystems.getDefault.getUserPrincipalLookupService
 
-  def apply(path: Path, dereference: Boolean)(implicit z: Env) =
+  def apply(path: Path, dereference: Boolean)(using e: Env) =
     val info =
       val buf = alloc[stat.stat]()
       val err =
