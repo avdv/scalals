@@ -72,6 +72,8 @@
           mkShell = pkgs.mkShell.override { stdenv = stdenvNoCC; };
 
           clang = pkgs.writeScriptBin "clang" ''
+            #!${pkgs.bash}/bin/bash
+
             declare -a args
             for arg; do
               arg="''${arg/-unknown-/-}"
@@ -82,6 +84,8 @@
           '';
 
           clangpp = pkgs.writeScriptBin "clang++" ''
+            #!${pkgs.bash}/bin/bash
+
             declare -a args
             declare -a tmpfiles
             trap '[[ "''${#tmpfiles[@]}" -gt 0 ]] && rm -v "''${tmpfiles[@]}"' EXIT
