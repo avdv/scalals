@@ -114,10 +114,10 @@ jobs:
       env:
         SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-full' || 'debug' }}
     - name: qemu-aarch64 scalals
-      run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-out-linux-aarch64
+      run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-linux-aarch64
     - uses: actions/upload-artifact@v4
       with:
-        path: scalals-out-*
+        path: scalals-*
 
   run:
     name: Run
@@ -136,10 +136,10 @@ jobs:
       - run: |
           ls -lh
           chmod +x scalals-*
-          ./scalals-*-$( echo "${RUNNER_OS}" | tr A-Z a-z )-x86_64
         working-directory: ${{steps.download.outputs.download-path}}/artifact
-      - run: |
-          ./scalals-*-$( echo "${RUNNER_OS}" | tr A-Z a-z )-aarch64
+      - run: ./scalals-${{ runner.os == 'Linux' && 'linux' || 'darwin' }}-x86_64
+        working-directory: ${{steps.download.outputs.download-path}}/artifact
+      - run: ./scalals-${{ runner.os == 'Linux' && 'linux' || 'darwin' }}-aarch64
         if: ${{ runner.arch == 'ARM64' }}
         working-directory: ${{steps.download.outputs.download-path}}/artifact
 
@@ -155,10 +155,10 @@ jobs:
       - uses: actions/download-artifact@v4
       - name: Rename binaries
         run: |
-          mv artifact/scalals-out-linux-aarch64 scalals-arm64-linux
-          mv artifact/scalals-out-linux-x86_64 scalals-x86_64-linux
-          mv artifact/scalals-out-macos-aarch64 scalals-arm64-darwin
-          mv artifact/scalals-out-macos-x86_64 scalals-x86_64-darwin
+          mv artifact/scalals-linux-aarch64 scalals-arm64-linux
+          mv artifact/scalals-linux-x86_64 scalals-x86_64-linux
+          mv artifact/scalals-darwin-aarch64 scalals-arm64-darwin
+          mv artifact/scalals-darwin-x86_64 scalals-x86_64-darwin
       # Drafts your next Release notes as Pull Requests are merged into "main"
       - uses: release-drafter/release-drafter@v6
         id: release
