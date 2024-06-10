@@ -73,11 +73,35 @@
           mkShell = pkgs.mkShell.override { stdenv = stdenvNoCC; };
 
           clang = pkgs.writeScriptBin "clang" ''
-            exec ${zig}/bin/zig cc "$@"
+            declare -a args
+            for arg; do
+              arg="''${arg/-unknown-/-}"
+              arg="''${arg/-apple-darwin-none/-macos-none}"
+              args+=( "$arg" )
+            done
+            exec ${zig}/bin/zig cc "''${args[@]}"
           '';
 
           clangpp = pkgs.writeScriptBin "clang++" ''
-            exec ${zig}/bin/zig c++ "$@"
+            declare -a args
+            declare -a tmpfiles
+            trap '[[ "''${#tmpfiles[@]}" -gt 0 ]] && rm -v "''${tmpfiles[@]}"' EXIT
+            for arg; do
+               case "$arg" in
+                 @* )
+                   infile="''${arg:1}"
+                   resp=$( mktemp )
+                   tmpfiles+=( "$resp" )
+                   sed -e 's,-unknown-,-,' -e 's,-apple-darwin-none,-macos-none,' "$infile" >> "$resp"
+                   args+=( "@$resp" )
+                   ;;
+                 * )
+                   arg="''${arg/-unknown-/-}"
+                   arg="''${arg/-apple-darwin-none/-macos-none}"
+                   args+=( "$arg" )
+               esac
+            done
+            ${zig}/bin/zig c++ "''${args[@]}"
           '';
 
           nativeBuildInputs = with pkgs; [ git ninja zig which clang clangpp ];

@@ -120,7 +120,7 @@ lazy val scalals =
           .withCompileOptions("-Wall" :: nixCFlagsCompile ++ config.compileOptions)
           .withBaseName {
             val target = targetTriplet.value.fold("") { t =>
-              val Array(arch, os, _) = t.split("-", 3)
+              val Array(arch, _, os, _) = t.split("-", 4)
               s"-$os-$arch"
             }
             "scalals" + target
