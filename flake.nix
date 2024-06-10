@@ -151,7 +151,7 @@
 
               buildPhase = ''
                 sbt tpolecatReleaseMode 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
-                ninja -f native/target/scala-3.4.2/native/build.ninja
+                ninja -f native/target/build.ninja
               '';
 
               dontPatchELF = true;
@@ -160,7 +160,7 @@
 
               installPhase = ''
                 mkdir --parents $out/bin
-                cp native/target/scala-*/scalals-out $out/bin/scalals
+                cp "$(ninja -f native/target/build.ninja -t targets rule exe)" $out/bin/scalals
               '';
             };
             default = scalals;
