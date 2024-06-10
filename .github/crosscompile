@@ -9,13 +9,13 @@ declare -ar TARGETS=(
     aarch64-apple-darwin-none
 )
 
-echo '::group::compile'
+echo '::group::configure'
 sbt -client 'project scalalsNative'
+echo '::endgroup::'
 
 # Mode: {debug, release-fast, release-full, release-size}
 
-sbt -client 'ninjaCompile'
-echo '::endgroup::'
+declare -a binaries
 
 for target in "${TARGETS[@]}"; do
     # LTO: {none, full, thin}
@@ -30,10 +30,14 @@ for target in "${TARGETS[@]}"; do
     sbt -client "set nativeConfig ~= { _.withLTO(scala.scalanative.build.LTO.$LTO) }"
     sbt -client "set targetTriplet:= Some(\"$target\")"
     sbt -client "ninja"
-    ninja -f native/target/scala-3.4.2/native/build.ninja
+    sbt -client "ninjaCompile"
+
+    ninja -f native/target/scala-3.4.2/build.ninja
+
+    binaries+=( "$( ninja -f native/target/scala-3.4.2/build.ninja -t targets rule exe )" )
+
     echo '::endgroup::'
 done
 
-mv -v native/target/scala-3.4.2/scalals-* .
-
+mv -vt . "${binaries[@]}"
 
