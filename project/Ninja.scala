@@ -51,7 +51,7 @@ object Ninja extends AutoPlugin {
   override lazy val projectSettings = Seq(
     ninja := ninjaTask.value,
     ninjaCompile := ninjaCompileTask.value,
-    ninjaCompileFile := (Compile / crossTarget).value.toPath / "compile.ninja",
+    ninjaCompileFile := target.value.toPath / "compile.ninja",
     runNinja := runNinjaTask.value,
   )
 
@@ -177,7 +177,7 @@ object Ninja extends AutoPlugin {
           .withCompilerConfig(nativeConfig.value)
       }
       val outpath = config.artifactPath
-      val ninjaBuild = (baseDir / "build.ninja").toPath
+      val ninjaBuild = (target.value / "build.ninja").toPath
 
       val fclasspath = NativeLib.filterClasspath(config.classPath)
       val fconfig = config.withClassPath(fclasspath)

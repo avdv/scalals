@@ -32,9 +32,9 @@ for target in "${TARGETS[@]}"; do
     sbt -client "ninja"
     sbt -client "ninjaCompile"
 
-    ninja -f native/target/scala-3.4.2/build.ninja
+    ninja -f native/target/build.ninja
 
-    binaries+=( "$( ninja -f native/target/scala-3.4.2/build.ninja -t targets rule exe )" )
+    binaries+=( "$( ninja -f native/target/build.ninja -t targets rule exe )" )
 
     echo '::endgroup::'
 done
