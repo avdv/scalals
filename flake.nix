@@ -83,29 +83,31 @@
             exec ${zig}/bin/zig cc "''${args[@]}"
           '';
 
-          clangpp = pkgs.writeScriptBin "clang++" ''
-            #!${pkgs.bash}/bin/bash
-
-            declare -a args
-            declare -a tmpfiles
-            trap '[[ "''${#tmpfiles[@]}" -gt 0 ]] && rm -v "''${tmpfiles[@]}"' EXIT
-            for arg; do
-               case "$arg" in
-                 @* )
-                   infile="''${arg:1}"
-                   resp=$( mktemp )
-                   tmpfiles+=( "$resp" )
-                   sed -e 's,-unknown-,-,' -e 's,-apple-darwin-none,-macos-none,' "$infile" >> "$resp"
-                   args+=( "@$resp" )
-                   ;;
-                 * )
-                   arg="''${arg/-unknown-/-}"
-                   arg="''${arg/-apple-darwin-none/-macos-none}"
-                   args+=( "$arg" )
-               esac
-            done
-            ${zig}/bin/zig c++ "''${args[@]}"
-          '';
+          clangpp = pkgs.writeShellApplication {
+            name = "clang++";
+            runtimeInputs = [ pkgs.gnused ];
+            text = ''
+              declare -a args=()
+              declare -a tmpfiles=()
+              trap '[[ "''${#tmpfiles[@]}" -gt 0 ]] && rm -v "''${tmpfiles[@]}"' EXIT
+              for arg; do
+                 case "$arg" in
+                   @* )
+                     infile="''${arg:1}"
+                     resp=$( mktemp )
+                     tmpfiles+=( "$resp" )
+                     sed -e 's,-unknown-,-,' -e 's,-apple-darwin-none,-macos-none,' "$infile" >> "$resp"
+                     args+=( "@$resp" )
+                     ;;
+                   * )
+                     arg="''${arg/-unknown-/-}"
+                     arg="''${arg/-apple-darwin-none/-macos-none}"
+                     args+=( "$arg" )
+                 esac
+              done
+              ${zig}/bin/zig c++ "''${args[@]}"
+            '';
+          };
 
           nativeBuildInputs = with pkgs; [ git ninja zig which clang clangpp ];
         in
