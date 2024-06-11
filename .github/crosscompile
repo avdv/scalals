@@ -21,8 +21,8 @@ for target in "${TARGETS[@]}"; do
     # LTO: {none, full, thin}
     case "$target" in
         # zig ld does not yet support LTO for mach-O see https://github.com/ziglang/zig/issues/8680
-        *macos*) LTO=none ;;
-        *)       LTO=full ;;
+        *darwin*) LTO=none ;;
+        *)        LTO=full ;;
     esac
 
     echo "::group::build $target"
