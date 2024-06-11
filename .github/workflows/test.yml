@@ -158,6 +158,7 @@ jobs:
       - name: Rename binaries
         run: |
           mv artifact/scalals-linux-aarch64 scalals-arm64-linux
+          mv artifact/scalals-linux-risc64 scalals-risc64-linux
           mv artifact/scalals-linux-x86_64 scalals-x86_64-linux
           mv artifact/scalals-darwin-aarch64 scalals-arm64-darwin
           mv artifact/scalals-darwin-x86_64 scalals-x86_64-darwin
@@ -171,6 +172,7 @@ jobs:
           gh release upload '${{ steps.release.outputs.tag_name }}' \
             scalals-arm64-linux \
             scalals-arm64-darwin \
+            scalals-risc64-linux \
             scalals-x86_64-linux \
             scalals-x86_64-darwin \
             --clobber --repo ${{ github.repository }}
