@@ -227,7 +227,13 @@ object Ninja extends AutoPlugin {
       // We need extra linking dependencies for:
       // * libdl for our vendored libunwind implementation.
       // * libpthread for process APIs and parallel garbage collection.
-      "pthread" +: "dl" +: srclinks ++: gclinks
+      // * Dbghelp for windows implementation of unwind libunwind API
+      val platformsLinks =
+        if (config.targetsWindows) Seq("dbghelp")
+        else if (config.targetsOpenBSD || config.targetsNetBSD)
+          Seq("pthread")
+        else Seq("pthread", "dl")
+      srclinks ++ gclinks ++ platformsLinks
     }
     val linkopts = linkOpts(config) ++ links.map("-l" + _)
     val linkflags = flto(config) ++ ninja_target(config)
