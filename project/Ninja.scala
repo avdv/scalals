@@ -206,7 +206,6 @@ object Ninja extends AutoPlugin {
   def addExe(objectsPaths: Seq[Path]): String = {
     val paths = for {
       p <- objectsPaths
-      if !p.toString.contains("/scala-native/windows/")
     } yield p.abs
 
     s"build $$program: exe ${paths.mkString(" ")}\n\n"
