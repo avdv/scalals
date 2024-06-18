@@ -3,6 +3,7 @@
 set -euo pipefail
 
 declare -ar TARGETS=(
+    x86_64-unknown-windows-gnu
     x86_64-unknown-linux-musl
     x86_64-apple-darwin-none
     aarch64-unknown-linux-musl
