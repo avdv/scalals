@@ -24,8 +24,10 @@ import scala.sys.process._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
+import scala.collection.JavaConverters._
 import java.nio.file.StandardOpenOption
 import java.io.Writer
+import java.nio.charset.StandardCharsets.UTF_8
 
 /** Internal utilities to interact with Ninja. */
 object Ninja extends AutoPlugin {
@@ -270,6 +272,15 @@ object Ninja extends AutoPlugin {
 
   def addBuildStatements(writer: Writer, config: Config, files: Seq[Path]): Seq[Path] = {
     files.map { path =>
+      if (path.endsWith("windows/time.c")) {
+        // FIXME patch time.c and remove all #define's and tzset function
+        val lines = for {
+          line <- scala.io.Source.fromFile(path.toFile).getLines
+          if !line.startsWith("#define") && !line.contains("_tzset")
+        } yield line
+
+        Files.write(path, lines.toList.asJava, UTF_8)
+      }
       val inpath = path.abs
       val outpath = inpath + oExt
       val isCpp = inpath.endsWith(cppExt)
