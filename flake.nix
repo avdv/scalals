@@ -24,28 +24,44 @@
     };
   };
 
-  outputs = { self, nixpkgs, nix-filter, flake-utils, pre-commit-hooks, sbt, ... }:
-    flake-utils.lib.eachSystem [ "aarch64-linux" "aarch64-darwin" "x86_64-darwin" "x86_64-linux" ]
-      (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      nix-filter,
+      flake-utils,
+      pre-commit-hooks,
+      sbt,
+      ...
+    }:
+    flake-utils.lib.eachSystem
+      [
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ]
+      (
+        system:
         let
           filter = nix-filter.lib;
 
-          jreHeadlessOverlay = _: prev: {
-            jre = prev.openjdk11_headless;
-          };
+          jreHeadlessOverlay = _: prev: { jre = prev.openjdk11_headless; };
 
           scalafmtOverlay = final: prev: {
-            scalafmt = prev.scalafmt.overrideAttrs (old:
+            scalafmt = prev.scalafmt.overrideAttrs (
+              old:
               let
-                version = builtins.head (builtins.match ''[ \n]*version *= *"([^ \n]+)".*'' (builtins.readFile ./.scalafmt.conf));
+                version = builtins.head (
+                  builtins.match ''[ \n]*version *= *"([^ \n]+)".*'' (builtins.readFile ./.scalafmt.conf)
+                );
                 outputHash = "sha256-Di46BTunM7kQ31Gni/Tv4Dlpwaw6wwQ7R9i/JP1mjew=";
               in
               {
                 inherit version;
-                passthru =
-                  {
-                    inherit outputHash;
-                  };
+                passthru = {
+                  inherit outputHash;
+                };
                 buildInputs = [
                   (prev.stdenv.mkDerivation {
                     name = "scalafmt-deps-${version}";
@@ -60,10 +76,17 @@
                     outputHashAlgo = if outputHash == "" then "sha256" else null;
                   })
                 ];
-              });
+              }
+            );
           };
 
-          pkgs = import nixpkgs { inherit system; overlays = [ jreHeadlessOverlay scalafmtOverlay ]; };
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [
+              jreHeadlessOverlay
+              scalafmtOverlay
+            ];
+          };
 
           inherit (pkgs) lib stdenvNoCC zig_0_12;
 
@@ -109,7 +132,14 @@
             '';
           };
 
-          nativeBuildInputs = with pkgs; [ git ninja zig which clang clangpp ];
+          nativeBuildInputs = with pkgs; [
+            git
+            ninja
+            zig
+            which
+            clang
+            clangpp
+          ];
         in
         rec {
           formatter = pkgs.nixfmt-rfc-style;
@@ -120,7 +150,9 @@
             scalals = sbt.lib.mkSbtDerivation rec {
               inherit pkgs nativeBuildInputs;
 
-              overrides = { stdenv = stdenvNoCC; };
+              overrides = {
+                stdenv = stdenvNoCC;
+              };
 
               pname = "scalals-native";
 
@@ -149,12 +181,12 @@
               SCALANATIVE_LTO = if stdenvNoCC.isLinux then "thin" else "none"; # {none, full, thin}
               XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
-              NIX_CFLAGS_COMPILE = (
-                pkgs.lib.optional (stdenvNoCC.isLinux && stdenvNoCC.isx86_64) "-march=sandybridge"
-              ) ++ (
-                # need to set target explicitly, see https://github.com/ziglang/zig/issues/14651
-                pkgs.lib.optional stdenvNoCC.isDarwin "-target ${stdenvNoCC.hostPlatform.qemuArch}-macos.11.0-none"
-              );
+              NIX_CFLAGS_COMPILE =
+                (pkgs.lib.optional (stdenvNoCC.isLinux && stdenvNoCC.isx86_64) "-march=sandybridge")
+                ++ (
+                  # need to set target explicitly, see https://github.com/ziglang/zig/issues/14651
+                  pkgs.lib.optional stdenvNoCC.isDarwin "-target ${stdenvNoCC.hostPlatform.qemuArch}-macos.11.0-none"
+                );
 
               buildPhase = ''
                 sbt tpolecatReleaseMode 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
@@ -173,7 +205,10 @@
             default = scalals;
           };
 
-          apps.default = flake-utils.lib.mkApp { drv = packages.default; exePath = "/bin/scalals"; };
+          apps.default = flake-utils.lib.mkApp {
+            drv = packages.default;
+            exePath = "/bin/scalals";
+          };
 
           checks = {
             pre-commit-check = pre-commit-hooks.lib.${system}.run {
@@ -195,48 +230,58 @@
             };
           };
 
-          devShells = {
-            default = mkShell {
-              name = "scalals";
-
-              SBT_TPOLECAT_DEV = "1";
-
-              shellHook = ''
-                ${checks.pre-commit-check.shellHook}
-              '';
-              packages = [ pkgs.metals ];
-              nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
-            };
-
-            graalVM = pkgs.mkShell {
-              name = "scalals / graalvm";
-
-              # Workaround GraalVM issue where the builder does not have access to the
-              # environment variables since 21.0.0
-              # https://github.com/oracle/graal/pull/6095
-              # https://github.com/oracle/graal/pull/6095
-              # https://github.com/oracle/graal/issues/7502
-              NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION = "true";
-
-              shellHook = ''
-                ${checks.pre-commit-check.shellHook}
-              '';
-              nativeBuildInputs = [ pkgs.graalvm-ce pkgs.sbt ];
-            };
-          } // (lib.optionalAttrs (system == "x86_64-linux") (
-            let
-              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
-            in
+          devShells =
             {
-              aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
-                name = "scalals-arm64";
+              default = mkShell {
+                name = "scalals";
 
-                NIX_CFLAGS_LINK = "-static";
-                nativeBuildInputs = [ pkgs.lld_13 pkgs.git pkgs.ninja pkgs.which pkgs.sbt ];
+                SBT_TPOLECAT_DEV = "1";
+
+                shellHook = ''
+                  ${checks.pre-commit-check.shellHook}
+                '';
+                packages = [ pkgs.metals ];
+                nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+              };
+
+              graalVM = pkgs.mkShell {
+                name = "scalals / graalvm";
+
+                # Workaround GraalVM issue where the builder does not have access to the
+                # environment variables since 21.0.0
+                # https://github.com/oracle/graal/pull/6095
+                # https://github.com/oracle/graal/pull/6095
+                # https://github.com/oracle/graal/issues/7502
+                NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION = "true";
+
+                shellHook = ''
+                  ${checks.pre-commit-check.shellHook}
+                '';
+                nativeBuildInputs = [
+                  pkgs.graalvm-ce
+                  pkgs.sbt
+                ];
               };
             }
-          )
-          );
+            // (lib.optionalAttrs (system == "x86_64-linux") (
+              let
+                inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
+              in
+              {
+                aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
+                  name = "scalals-arm64";
+
+                  NIX_CFLAGS_LINK = "-static";
+                  nativeBuildInputs = [
+                    pkgs.lld_13
+                    pkgs.git
+                    pkgs.ninja
+                    pkgs.which
+                    pkgs.sbt
+                  ];
+                };
+              }
+            ));
 
           # compatibility for nix < 2.7.0
           defaultApp = apps.default;
