@@ -177,16 +177,21 @@
                 echo 'ThisBuild / version := "${version}"' > version.sbt
               '';
 
-              SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
-              SCALANATIVE_LTO = if stdenvNoCC.isLinux then "thin" else "none"; # {none, full, thin}
-              XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
+              env = {
+                SCALANATIVE_MODE = "release-full"; # {debug, release-fast, release-full}
+                SCALANATIVE_LTO = if stdenvNoCC.isLinux then "thin" else "none"; # {none, full, thin}
+                XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
-              NIX_CFLAGS_COMPILE =
-                (pkgs.lib.optional (stdenvNoCC.isLinux && stdenvNoCC.isx86_64) "-march=sandybridge")
-                ++ (
-                  # need to set target explicitly, see https://github.com/ziglang/zig/issues/14651
-                  pkgs.lib.optional stdenvNoCC.isDarwin "-target ${stdenvNoCC.hostPlatform.qemuArch}-macos.11.0-none"
-                );
+                NIX_CFLAGS_COMPILE =
+                  if stdenvNoCC.isLinux && stdenvNoCC.isx86_64 then
+                    # zig uses -march=native by default
+                    "-march=sandybridge"
+                  else if stdenvNoCC.isDarwin then
+                    # need to set target explicitly, see https://github.com/ziglang/zig/issues/14651
+                    "-target ${stdenvNoCC.hostPlatform.qemuArch}-macos.11.0-none"
+                  else
+                    null;
+              };
 
               buildPhase = ''
                 sbt tpolecatReleaseMode 'project scalalsNative' 'show nativeConfig' ninjaCompile ninja
@@ -235,7 +240,7 @@
               default = mkShell {
                 name = "scalals";
 
-                SBT_TPOLECAT_DEV = "1";
+                env.SBT_TPOLECAT_DEV = "1";
 
                 shellHook = ''
                   ${checks.pre-commit-check.shellHook}
@@ -252,7 +257,7 @@
                 # https://github.com/oracle/graal/pull/6095
                 # https://github.com/oracle/graal/pull/6095
                 # https://github.com/oracle/graal/issues/7502
-                NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION = "true";
+                env.NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION = "true";
 
                 shellHook = ''
                   ${checks.pre-commit-check.shellHook}
@@ -271,7 +276,8 @@
                 aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
                   name = "scalals-arm64";
 
-                  NIX_CFLAGS_LINK = "-static";
+                  env.NIX_CFLAGS_LINK = "-static";
+
                   nativeBuildInputs = [
                     pkgs.lld_13
                     pkgs.git
