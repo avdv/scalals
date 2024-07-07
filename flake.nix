@@ -112,6 +112,8 @@
           nativeBuildInputs = with pkgs; [ git ninja zig which clang clangpp ];
         in
         rec {
+          formatter = pkgs.nixfmt-rfc-style;
+
           packages = rec {
             inherit (pkgs) scalafmt;
 
@@ -177,7 +179,12 @@
             pre-commit-check = pre-commit-hooks.lib.${system}.run {
               src = ./.;
               hooks = {
-                nixpkgs-fmt.enable = true;
+                nix-fmt = {
+                  enable = true;
+                  name = "nix fmt";
+                  entry = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+                  types = [ "nix" ];
+                };
                 scalafmt = {
                   enable = true;
                   name = "scalafmt";
