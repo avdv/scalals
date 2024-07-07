@@ -9,11 +9,11 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    pre-commit-hooks = {
+    git-hooks = {
       inputs = {
         nixpkgs.follows = "nixpkgs";
       };
-      url = "github:cachix/pre-commit-hooks.nix";
+      url = "github:cachix/git-hooks.nix";
     };
     sbt = {
       inputs = {
@@ -30,7 +30,7 @@
       nixpkgs,
       nix-filter,
       flake-utils,
-      pre-commit-hooks,
+      git-hooks,
       sbt,
       ...
     }:
@@ -211,7 +211,7 @@
           };
 
           checks = {
-            pre-commit-check = pre-commit-hooks.lib.${system}.run {
+            pre-commit-check = git-hooks.lib.${system}.run {
               src = ./.;
               hooks = {
                 nix-fmt = {
