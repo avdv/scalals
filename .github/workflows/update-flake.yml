@@ -9,6 +9,9 @@ on:
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
     - uses: actions/checkout@v4
     - uses: cachix/install-nix-action@V27
@@ -22,6 +25,7 @@ jobs:
         git config user.name '${{ github.actor }}'
     - run: nix flake update --commit-lock-file
     - name: Create Pull Request
+      id: create-pr
       uses: peter-evans/create-pull-request@v6
       with:
         commit-message: "[automation] flake update"
@@ -29,3 +33,7 @@ jobs:
         branch: "automation/update-flake-inputs"
         labels: "dependencies"
         token: "${{ secrets.PR_TOKEN }}"
+    - name: Enable Pull Request Automerge
+      run: gh pr merge --merge --auto "${{ steps.create-pr.outputs.pull-request-number }}"
+      env:
+        GH_TOKEN: ${{ secrets.PR_TOKEN }}
