@@ -26,7 +26,7 @@ jobs:
           ~/.sbt/launchers
         key: ${{ runner.os }}-sbt-${{ hashFiles('build.sbt', 'project/plugins.sbt') }}
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@V28
+      uses: cachix/install-nix-action@v29
       with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@V28
+      uses: cachix/install-nix-action@v29
     - name: "Install Cachix ❄"
       uses: cachix/cachix-action@v15
       with:
@@ -78,7 +78,7 @@ jobs:
           ~/.sbt/launchers
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '.travis.yml') }}
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@V28
+      uses: cachix/install-nix-action@v29
       with:
           #install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
           #install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
