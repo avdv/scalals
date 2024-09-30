@@ -145,6 +145,20 @@ jobs:
         if: ${{ runner.arch == 'ARM64' }}
         working-directory: ${{steps.download.outputs.download-path}}/artifact
 
+  run-win32:
+    name: Run win32
+    needs:
+      - tests
+    runs-on:
+      windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        id: download
+      - run: ls
+        working-directory: ${{steps.download.outputs.download-path}}/artifact
+      - run: "./scalals-windows-x86_64 -lh"
+        working-directory: ${{steps.download.outputs.download-path}}/artifact
+
   release:
     if: github.ref == 'refs/heads/main'
     needs:
