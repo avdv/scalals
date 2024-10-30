@@ -11,7 +11,7 @@ import scala.Ordering.Implicits._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion := "3.5.0"
+ThisBuild / scalaVersion := "3.5.2"
 
 val sharedSettings = Seq(
   publish / skip := true,
