@@ -49,6 +49,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      with:
+        fetch-depth: 2
+        persist-credentials: false
     - name: "Install Nix ❄"
       uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
     - name: "Install Cachix ❄"
@@ -58,7 +61,24 @@ jobs:
         extraPullNames: pre-commit-hooks
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         pushFilter: '[-](source|nixpkgs-src)$'
-    - run: git branch PR-${{ github.event.number }}
+    - name: Update scalals.dependencies hash
+      id: hash-update
+      if: github.event_name == 'pull_request' && github.repository == 'avdv/scalals'
+      run: |-
+        nix develop --command .github/update-hash scalals.dependencies
+        echo exit=$( git diff --quiet flake.nix ; echo $? ) >> "$GITHUB_OUTPUT"
+    - name: Set author identity and push url
+      run: |-
+        git config user.email '${{ github.actor }}@users.noreply.github.com'
+        git config user.name '${{ github.actor }}'
+        git remote set-url --push origin https://x-access-token:${{ secrets.PR_TOKEN }}@github.com/${{ github.repository }}
+    - name: Push changes to PR
+      if: steps.hash-update.outputs.exit != '0'
+      run: |-
+        git switch -c pr-branch ${{ github.event.pull_request.head.sha }}
+        git commit -m 'Update scalals.dependencies hash' flake.nix
+        git push origin HEAD:${{ github.head_ref }}
+        exit 1
     - run: nix flake check
     - run: nix build --print-build-logs
     - run: nix run
