@@ -134,9 +134,9 @@ jobs:
       env:
         SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-full' || 'debug' }}
     - name: qemu-aarch64 scalals
-      run: nix shell 'nixpkgs#qemu' --command qemu-aarch64 scalals-linux-aarch64
+      run: nix shell --inputs-from . 'nixpkgs#qemu' --command qemu-aarch64 scalals-linux-aarch64
     - name: qemu-risc64 scalals
-      run: nix shell 'nixpkgs#qemu' --command qemu-riscv64 scalals-linux-riscv64
+      run: nix shell --inputs-from . 'nixpkgs#qemu' --command qemu-riscv64 scalals-linux-riscv64
     - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         path: scalals-*
