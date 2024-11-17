@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+if [ $# -ne 1 ]; then
+  echo 'error: wrong number of arguments' >&2
+  echo "usage: $0 ATTR" >&2
+  exit 1
+fi
+
+attr="$1"
+
+if [[ -n "$( git status --porcelain -- flake.nix )" ]]; then
+    echo "flake.nix is not clean. cowardly refusing to continue." >&2
+    exit 2
+fi
+
+outputHash=$( nix eval --raw ".#${attr}.outputHash" )
+
+sed -i'' -e "s,$outputHash,," flake.nix
+
+if output=$( nix build --no-link --print-build-logs ".#${attr}" 2>&1 ); then
+    echo "expected the build to fail after replacing the hash" >&2
+    exit 1
+fi
+
+if [[ "$output" != *'error: hash mismatch in fixed-output derivation'* ]]; then
+    echo "build problem: $output" >&2 ; exit 1
+fi
+
+git restore flake.nix
+
+got=$( sed -ne 's,.*got: *\([^ ]*\),\1,p' <<< "$output" )
+
+if [[ "$outputHash" = "$got" ]]; then
+    echo "hash for $attr is the same" >&2
+else
+    echo "got new hash: $got" >&2
+    sed -i'' -e "s,$outputHash,$got," flake.nix
+fi
