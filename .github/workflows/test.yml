@@ -166,6 +166,7 @@ jobs:
         working-directory: ${{steps.download.outputs.download-path}}/artifact
 
   release:
+    name: Prepare release
     if: github.ref == 'refs/heads/main'
     needs:
       - run
@@ -198,3 +199,40 @@ jobs:
             --clobber --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  benchmark:
+    name: Benchmark
+    if: github.ref == 'refs/heads/main'
+    needs:
+      - run
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+      - name: ⚙ Install hyperfine
+        run: |-
+          sudo apt-get update
+          sudo apt-get install -y hyperfine
+      - run: |-
+          mv artifact/scalals-linux-x86_64 scalals-x86_64-linux
+          chmod +x scalals-x86_64-linux
+      - uses: bencherdev/bencher@main
+      - name: Track base branch benchmarks with Bencher
+        run: |
+          bencher run \
+          --project scalals \
+          --token '${{ secrets.BENCHER_API_TOKEN }}' \
+          --branch ${{ github.head_ref || github.ref_name }} \
+          --testbed ubuntu-latest \
+          --threshold-measure latency \
+          --threshold-test t_test \
+          --threshold-max-sample-size 64 \
+          --threshold-upper-boundary 0.99 \
+          --thresholds-reset \
+          --err \
+          --adapter shell_hyperfine \
+          --file ../results.json \
+          --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+          "hyperfine -w 2 --export-json ../results.json 'scalals-x86_64-linux --tree --color'"
