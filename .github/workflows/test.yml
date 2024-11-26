@@ -235,4 +235,4 @@ jobs:
           --adapter shell_hyperfine \
           --file ../results.json \
           --github-actions '${{ secrets.GITHUB_TOKEN }}' \
-          "hyperfine -w 2 --export-json ../results.json 'scalals-x86_64-linux --tree --color'"
+          "hyperfine -w 2 --export-json ../results.json './scalals-x86_64-linux --tree --color'"
