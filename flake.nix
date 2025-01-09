@@ -141,7 +141,7 @@
             clangpp
           ];
         in
-        rec {
+        {
           formatter = pkgs.nixfmt-rfc-style;
 
           packages = rec {
@@ -211,7 +211,7 @@
           };
 
           apps.default = flake-utils.lib.mkApp {
-            drv = packages.default;
+            drv = self.packages.${system}.default;
             exePath = "/bin/scalals";
           };
 
@@ -242,9 +242,8 @@
 
                 env.SBT_TPOLECAT_DEV = "1";
 
-                shellHook = ''
-                  ${checks.pre-commit-check.shellHook}
-                '';
+                inherit (self.checks.${system}.pre-commit-check) shellHook;
+
                 packages = [ pkgs.metals ];
                 nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
               };
@@ -259,9 +258,8 @@
                 # https://github.com/oracle/graal/issues/7502
                 env.NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION = "true";
 
-                shellHook = ''
-                  ${checks.pre-commit-check.shellHook}
-                '';
+                inherit (self.checks.${system}.pre-commit-check) shellHook;
+
                 nativeBuildInputs = [
                   pkgs.graalvm-ce
                   pkgs.sbt
@@ -290,9 +288,9 @@
             ));
 
           # compatibility for nix < 2.7.0
-          defaultApp = apps.default;
-          defaultPackage = packages.default;
-          devShell = devShells.default;
+          defaultApp = self.apps.${system}.default;
+          defaultPackage = self.packages.${system}.default;
+          devShell = self.devShells.${system}.default;
         }
       );
 }
