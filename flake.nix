@@ -251,13 +251,6 @@
               graalVM = pkgs.mkShell {
                 name = "scalals / graalvm";
 
-                # Workaround GraalVM issue where the builder does not have access to the
-                # environment variables since 21.0.0
-                # https://github.com/oracle/graal/pull/6095
-                # https://github.com/oracle/graal/pull/6095
-                # https://github.com/oracle/graal/issues/7502
-                env.NATIVE_IMAGE_DEPRECATED_BUILDER_SANITATION = "true";
-
                 inherit (self.checks.${system}.pre-commit-check) shellHook;
 
                 nativeBuildInputs = [
