@@ -132,6 +132,8 @@
             '';
           };
 
+          buildInputs = lib.optional (system == "x86_64-darwin") pkgs.apple-sdk_11;
+
           nativeBuildInputs = with pkgs; [
             git
             ninja
@@ -148,7 +150,7 @@
             inherit (pkgs) scalafmt;
 
             scalals = sbt.lib.mkSbtDerivation rec {
-              inherit pkgs nativeBuildInputs;
+              inherit pkgs buildInputs nativeBuildInputs;
 
               overrides = {
                 stdenv = stdenvNoCC;
@@ -243,6 +245,7 @@
                 env.SBT_TPOLECAT_DEV = "1";
 
                 inherit (self.checks.${system}.pre-commit-check) shellHook;
+                inherit buildInputs;
 
                 packages = [ pkgs.metals ];
                 nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
@@ -252,6 +255,7 @@
                 name = "scalals / graalvm";
 
                 inherit (self.checks.${system}.pre-commit-check) shellHook;
+                inherit buildInputs;
 
                 nativeBuildInputs = [
                   pkgs.graalvm-ce
