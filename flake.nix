@@ -185,14 +185,9 @@
                 XDG_CACHE_HOME = "xdg_cache"; # needed by zig cc for a writable directory
 
                 NIX_CFLAGS_COMPILE =
-                  if stdenvNoCC.isLinux && stdenvNoCC.isx86_64 then
+                  lib.optionalString (stdenvNoCC.isLinux && stdenvNoCC.isx86_64)
                     # zig uses -march=native by default
-                    "-march=sandybridge"
-                  else if stdenvNoCC.isDarwin then
-                    # need to set target explicitly, see https://github.com/ziglang/zig/issues/14651
-                    "-target ${stdenvNoCC.hostPlatform.qemuArch}-macos.11.0-none"
-                  else
-                    null;
+                    "-march=sandybridge";
               };
 
               buildPhase = ''
