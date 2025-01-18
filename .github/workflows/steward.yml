@@ -20,7 +20,10 @@ jobs:
       run: |
         outputHash=$( nix eval --raw '.#scalals.dependencies.outputHash' )
         sed -i'' -e "s,$outputHash,," flake.nix
-        ! output=$( nix build --no-link --print-build-logs '.#scalals.dependencies' 2>&1 )
+        if output=$( nix build --no-link --print-build-logs '.#scalals.dependencies' 2>&1 ); then
+           echo "command succeeded unexpectedly." >&2
+           exit 1
+        fi
         if [[ "$output" != *'error: hash mismatch in fixed-output derivation'* ]]; then
            echo "build problem: $output" >&2 ; exit 1
         fi
