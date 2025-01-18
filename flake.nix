@@ -216,6 +216,7 @@
             pre-commit-check = git-hooks.lib.${system}.run {
               src = ./.;
               hooks = {
+                actionlint.enable = true;
                 nix-fmt = {
                   enable = true;
                   name = "nix fmt";
