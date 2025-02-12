@@ -32,7 +32,7 @@ jobs:
         sed -i'' -e "s,$outputHash,$got," flake.nix
         git diff
     - name: Push changes
-      uses: devops-infra/action-commit-push@b7427f14518901401fd1c7095aecee2e54815390 # v0.9.1
+      uses: devops-infra/action-commit-push@b8c990ac36bac67f71133ad7ec3da1d7abf4d57e # v0.10.0
       with:
         amend: true
         force: true
