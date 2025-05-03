@@ -125,7 +125,7 @@ lazy val scalals =
             }
             "scalals" + target
           }
-          .withLinkingOptions("-fuse-ld=lld" :: nixCFlagsLink)
+          .withLinkingOptions(nixCFlagsLink)
           .withMultithreading(Some(false))
           .withTargetTriple(targetTriplet.value)
       },
