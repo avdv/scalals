@@ -216,9 +216,17 @@ object Ninja extends AutoPlugin {
 
   def addRules(config: Config, linkerResult: ReachabilityAnalysis.Result, outpath: Path, incdir: Path): String = {
     val configFlags = {
-      if (config.compilerConfig.multithreadingSupport)
-        Seq("-DSCALANATIVE_MULTITHREADING_ENABLED")
-      else Nil
+      val multithreadingEnabled =
+        if (config.compilerConfig.multithreadingSupport)
+          Seq("-DSCALANATIVE_MULTITHREADING_ENABLED")
+        else Nil
+      val usingCppExceptions =
+        if (config.usingCppExceptions)
+          Seq("-DSCALANATIVE_USING_CPP_EXCEPTIONS")
+        else Nil
+      val allowTargetOverrrides =
+        config.compilerConfig.targetTriple.map(_ => s"-Wno-override-module")
+      multithreadingEnabled ++ usingCppExceptions ++ allowTargetOverrrides
     }
     val cflags = opt(config) ++: flto(config) ++: ninja_target(config) ++: configFlags :+ "-fvisibility=hidden"
 
