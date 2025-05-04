@@ -253,7 +253,7 @@ object Ninja extends AutoPlugin {
         |program = $outpath
         |
         |rule cc
-        |  command = $$clang -std=gnu11 $$cflags $$auxflags -c $$in -o $$out
+        |  command = $$clang -std=gnu11 $$cflags $$auxflags -isystem $incdir -c $$in -o $$out
         |  description = compile object file (${config.gc.name} gc, $ltoName lto)
         |
         |rule ll
