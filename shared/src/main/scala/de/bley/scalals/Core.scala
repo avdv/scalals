@@ -137,8 +137,8 @@ trait Core:
 
   protected def orderingFor(config: Config) =
     val orderBy = config.sort match
-      case SortMode.size => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
-      case SortMode.time => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
+      case SortMode.size      => Ordering.by((f: generic.FileInfo) => (-f.size, f.name))
+      case SortMode.time      => Ordering.by((f: generic.FileInfo) => (-f.lastModifiedTime.toEpochMilli(), f.name))
       case SortMode.extension =>
         Ordering.by { (f: generic.FileInfo) =>
           val e = f.name.dropWhile(_ == '.')
