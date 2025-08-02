@@ -67,8 +67,8 @@ final case class IndicatorDecorator(style: IndicatorStyle) extends Decorator:
   override def decorate(subject: generic.FileInfo, builder: StringBuilder): Int =
 
     val indicator = style match
-      case IndicatorStyle.slash => if subject.isDirectory then "/" else ""
-      case IndicatorStyle.none  => ""
+      case IndicatorStyle.slash                                 => if subject.isDirectory then "/" else ""
+      case IndicatorStyle.none                                  => ""
       case IndicatorStyle.classify | IndicatorStyle.`file-type` =>
         if subject.isDirectory then "/"
         else if subject.isSymlink then "@"
