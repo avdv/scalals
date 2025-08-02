@@ -2,7 +2,7 @@
   description = "scalals";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nix-filter.url = "github:numtide/nix-filter";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -161,7 +161,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-TuP9XEpcC+KcgggG7niau3j09OSypP7hiEm+3Yg2M0Q=";
+              depsSha256 = "sha256-OJalR45/BxtV0e89Z/zzKXQ2ofa5bQ/1NH3IuJosTUs=";
 
               src = filter {
                 root = self;
@@ -233,65 +233,64 @@
             };
           };
 
-          devShells =
-            {
-              default = mkShell {
-                name = "scalals";
+          devShells = {
+            default = mkShell {
+              name = "scalals";
 
-                env.SBT_TPOLECAT_DEV = "1";
+              env.SBT_TPOLECAT_DEV = "1";
 
-                inherit (self.checks.${system}.pre-commit-check) shellHook;
-                inherit buildInputs;
+              inherit (self.checks.${system}.pre-commit-check) shellHook;
+              inherit buildInputs;
 
-                packages = [ pkgs.metals ];
-                nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+              packages = [ pkgs.metals ];
+              nativeBuildInputs = nativeBuildInputs ++ [ pkgs.sbt ];
+            };
+
+            graalVM = pkgs.mkShell {
+              name = "scalals / graalvm";
+
+              inherit (self.checks.${system}.pre-commit-check) shellHook;
+              inherit buildInputs;
+
+              nativeBuildInputs = [
+                pkgs.graalvm-ce
+                pkgs.sbt
+              ];
+            };
+          }
+          // (lib.optionalAttrs (system == "x86_64-linux") (
+            let
+              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
+              llvm-bin = llvmPackages_13.libcxxStdenv.mkDerivation {
+                name = "clang-llvm-bin";
+                dontUnpack = true;
+                dontConfigure = true;
+                dontBuild = true;
+                installPhase = ''
+                  mkdir $out
+                  ln -sT $NIX_CC/bin/$CC $out/clang
+                  ln -sT $NIX_CC/bin/$CXX $out/clang++
+                '';
               };
+            in
+            {
+              aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
+                name = "scalals-arm64";
 
-              graalVM = pkgs.mkShell {
-                name = "scalals / graalvm";
-
-                inherit (self.checks.${system}.pre-commit-check) shellHook;
-                inherit buildInputs;
+                # scala-native uses $LLVM_BIN to resolve clang and clang++
+                env.LLVM_BIN = llvm-bin;
+                env.NIX_CFLAGS_LINK = "-static";
 
                 nativeBuildInputs = [
-                  pkgs.graalvm-ce
+                  pkgs.lld_13
+                  pkgs.git
+                  pkgs.ninja
+                  pkgs.which
                   pkgs.sbt
                 ];
               };
             }
-            // (lib.optionalAttrs (system == "x86_64-linux") (
-              let
-                inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
-                llvm-bin = llvmPackages_13.libcxxStdenv.mkDerivation {
-                  name = "clang-llvm-bin";
-                  dontUnpack = true;
-                  dontConfigure = true;
-                  dontBuild = true;
-                  installPhase = ''
-                    mkdir $out
-                    ln -sT $NIX_CC/bin/$CC $out/clang
-                    ln -sT $NIX_CC/bin/$CXX $out/clang++
-                  '';
-                };
-              in
-              {
-                aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
-                  name = "scalals-arm64";
-
-                  # scala-native uses $LLVM_BIN to resolve clang and clang++
-                  env.LLVM_BIN = llvm-bin;
-                  env.NIX_CFLAGS_LINK = "-static";
-
-                  nativeBuildInputs = [
-                    pkgs.lld_13
-                    pkgs.git
-                    pkgs.ninja
-                    pkgs.which
-                    pkgs.sbt
-                  ];
-                };
-              }
-            ));
+          ));
 
           # compatibility for nix < 2.7.0
           defaultApp = self.apps.${system}.default;
