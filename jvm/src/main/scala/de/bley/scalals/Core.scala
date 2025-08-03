@@ -8,7 +8,6 @@ import java.text.Collator
 import scala.jdk.CollectionConverters.*
 import scala.util.chaining.*
 import scala.util.Try
-import scala.collection.mutable
 
 object Core extends generic.Core:
   private val collator = Collator.getInstance
