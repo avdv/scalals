@@ -109,10 +109,10 @@ object Core extends generic.Core:
   end permissionString
 
   @inline def timing[T](marker: String)(body: => T): T =
-    // val start = System.nanoTime
+    val start = System.nanoTime
     val r = body
-    // val end = System.nanoTime
-    // Console.err.println(marker + " " + (end - start).toString)
+    val end = System.nanoTime
+    Console.err.println(marker + " " + (end - start).toString)
     r
   end timing
 end Core

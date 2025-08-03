@@ -145,7 +145,7 @@ object GitDecorator extends Decorator:
         ".",
       ).start()
       out <- Try(Source.fromInputStream(gitStatus.getInputStream()))
-      gitInfo = mutable.HashMap.empty[String, mutable.HashSet[Char]].withDefault(m => mutable.HashSet.empty[Char])
+      gitInfo = mutable.HashMap.empty[String, mutable.HashSet[Char]].withDefault(_ => mutable.HashSet.empty[Char])
       sb = new StringBuilder
       iter = out.iter.buffered
     yield
