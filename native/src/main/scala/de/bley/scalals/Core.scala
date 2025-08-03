@@ -2,7 +2,6 @@ package de.bley.scalals
 
 import java.time.Instant
 
-import scala.collection.mutable
 import java.io.IOException
 
 import scala.scalanative.libc.errno
