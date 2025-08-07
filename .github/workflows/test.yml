@@ -160,12 +160,9 @@ jobs:
       - run: |
           ls -lh
           chmod +x scalals-*
-        working-directory: ${{steps.download.outputs.download-path}}/artifact
       - run: ./scalals-${{ runner.os == 'Linux' && 'linux' || 'darwin' }}-x86_64
-        working-directory: ${{steps.download.outputs.download-path}}/artifact
       - run: ./scalals-${{ runner.os == 'Linux' && 'linux' || 'darwin' }}-aarch64
         if: ${{ runner.arch == 'ARM64' }}
-        working-directory: ${{steps.download.outputs.download-path}}/artifact
 
   release:
     name: Prepare release
@@ -180,11 +177,11 @@ jobs:
       - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
       - name: Rename binaries
         run: |
-          mv artifact/scalals-linux-aarch64 scalals-arm64-linux
-          mv artifact/scalals-linux-riscv64 scalals-riscv64-linux
-          mv artifact/scalals-linux-x86_64 scalals-x86_64-linux
-          mv artifact/scalals-darwin-aarch64 scalals-arm64-darwin
-          mv artifact/scalals-darwin-x86_64 scalals-x86_64-darwin
+          mv scalals-linux-aarch64 scalals-arm64-linux
+          mv scalals-linux-riscv64 scalals-riscv64-linux
+          mv scalals-linux-x86_64 scalals-x86_64-linux
+          mv scalals-darwin-aarch64 scalals-arm64-darwin
+          mv scalals-darwin-x86_64 scalals-x86_64-darwin
       # Drafts your next Release notes as Pull Requests are merged into "main"
       - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6
         id: release
@@ -218,7 +215,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y hyperfine
       - run: |-
-          mv artifact/scalals-linux-x86_64 scalals-x86_64-linux
+          mv scalals-linux-x86_64 scalals-x86_64-linux
           chmod +x scalals-x86_64-linux
       - uses: bencherdev/bencher@main
       - name: Track base branch benchmarks with Bencher
