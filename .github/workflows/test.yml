@@ -14,9 +14,9 @@ jobs:
         os: [ubuntu-latest, macos-13, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
     - name: Cache SBT
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
           ~/.cache/coursier
@@ -26,7 +26,7 @@ jobs:
           ~/.sbt/launchers
         key: ${{ runner.os }}-sbt-${{ hashFiles('build.sbt', 'project/plugins.sbt') }}
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@fc6e360bedc9ee72d75e701397f0bb30dce77568 # v31
+      uses: cachix/install-nix-action@fc6e360bedc9ee72d75e701397f0bb30dce77568 # v31.5.2
       with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -48,12 +48,12 @@ jobs:
         os: [ubuntu-latest, macos-13, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       with:
         fetch-depth: 2
         persist-credentials: false
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@fc6e360bedc9ee72d75e701397f0bb30dce77568 # v31
+      uses: cachix/install-nix-action@fc6e360bedc9ee72d75e701397f0bb30dce77568 # v31.5.2
     - name: "Install Cachix ❄"
       uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
       with:
@@ -88,9 +88,9 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
     - name: Cache SBT
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
           ~/.cache/coursier
@@ -100,7 +100,7 @@ jobs:
           ~/.sbt/launchers
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '.travis.yml') }}
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@fc6e360bedc9ee72d75e701397f0bb30dce77568 # v31
+      uses: cachix/install-nix-action@fc6e360bedc9ee72d75e701397f0bb30dce77568 # v31.5.2
       with:
           #install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
           #install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
@@ -121,7 +121,7 @@ jobs:
           "( echo 'env<<EOF' ; zig env ; echo EOF ) >> '$GITHUB_OUTPUT'"
       id: nix-zig
     - name: Cache zig ${{ fromJson(steps.nix-zig.outputs.env).version }}
-      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
       with:
         path: |
           ${{ fromJson(steps.nix-zig.outputs.env).global_cache_dir }}
@@ -139,7 +139,7 @@ jobs:
       run: nix shell --inputs-from . 'nixpkgs#qemu' --command qemu-aarch64 scalals-linux-aarch64
     - name: qemu-risc64 scalals
       run: nix shell --inputs-from . 'nixpkgs#qemu' --command qemu-riscv64 scalals-linux-riscv64
-    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+    - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         path: scalals-*
 
@@ -155,7 +155,7 @@ jobs:
     runs-on:
       ${{ matrix.os }}
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         id: download
       - run: |
           ls -lh
@@ -174,7 +174,7 @@ jobs:
       # write permission is required to create a github release
       contents: write
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       - name: Rename binaries
         run: |
           mv scalals-linux-aarch64 scalals-arm64-linux
@@ -183,7 +183,7 @@ jobs:
           mv scalals-darwin-aarch64 scalals-arm64-darwin
           mv scalals-darwin-x86_64 scalals-x86_64-darwin
       # Drafts your next Release notes as Pull Requests are merged into "main"
-      - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6
+      - uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -208,8 +208,8 @@ jobs:
     permissions:
       checks: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
       - name: ⚙ Install hyperfine
         run: |-
           sudo apt-get update
@@ -217,7 +217,7 @@ jobs:
       - run: |-
           mv scalals-linux-x86_64 scalals-x86_64-linux
           chmod +x scalals-x86_64-linux
-      - uses: bencherdev/bencher@main
+      - uses: bencherdev/bencher@f89d454e74a32a81b2eab29fe0afdb2316617342 # v0.5.3
       - name: Track base branch benchmarks with Bencher
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
