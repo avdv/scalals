@@ -216,7 +216,20 @@
             pre-commit-check = git-hooks.lib.${system}.run {
               src = ./.;
               hooks = {
-                actionlint.enable = true;
+                actionlint = {
+                  enable = true;
+                  # override version of actionlint which accepts macos-15-intel runners
+                  package = pkgs.actionlint.overrideAttrs {
+                    version = "1.7.8";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "rhysd";
+                      repo = "actionlint";
+                      tag = "v1.7.8";
+                      hash = "sha256-0bUWsEBfIZdl+wPt4nysZ5SbSz8AaRg1WutqMxCqdfk=";
+                    };
+                    vendorHash = "sha256-JWdVcX1wAituPb0N4Sg6tM9gsygEPFUblBPH2YcpBvE=";
+                  };
+                };
                 nix-fmt = {
                   enable = true;
                   name = "nix fmt";
