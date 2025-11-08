@@ -11,7 +11,7 @@ declare -ar TARGETS=(
 )
 
 echo '::group::configure'
-sbt -client 'project scalalsNative'
+JAVA_OPTS="-Xms3G -Xmx10G -XX:+UseG1GC" sbt -client 'project scalalsNative'
 echo '::endgroup::'
 
 # Mode: {debug, release-fast, release-full, release-size}
