@@ -98,7 +98,7 @@ jobs:
           ~/.ivy2/local
           ~/.sbt/boot
           ~/.sbt/launchers
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '.travis.yml') }}
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: "Install Nix ❄"
       uses: cachix/install-nix-action@456688f15bc354bef6d396e4a35f4f89d40bf2b7 # v31.8.2
       with:
