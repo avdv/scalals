@@ -126,8 +126,6 @@ jobs:
         path: |
           ${{ fromJson(steps.nix-zig.outputs.env).global_cache_dir }}
         key: zig-${{ fromJson(steps.nix-zig.outputs.env).zig_exe }}
-        restore-keys: |
-          zig-
     - run: git branch PR-${{ github.event.number }}
     - name: Test
       run: nix develop --ignore-environment --keep HOME --command sbt tpolecatCiMode 'scalalsNative / test'
