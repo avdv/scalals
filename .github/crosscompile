@@ -23,6 +23,10 @@ for target in "${TARGETS[@]}"; do
     case "$target" in
         # zig ld does not yet support LTO for mach-O see https://github.com/ziglang/zig/issues/8680
         *darwin*) LTO=none ;;
+        # FIXME: with zig 0.14.1 using LTO leads to a runtime error:
+        #   Exception in thread "main"
+        #   Exception: java.lang.NegativeArraySizeException thrown from the UncaughtExceptionHandler in thread "main" 
+        *risc*)   LTO=none ;;
         *)        LTO=full ;;
     esac
 
