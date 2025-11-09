@@ -46,7 +46,7 @@
         let
           filter = nix-filter.lib;
 
-          jreHeadlessOverlay = _: prev: { jre = prev.openjdk11_headless; };
+          jreHeadlessOverlay = _: prev: { jre = prev.openjdk21_headless; };
 
           scalafmtOverlay = final: prev: {
             scalafmt = prev.scalafmt.overrideAttrs (
