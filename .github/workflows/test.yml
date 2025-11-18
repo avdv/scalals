@@ -215,7 +215,7 @@ jobs:
       - run: |-
           mv scalals-linux-x86_64 scalals-x86_64-linux
           chmod +x scalals-x86_64-linux
-      - uses: bencherdev/bencher@32414ab2b6e90713b1d85e6507ff1b802028f667 # v0.5.7
+      - uses: bencherdev/bencher@61e6a2c2e0b4c8f61c87bef598ba9dbafa51c689 # v0.5.8
       - name: Track base branch benchmarks with Bencher
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
