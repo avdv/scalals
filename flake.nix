@@ -273,8 +273,8 @@
           }
           // (lib.optionalAttrs (system == "x86_64-linux") (
             let
-              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_13 mkShell;
-              llvm-bin = llvmPackages_13.libcxxStdenv.mkDerivation {
+              inherit (pkgs.pkgsCross.aarch64-multiplatform-musl) llvmPackages_18 mkShell;
+              llvm-bin = llvmPackages_18.libcxxStdenv.mkDerivation {
                 name = "clang-llvm-bin";
                 dontUnpack = true;
                 dontConfigure = true;
@@ -287,7 +287,7 @@
               };
             in
             {
-              aarch64-cross = mkShell.override { stdenv = llvmPackages_13.libcxxStdenv; } {
+              aarch64-cross = mkShell.override { stdenv = llvmPackages_18.libcxxStdenv; } {
                 name = "scalals-arm64";
 
                 # scala-native uses $LLVM_BIN to resolve clang and clang++
@@ -295,7 +295,7 @@
                 env.NIX_CFLAGS_LINK = "-static";
 
                 nativeBuildInputs = [
-                  pkgs.lld_13
+                  pkgs.lld_18
                   pkgs.git
                   pkgs.ninja
                   pkgs.which
