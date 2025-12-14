@@ -2,7 +2,7 @@
   description = "scalals";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nix-filter.url = "github:numtide/nix-filter";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -132,7 +132,7 @@
             '';
           };
 
-          buildInputs = lib.optional (system == "x86_64-darwin") pkgs.apple-sdk_11;
+          buildInputs = lib.optional (system == "x86_64-darwin") pkgs.apple-sdk_14;
 
           nativeBuildInputs = with pkgs; [
             git
