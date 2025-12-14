@@ -266,7 +266,7 @@
               inherit buildInputs;
 
               nativeBuildInputs = [
-                pkgs.graalvm-ce
+                pkgs.graalvmPackages.graalvm-ce
                 pkgs.sbt
               ];
             };
