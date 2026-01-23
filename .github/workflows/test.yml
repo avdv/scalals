@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Cache SBT
-      uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
       with:
         path: |
           ~/.cache/coursier
@@ -93,7 +93,7 @@ jobs:
         sudo rm -rf /usr/share/dotnet /opt/ghc "$ANDROID_HOME" /usr/local/.ghcup /usr/local/share/powershell /opt/az /opt/microsoft &
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Cache SBT
-      uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
       with:
         path: |
           ~/.cache/coursier
@@ -124,7 +124,7 @@ jobs:
           "( echo 'env<<EOF' ; zig env ; echo EOF ) >> '$GITHUB_OUTPUT'"
       id: nix-zig
     - name: Cache zig ${{ fromJson(steps.nix-zig.outputs.env).version }}
-      uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+      uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
       with:
         path: |
           ${{ fromJson(steps.nix-zig.outputs.env).global_cache_dir }}
