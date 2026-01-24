@@ -90,7 +90,7 @@
 
           inherit (pkgs) lib stdenvNoCC;
 
-          zig = pkgs.zig_0_14;
+          zig = pkgs.zig_0_15;
 
           mkShell = pkgs.mkShell.override { stdenv = stdenvNoCC; };
 
