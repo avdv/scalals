@@ -109,7 +109,11 @@ lazy val scalals =
     // configure Scala-Native settings
     .nativeSettings(
       targetTriplet := None,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
+      // scala-java-time 2.6.0 depends on portable-scala 0.5_2.13
+      // which leads to an error about conflicting cross versions
+      libraryDependencies += ("io.github.cquiroz" %%% "scala-java-time" % "2.6.0").excludeAll(
+        ExclusionRule(organization = "org.scala-native")
+      ),
       nativeConfig := {
         val config = nativeConfig.value
         val nixCFlagsCompile = for {
