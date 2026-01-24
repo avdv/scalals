@@ -121,7 +121,14 @@ jobs:
     - name: Determine zig env
       run: |
         nix develop --ignore-environment --keep HOME --command bash -c \
-          "( echo 'env<<EOF' ; zig env ; echo EOF ) >> '$GITHUB_OUTPUT'"
+          "( echo 'env<<EOF'
+             zig env \
+               | sed -ne '1i {' \
+                     -e 's/[.]zig_exe *=/\"zig_exe\": /p' \
+                     -e 's/[.]global_cache_dir *=/\"global_cache_dir\": /p' \
+                     -e 's/[.]version *=/\"version\": /p' \
+                     -e '\$i \"\": \"\" }'
+             echo EOF ) >> '$GITHUB_OUTPUT'"
       id: nix-zig
     - name: Cache zig ${{ fromJson(steps.nix-zig.outputs.env).version }}
       uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
