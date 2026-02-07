@@ -15,12 +15,6 @@ ThisBuild / scalaVersion := "3.8.1"
 
 val sharedSettings = Seq(
   publish / skip := true,
-  tpolecatCiModeOptions ~= { options =>
-    options.map { option =>
-      if (option.option == "-Xfatal-warnings") ScalacOption("-Werror", option.args, option.isSupported)
-      else option
-    }
-  },
   tpolecatDevModeOptions ++= Set(
     ScalacOption("-rewrite", _ => true),
     // TODO use ScalacOptions.newSyntax instead
