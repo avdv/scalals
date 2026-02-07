@@ -161,7 +161,7 @@
               # read the first non-empty string from the VERSION file
               version = builtins.head (builtins.match "[ \n]*([^ \n]+).*" (builtins.readFile ./VERSION));
 
-              depsSha256 = "sha256-umPptEiM8RoxlWeSV7h6F9Yc+QxFr/7DaS/9YNQsJHU=";
+              depsSha256 = "sha256-RDjIh0m0CyKYK0XyEvOAPZcxejMZNL1Pjop+y54g6eM=";
 
               src = filter {
                 root = self;
