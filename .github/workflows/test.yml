@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        fetch-depth: 2
+        fetch-depth: 3
         persist-credentials: false
     - name: "Install Nix ❄"
       uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
@@ -61,11 +61,18 @@ jobs:
         extraPullNames: pre-commit-hooks
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         pushFilter: '[-](source|nixpkgs-src)$'
-    - name: Update scalals.dependencies hash
+    - name: Update dependency hashes
       id: hash-update
       if: github.event_name == 'pull_request' && github.repository == 'avdv/scalals'
       run: |-
-        nix develop --command .github/update-hash scalals.dependencies
+        if [[ "$( git diff-tree --name-only --no-commit-id '${{ github.event.pull_request.head.sha }}' )" == *.scalafmt.conf* ]]; then
+          hash=scalafmt
+        else
+          hash=scalals.dependencies
+        fi
+        echo "Update $hash"
+        .github/update-hash "$hash"
+        echo hash="$hash" >> "$GITHUB_OUTPUT"
         echo exit="$( git diff --quiet flake.nix ; echo $? )" >> "$GITHUB_OUTPUT"
     - name: Set author identity and push url
       run: |-
@@ -78,7 +85,7 @@ jobs:
         GH_HEAD_REF: ${{ github.head_ref }}
       run: |-
         git switch -c pr-branch ${{ github.event.pull_request.head.sha }}
-        git commit -m 'Update scalals.dependencies hash' flake.nix
+        git commit -m 'Update ${{ steps.hash-update.outputs.hash }} hash' flake.nix
         git push origin "HEAD:$GH_HEAD_REF"
         exit 1
     - run: nix flake check
