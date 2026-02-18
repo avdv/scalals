@@ -26,7 +26,7 @@ jobs:
           ~/.sbt/launchers
         key: ${{ runner.os }}-sbt-${{ hashFiles('build.sbt', 'project/plugins.sbt') }}
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
+      uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
       with:
           extra_nix_config: |
             experimental-features = nix-command flakes
@@ -53,7 +53,7 @@ jobs:
         fetch-depth: 3
         persist-credentials: false
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
+      uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
     - name: "Install Cachix ❄"
       uses: cachix/cachix-action@3ba601ff5bbb07c7220846facfa2cd81eeee15a1 # v16
       with:
@@ -110,7 +110,7 @@ jobs:
           ~/.sbt/launchers
         key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
     - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
+      uses: cachix/install-nix-action@2126ae7fc54c9df00dd18f7f18754393182c73cd # v31.9.1
       with:
           #install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
           #install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
