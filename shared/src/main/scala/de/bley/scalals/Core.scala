@@ -54,7 +54,7 @@ trait Core:
       val dirStack = mutable.Queue(dirPaths*)
 
       while dirStack.nonEmpty do
-        val dir = dirStack.dequeue
+        val dir = dirStack.dequeue()
 
         if showPrefix then println(s"\uf115  $dir:")
 
