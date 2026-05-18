@@ -37,7 +37,7 @@ typedef unsigned long scalanative_fsfilcnt_t;
 #include <sys/stat.h>
 
 // We don't use the "standard" types such as `dev_t` for instance
-// because these have different sizes on eg. Linux and OSX. We use the
+// because these have different sizes on e.g. Linux and OSX. We use the
 // smallest type that can hold all the possible values for the different
 // systems.
 struct scalanative_stat {
@@ -54,9 +54,9 @@ struct scalanative_stat {
                                       length in bytes. For a typed memory object,
                                       the length in bytes. For other file types,
                                       the use of this field is unspecified. */
-    scalanative_time_t _st_atime; /** Time of last access. */
-    scalanative_time_t _st_mtime; /** Time of last data modification. */
-    scalanative_time_t _st_ctime; /** Time of last status change. */
+    scalanative_timespec st_atim; /** Time of last access. */
+    scalanative_timespec st_mtim; /** Time of last data modification. */
+    scalanative_timespec st_ctim; /** Time of last status change. */
     scalanative_blkcnt_t st_blocks;   /** Number of blocks allocated for this
                                           object. */
     scalanative_blksize_t st_blksize; /** A file system-specific preferred I/O
@@ -75,11 +75,31 @@ void scalanative_stat_init(struct stat *stat,
     my_stat->st_uid = stat->st_uid;
     my_stat->st_gid = stat->st_gid;
     my_stat->st_size = stat->st_size;
-    my_stat->_st_atime = stat->st_atime;
-    my_stat->_st_mtime = stat->st_mtime;
-    my_stat->_st_ctime = stat->st_ctime;
+// see https://linux.die.net/man/2/stat
+#if defined(_BSD_SOURCE) || defined(_SVID_SOURCE) ||                           \
+    defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200809L ||                  \
+    defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 700
+    my_stat->st_atim = stat->st_atim;
+    my_stat->st_mtim = stat->st_mtim;
+    my_stat->st_ctim = stat->st_ctim;
+    my_stat->st_blksize = stat->st_blksize;
+    my_stat->st_blocks = stat->st_blocks;
+#elif defined(__MINGW32__)
+    my_stat->st_atim.tv_sec = stat->st_atime;
+    my_stat->st_mtim.tv_sec = stat->st_mtime;
+    my_stat->st_ctim.tv_sec = stat->st_ctime;
+    my_stat->st_atim.tv_nsec = 0;
+    my_stat->st_mtim.tv_nsec = 0;
+    my_stat->st_ctim.tv_nsec = 0;
     my_stat->st_blksize = 0;
     my_stat->st_blocks = 0;
+#else // APPLE
+    my_stat->st_atim = stat->st_atimespec;
+    my_stat->st_mtim = stat->st_mtimespec;
+    my_stat->st_ctim = stat->st_ctimespec;
+    my_stat->st_blksize = stat->st_blksize;
+    my_stat->st_blocks = stat->st_blocks;
+#endif
     my_stat->st_nlink = stat->st_nlink;
     my_stat->st_mode = stat->st_mode;
 }
