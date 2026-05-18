@@ -16,16 +16,19 @@ int scalanative_path_max() { return PATH_MAX; }
 
 // types used in pwd.c and sys/stat.c
 
-typedef unsigned long scalanative_dev_t;
+// FIXME use declarations from scala-native once
+//       https://github.com/scala-native/scala-native/issues/4914 is fixed
+typedef unsigned long long scalanative_dev_t;
 typedef unsigned int scalanative_mode_t;
 typedef unsigned long long scalanative_ino_t;
 typedef unsigned int scalanative_uid_t;
 typedef unsigned int scalanative_gid_t;
 typedef long long scalanative_off_t;
 typedef long int scalanative_time_t;
+typedef struct timespec scalanative_timespec;
 typedef long long scalanative_blkcnt_t;
-typedef long scalanative_blksize_t;
-typedef unsigned long scalanative_nlink_t;
+typedef long long scalanative_blksize_t;
+typedef unsigned long long scalanative_nlink_t;
 
 typedef unsigned long scalanative_fsblkcnt_t;
 typedef unsigned long scalanative_fsfilcnt_t;
