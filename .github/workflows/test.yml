@@ -232,7 +232,7 @@ jobs:
       - run: |-
           mv scalals-linux-x86_64 scalals-x86_64-linux
           chmod +x scalals-x86_64-linux
-      - uses: bencherdev/bencher@99117a626dc634b8ad817f38abcf4876b3b0668b # v0.6.5
+      - uses: bencherdev/bencher@50fb1e138651a46d2fb704fab1adab38c181552e # v0.6.6
       - name: Track base branch benchmarks with Bencher
         env:
           BRANCH: ${{ github.head_ref || github.ref_name }}
