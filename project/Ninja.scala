@@ -300,11 +300,24 @@ object Ninja extends AutoPlugin {
       writer.write(s"build $objPath: $rule $inpath\n")
 
       if (config.compileOptions.nonEmpty) {
-        writer.write(s"  auxflags = ${config.compileOptions.mkString(" ")}\n")
+        val filteredOptions = filterCompileOptions(config)
+        writer.write(s"  auxflags = ${filteredOptions.mkString(" ")}\n")
       }
       writer.write('\n')
 
       objPath
+    }
+  }
+
+  private def isRiscv64(config: Config): Boolean = {
+    config.compilerConfig.targetTriple.exists(_.contains("riscv64"))
+  }
+
+  private def filterCompileOptions(config: Config): Seq[String] = {
+    if (isRiscv64(config)) {
+      config.compileOptions.filterNot(_ == "-D__SCALANATIVE_DELIMCC")
+    } else {
+      config.compileOptions
     }
   }
 
