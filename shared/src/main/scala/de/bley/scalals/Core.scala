@@ -319,7 +319,7 @@ trait Core:
         override def decorate(file: FileInfo, builder: StringBuilder): Int =
           val owner =
             try file.owner
-            catch case e: IOException => "-"
+            catch case _: IOException => "-"
 
           builder.append(owner)
           owner.length()
@@ -331,7 +331,7 @@ trait Core:
             // val group = file.group
             // principalCache.getOrElseUpdate(group, group.getName)
             file.group
-          catch case e: IOException => "-"
+          catch case _: IOException => "-"
         builder.append(group)
         group.length()
 
