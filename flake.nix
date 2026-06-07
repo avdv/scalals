@@ -2,7 +2,7 @@
   description = "scalals";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nix-filter.url = "github:numtide/nix-filter";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -144,7 +144,7 @@
           ];
         in
         {
-          formatter = pkgs.nixfmt-rfc-style;
+          formatter = pkgs.nixfmt;
 
           packages = rec {
             inherit (pkgs) scalafmt;
@@ -233,7 +233,7 @@
                 nix-fmt = {
                   enable = true;
                   name = "nix fmt";
-                  entry = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+                  entry = "${pkgs.nixfmt}/bin/nixfmt";
                   types = [ "nix" ];
                 };
                 scalafmt = {
