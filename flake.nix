@@ -55,7 +55,7 @@
                 version = builtins.head (
                   builtins.match ''[ \n]*version *= *"([^ \n]+)".*'' (builtins.readFile ./.scalafmt.conf)
                 );
-                outputHash = "sha256-EgkXDCbgn7OmH1e/us6lyNiei/qZMzFn/1Qh4LiraBo=";
+                outputHash = "sha256-B76+wI9ekioaaBzAFqDfUw6xPvtFiTjrCo6q52mHuDM=";
               in
               {
                 inherit version;
