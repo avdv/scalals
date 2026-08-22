@@ -1,13 +1,13 @@
 import scala.util.matching.Regex
 import Regex.Groups
-import scala.sys.process._
+import scala.sys.process.*
 import java.nio.file.{ Files, Paths }
 import java.io.File
 import scala.scalanative.build.NativeConfig
 import org.typelevel.scalacoptions.{ ScalacOption, ScalacOptions }
 import org.typelevel.scalacoptions.ScalaVersion
 import org.typelevel.scalacoptions.ScalaVersion.V3_0_0
-import scala.Ordering.Implicits._
+import scala.Ordering.Implicits.*
 import scala.jdk.CollectionConverters.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
@@ -25,7 +25,7 @@ val sharedSettings = Seq(
   ),
 )
 
-def generateConstants(base: File): File = {
+def generateConstants(base: File): File =
   base.mkdirs()
   val outputFile = base / "constants.scala"
   val cc = sys.env.getOrElse("CC", "clang")
@@ -33,21 +33,20 @@ def generateConstants(base: File): File = {
   val definition = "_(S_[^ ]+) = ((?:0[xX])?[0-9]+)".r
   val shift = "[(] *((?:0[xX])?[0-9]+) *>> *((?:0[xX])?[0-9]+) *[)]".r
 
-  def evalShifts(s: String): String = {
+  def evalShifts(s: String): String =
     val replaced = shift.replaceAllIn(
       s,
-      _ match {
-        case Groups(CNumber(lhs), CNumber(rhs)) => (lhs >> rhs).toString
-      },
+      _ match
+        case Groups(CNumber(lhs), CNumber(rhs)) => (lhs >> rhs).toString,
     )
-    if (replaced == s) s
+    if replaced == s then s
     else evalShifts(replaced)
-  }
+  end evalShifts
 
-  val constants = for {
+  val constants = for
     line <- output.getLines()
     case Groups(name, CNumber(value)) <- definition.findFirstMatchIn(evalShifts(line))
-  } yield f"val $name%s: Int = $value%#x"
+  yield f"val $name%s: Int = $value%#x"
 
   io.IO.write(
     outputFile,
@@ -59,7 +58,7 @@ def generateConstants(base: File): File = {
        |""".stripMargin,
   )
   outputFile
-}
+end generateConstants
 
 lazy val targetTriplet = settingKey[Option[String]]("describes target platform for native compilation")
 
@@ -89,10 +88,9 @@ lazy val scalals =
       Compile / packageSrc / mappings := {
         val conv = fileConverter.value
         (Compile / packageSrc / mappings).value.map { case mapping @ (from, to) =>
-          if (from.name == "Core.scala" && conv.toPath(from).iterator.asScala.contains(Paths.get("shared")))
+          if from.name == "Core.scala" && conv.toPath(from).iterator.asScala.contains(Paths.get("shared")) then
             from -> to.replace("Core.scala", "CoreShared.scala")
-          else
-            mapping
+          else mapping
         }
       },
       graalVMNativeImageOptions ++= Seq(
@@ -108,15 +106,15 @@ lazy val scalals =
       libraryDependencies += "io.github.cquiroz" %% "scala-java-time" % "2.7.0",
       nativeConfig := {
         val config = nativeConfig.value
-        val nixCFlagsCompile = for {
+        val nixCFlagsCompile = for
           flags <- sys.env.get("NIX_CFLAGS_COMPILE").toList
           flag <- flags.split(" +") if flag.nonEmpty
-        } yield flag
+        yield flag
 
-        val nixCFlagsLink = for {
+        val nixCFlagsLink = for
           flags <- sys.env.get("NIX_CFLAGS_LINK").toList
           flag <- flags.split(" +") if flag.nonEmpty
-        } yield flag
+        yield flag
 
         config
           .withCompileOptions("-Wall" :: nixCFlagsCompile ++ config.compileOptions)

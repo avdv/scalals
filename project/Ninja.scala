@@ -11,17 +11,17 @@
 package scala.scalanative
 package build
 
-import scala.scalanative.build._
-import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport._
-import scala.scalanative.sbtplugin.Utilities._
+import scala.scalanative.build.*
+import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport.*
+import scala.scalanative.sbtplugin.Utilities.*
 import scala.scalanative.linker.ReachabilityAnalysis
 
 import sbt.*
-import Keys._
+import Keys.*
 import java.nio.file.{ Files, Path, Paths }
 import scala.scalanative.sbtplugin.ScalaNativePlugin
-import scala.sys.process._
-import scala.concurrent._
+import scala.sys.process.*
+import scala.concurrent.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.*
@@ -30,25 +30,23 @@ import java.io.Writer
 import java.nio.charset.StandardCharsets.UTF_8
 
 /** Internal utilities to interact with Ninja. */
-object Ninja extends AutoPlugin {
+object Ninja extends AutoPlugin:
   implicit private val sharedScope: scala.scalanative.util.Scope = scala.scalanative.util.Scope.unsafe()
 
   override def requires = ScalaNativePlugin
 
-  implicit class RichPath(val path: Path) extends AnyVal {
+  implicit class RichPath(val path: Path) extends AnyVal:
     def abs: String = path.toAbsolutePath.toString
-  }
 
   override def trigger = allRequirements
 
-  object autoImport {
+  object autoImport:
     val ninja = taskKey[Path]("build ninja file")
     val runNinja = taskKey[Unit]("run ninja")
     val ninjaCompileFile = settingKey[Path]("file with ninja build rules")
     val ninjaCompile = taskKey[Unit]("generate ninja compile file")
-  }
 
-  import autoImport._
+  import autoImport.*
 
   override lazy val projectSettings = Seq(
     ninja := Def.uncached(ninjaTask.value),
@@ -108,23 +106,27 @@ object Ninja extends AutoPlugin {
       initialConfig: Config,
       analysis: ReachabilityAnalysis.Result,
       destPath: Path,
-  ): Config = {
+  ): Config =
     configureNativeLibraryMethod.invoke(nativeLibModule, initialConfig, analysis, destPath).asInstanceOf[Config]
-  }
 
-  private val configureNativeLibraryMethod = {
-    nativeLibClass.getDeclaredMethod("configureNativeLibrary", classOf[Config], classOf[ReachabilityAnalysis.Result], classOf[Path])
-  }
   //   val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("configureNativeLibrary")).asMethod
   //   im.reflectMethod(nlm)
   // }
+  private val configureNativeLibraryMethod =
+    nativeLibClass
+      .getDeclaredMethod(
+        "configureNativeLibrary",
+        classOf[Config],
+        classOf[ReachabilityAnalysis.Result],
+        classOf[Path],
+      )
 
   lazy val ninjaCompileTask =
     Def.uncachedTask {
       val outfile = ninjaCompileFile.value
       val logger = streams.value.log.toLogger
 
-      val config = {
+      val config =
         val mainClass = (Compile / selectMainClass).value
         //val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
         val baseDir = crossTarget.value
@@ -135,7 +137,7 @@ object Ninja extends AutoPlugin {
           //.withClassPath(classpath)
           .withCompilerConfig(nativeConfig.value)
           .withBaseDir(baseDir.toPath())
-      }
+      end config
 
       val writer = Files.newBufferedWriter(outfile, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)
       logger.info(s"generating $outfile")
@@ -146,18 +148,18 @@ object Ninja extends AutoPlugin {
       // create optimized code and generate ll
       val entries = ScalaNative.entries(fconfig)
 
-      val result = for {
+      val result = for
         linked <- ScalaNative.link(fconfig, entries)
         _ = ScalaNative.logLinked(fconfig, linked, "ninja")
         optimized <- ScalaNative.optimize(fconfig, linked)
         codegen <- ScalaNative.codegen(fconfig, optimized)
         generated <- Future.sequence(codegen)
-      } yield {
+      yield
         // find native libs
         val nativelibs = NativeLib.findNativeLibs(fconfig)
 
         // compile all libs
-        val objectPaths = {
+        val objectPaths =
           val libObjectPaths = nativelibs
             .map { unpackNativeCode }
             .map { destPath =>
@@ -171,20 +173,19 @@ object Ninja extends AutoPlugin {
           val llObjectPaths = addBuildStatements(writer, fconfig, generated)
 
           libObjectPaths ++ llObjectPaths
-        }
+        end objectPaths
 
         writer.write(addExe(objectPaths))
         writer.write(addDefaultTarget("$program"))
         writer.close()
-      }
       Await.result(result, Duration.Inf)
     }
 
-  lazy val ninjaTask : Def.Initialize[Task[Path]] =
+  lazy val ninjaTask: Def.Initialize[Task[Path]] =
     Def.uncachedTask {
       val logger = streams.value.log.toLogger
       val baseDir = crossTarget.value
-      val config = {
+      val config =
         val mainClass = (Compile / selectMainClass).value
         //val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
 
@@ -194,7 +195,7 @@ object Ninja extends AutoPlugin {
           .withMainClass(mainClass)
           //.withClassPath(classpath)
           .withCompilerConfig(nativeConfig.value)
-      }
+      end config
       val outpath = config.artifactPath
       val ninjaBuild = (target.value / "build.ninja").toPath
 
@@ -222,33 +223,30 @@ object Ninja extends AutoPlugin {
       Await.result(linkResult, Duration.Inf)
     }
 
-  def addExe(objectsPaths: Seq[Path]): String = {
-    val paths = for {
-      p <- objectsPaths
-    } yield p.abs
+  def addExe(objectsPaths: Seq[Path]): String =
+    val paths =
+      for p <- objectsPaths
+      yield p.abs
 
     s"build $$program: exe ${paths.mkString(" ")}\n\n"
-  }
 
   def addDefaultTarget(name: String): String = s"default $name\n\n"
 
-  def addRules(config: Config, linkerResult: ReachabilityAnalysis.Result, outpath: Path, incdir: Path): String = {
-    val configFlags = {
+  def addRules(config: Config, linkerResult: ReachabilityAnalysis.Result, outpath: Path, incdir: Path): String =
+    val configFlags =
       val multithreadingEnabled =
-        if (config.compilerConfig.multithreadingSupport)
-          Seq("-DSCALANATIVE_MULTITHREADING_ENABLED")
+        if config.compilerConfig.multithreadingSupport then Seq("-DSCALANATIVE_MULTITHREADING_ENABLED")
         else Nil
       val usingCppExceptions =
-        if (config.usingCppExceptions)
-          Seq("-DSCALANATIVE_USING_CPP_EXCEPTIONS")
+        if config.usingCppExceptions then Seq("-DSCALANATIVE_USING_CPP_EXCEPTIONS")
         else Nil
       val allowTargetOverrrides =
         config.compilerConfig.targetTriple.map(_ => s"-Wno-override-module")
       multithreadingEnabled ++ usingCppExceptions ++ allowTargetOverrrides
-    }
+    end configFlags
     val cflags = opt(config) ++: flto(config) ++: ninja_target(config) ++: configFlags :+ "-fvisibility=hidden"
 
-    val links = {
+    val links =
       val srclinks = linkerResult.links.map(_.name)
       val gclinks = config.gc.links
       // We need extra linking dependencies for:
@@ -256,12 +254,11 @@ object Ninja extends AutoPlugin {
       // * libpthread for process APIs and parallel garbage collection.
       // * Dbghelp for windows implementation of unwind libunwind API
       val platformsLinks =
-        if (config.targetsWindows) Seq("dbghelp")
-        else if (config.targetsOpenBSD || config.targetsNetBSD)
-          Seq("pthread")
+        if config.targetsWindows then Seq("dbghelp")
+        else if config.targetsOpenBSD || config.targetsNetBSD then Seq("pthread")
         else Seq("pthread", "dl")
       srclinks ++ gclinks ++ platformsLinks
-    }
+    end links
     val linkopts = linkOpts(config) ++ links.map("-l" + _)
     val linkflags = flto(config) ++ ninja_target(config)
     val ltoName = lto(config).getOrElse("none")
@@ -293,50 +290,43 @@ object Ninja extends AutoPlugin {
         |  description = link exe (${config.gc.name} gc, $ltoName lto)
         |
         |""".stripMargin
-  }
+  end addRules
 
-  def addBuildStatements(writer: Writer, config: Config, files: Seq[Path]): Seq[Path] = {
+  def addBuildStatements(writer: Writer, config: Config, files: Seq[Path]): Seq[Path] =
     files.map { path =>
-      if (path.endsWith("windows/time.c")) {
+      if path.endsWith("windows/time.c") then
         // FIXME patch time.c and remove all #define's and tzset function
-        val lines = for {
+        val lines = for
           line <- scala.io.Source.fromFile(path.toFile).getLines()
           if !line.startsWith("#define") && !line.contains("_tzset")
-        } yield line
+        yield line
 
         Files.write(path, lines.toList.asJava, UTF_8)
-      }
+      end if
       val inpath = path.abs
       val outpath = inpath + oExt
       val isCpp = inpath.endsWith(cppExt)
       val isLl = inpath.endsWith(llExt)
       val objPath = Paths.get(outpath)
 
-      val rule = if (isCpp) "cpp" else if (isLl) "ll" else "cc"
+      val rule = if isCpp then "cpp" else if isLl then "ll" else "cc"
 
       writer.write(s"build $objPath: $rule $inpath\n")
 
-      if (config.compileOptions.nonEmpty) {
+      if config.compileOptions.nonEmpty then
         val filteredOptions = filterCompileOptions(config)
         writer.write(s"  auxflags = ${filteredOptions.mkString(" ")}\n")
-      }
       writer.write('\n')
 
       objPath
     }
-  }
 
-  private def isRiscv64(config: Config): Boolean = {
+  private def isRiscv64(config: Config): Boolean =
     config.compilerConfig.targetTriple.exists(_.contains("riscv64"))
-  }
 
-  private def filterCompileOptions(config: Config): Seq[String] = {
-    if (isRiscv64(config)) {
-      config.compileOptions.filterNot(_ == "-D__SCALANATIVE_DELIMCC")
-    } else {
-      config.compileOptions
-    }
-  }
+  private def filterCompileOptions(config: Config): Seq[String] =
+    if isRiscv64(config) then config.compileOptions.filterNot(_ == "-D__SCALANATIVE_DELIMCC")
+    else config.compileOptions
 
   /** Object file extension: ".o" */
   val oExt = ".o"
@@ -352,20 +342,18 @@ object Ninja extends AutoPlugin {
 
   private def linkOpts(config: Config): Seq[String] =
     config.linkingOptions ++ {
-      config.mode match {
+      config.mode match
         // disable UB sanitizer in debug mode
         case Mode.Debug       => Seq("-fno-sanitize=all")
         case Mode.ReleaseFull => Seq("-s")
         case _                => Seq.empty
-      }
     }
 
   private def lto(config: Config): Option[String] =
-    (config.mode, config.LTO) match {
+    (config.mode, config.LTO) match
       case (Mode.Debug, _)             => None
       case (_: Mode.Release, LTO.None) => None
       case (_: Mode.Release, lto)      => Some(lto.name)
-    }
 
   private def flto(config: Config): Seq[String] =
     lto(config).fold[Seq[String]] {
@@ -373,17 +361,15 @@ object Ninja extends AutoPlugin {
     } { name => Seq(s"-flto=$name") }
 
   private def ninja_target(config: Config): Seq[String] =
-    config.compilerConfig.targetTriple match {
+    config.compilerConfig.targetTriple match
       case Some(tt) => Seq("-target", tt)
       case None     => Seq("-Wno-override-module")
-    }
 
   private def opt(config: Config): Seq[String] =
-    config.mode match {
+    config.mode match
       // disable UB sanitizer in debug mode
       case Mode.Debug       => List("-O0", "-fno-sanitize=all")
       case Mode.ReleaseFast => List("-O2", "-Xclang", "-O2")
       case Mode.ReleaseFull => List("-O3", "-Xclang", "-O3")
       case Mode.ReleaseSize => List("-Os", "-Xclang", "-Oz")
-    }
-}
+end Ninja
