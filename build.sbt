@@ -8,10 +8,11 @@ import org.typelevel.scalacoptions.{ ScalacOption, ScalacOptions }
 import org.typelevel.scalacoptions.ScalaVersion
 import org.typelevel.scalacoptions.ScalaVersion.V3_0_0
 import scala.Ordering.Implicits._
+import scala.jdk.CollectionConverters.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / scalaVersion := "3.8.4"
+scalaVersion := "3.8.4"
 
 val sharedSettings = Seq(
   publish / skip := true,
@@ -45,7 +46,7 @@ def generateConstants(base: File): File = {
 
   val constants = for {
     line <- output.getLines()
-    Groups(name, CNumber(value)) <- definition.findFirstMatchIn(evalShifts(line))
+    case Groups(name, CNumber(value)) <- definition.findFirstMatchIn(evalShifts(line))
   } yield f"val $name%s: Int = $value%#x"
 
   io.IO.write(
@@ -73,8 +74,8 @@ lazy val scalals =
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
       libraryDependencies ++= Seq(
-        "com.github.scopt" %%% "scopt" % "4.1.0",
-        "org.scalameta" %%% "munit" % "1.3.6" % Test,
+        "com.github.scopt" %% "scopt" % "4.1.0",
+        "org.scalameta" %% "munit" % "1.3.6" % Test,
       ),
     )
     // configure JVM settings
@@ -85,9 +86,10 @@ lazy val scalals =
       }.taskValue,
       Compile / run / fork := true,
       Compile / run / javaOptions += "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
-      Compile / packageSrc / mappings ~= { mappings =>
-        mappings.map { case mapping @ (from, to) =>
-          if (from.name == "Core.scala" && from.getPath.contains("/shared/"))
+      Compile / packageSrc / mappings := {
+        val conv = fileConverter.value
+        (Compile / packageSrc / mappings).value.map { case mapping @ (from, to) =>
+          if (from.name == "Core.scala" && conv.toPath(from).iterator.asScala.contains(Paths.get("shared")))
             from -> to.replace("Core.scala", "CoreShared.scala")
           else
             mapping
@@ -97,13 +99,13 @@ lazy val scalals =
         "--no-fallback",
         "-H:-CheckToolchain",
         "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
-        s"-H:ReflectionConfigurationFiles=${baseDirectory.value / "graal-config.json" absolutePath}",
+        s"-H:ReflectionConfigurationFiles=${(baseDirectory.value / "graal-config.json").absolutePath}",
       ),
     )
     // configure Scala-Native settings
     .nativeSettings(
       targetTriplet := None,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.7.0",
+      libraryDependencies += "io.github.cquiroz" %% "scala-java-time" % "2.7.0",
       nativeConfig := {
         val config = nativeConfig.value
         val nixCFlagsCompile = for {

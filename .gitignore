@@ -17,6 +17,7 @@
 /jvm/target/
 /native/target/
 /project/target/
+/project/project/target/
 /project/boot/
 /shared/target/
 

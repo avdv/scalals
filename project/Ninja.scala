@@ -16,7 +16,7 @@ import scala.scalanative.sbtplugin.ScalaNativePlugin.autoImport._
 import scala.scalanative.sbtplugin.Utilities._
 import scala.scalanative.linker.ReachabilityAnalysis
 
-import sbt._
+import sbt.*
 import Keys._
 import java.nio.file.{ Files, Path, Paths }
 import scala.scalanative.sbtplugin.ScalaNativePlugin
@@ -24,14 +24,14 @@ import scala.sys.process._
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.*
 import java.nio.file.StandardOpenOption
 import java.io.Writer
 import java.nio.charset.StandardCharsets.UTF_8
 
 /** Internal utilities to interact with Ninja. */
 object Ninja extends AutoPlugin {
-  implicit private val sharedScope = scala.scalanative.util.Scope.unsafe()
+  implicit private val sharedScope: scala.scalanative.util.Scope = scala.scalanative.util.Scope.unsafe()
 
   override def requires = ScalaNativePlugin
 
@@ -51,71 +51,88 @@ object Ninja extends AutoPlugin {
   import autoImport._
 
   override lazy val projectSettings = Seq(
-    ninja := ninjaTask.value,
-    ninjaCompile := ninjaCompileTask.value,
+    ninja := Def.uncached(ninjaTask.value),
+    ninjaCompile := ninjaCompileTask,
     ninjaCompileFile := target.value.toPath / "compile.ninja",
-    runNinja := runNinjaTask.value,
+    runNinja := Def.uncached(runNinjaTask),
   )
 
   lazy val runNinjaTask =
-    Def.task {
+    Def.uncachedTask {
       val ninjaFile = ninja.value
 
       Process(Seq("ninja", "-f", ninjaFile.abs)).!
     }
 
-  import scala.reflect.runtime.{ universe => ru }
+  private val nativeLibClass = Class.forName("scala.scalanative.build.NativeLib$")
+  private val nativeLibModule = nativeLibClass.getField("MODULE$").get(null)
 
-  private val m = ru.runtimeMirror(getClass.getClassLoader)
-  private val nativeLibMod = ru.typeOf[NativeLib.type].termSymbol.asModule
-  private val mm = m.reflectModule(nativeLibMod)
-  private val im = m.reflect(mm.instance)
+  private val unpackNativeCodeMethod =
+    nativeLibClass.getDeclaredMethod("unpackNativeCode", classOf[NativeLib])
 
-  private def unpackNativeCode(nativelib: NativeLib): Path = {
-    unpackNativeCodeMethod(nativelib).asInstanceOf[Path]
-  }
+  private val findNativePathsMethod =
+    nativeLibClass.getDeclaredMethod("findNativePaths", classOf[Path])
 
-  private val unpackNativeCodeMethod = {
-    val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("unpackNativeCode")).asMethod
-    im.reflectMethod(nlm)
-  }
+  private def unpackNativeCode(nativelib: NativeLib): Path =
+    unpackNativeCodeMethod.invoke(nativeLibModule, nativelib).asInstanceOf[Path]
 
-  private def findNativePaths(destPath: Path): Seq[Path] = {
-    findNativePathsMethod(destPath).asInstanceOf[Seq[Path]]
-  }
+  private def findNativePaths(destPath: Path): Seq[Path] =
+  findNativePathsMethod.invoke(nativeLibModule, destPath).asInstanceOf[Seq[Path]]
 
-  private val findNativePathsMethod = {
-    val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("findNativePaths")).asMethod
-    im.reflectMethod(nlm)
-  }
+  //import scala.reflect.runtime.{ universe => ru }
+
+  // private val m = ru.runtimeMirror(getClass.getClassLoader)
+  // private val nativeLibMod = ru.typeOf[NativeLib.type].termSymbol.asModule
+  // private val mm = m.reflectModule(nativeLibMod)
+  // private val im = m.reflect(mm.instance)
+
+  // private def unpackNativeCode(nativelib: NativeLib): Path = {
+  //   unpackNativeCodeMethod(nativelib).asInstanceOf[Path]
+  // }
+
+  // private val unpackNativeCodeMethod = {
+  //   val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("unpackNativeCode")).asMethod
+  //   im.reflectMethod(nlm)
+  // }
+
+  // private def findNativePaths(destPath: Path): Seq[Path] = {
+  //   findNativePathsMethod(destPath).asInstanceOf[Seq[Path]]
+  // }
+
+  // private val findNativePathsMethod = {
+  //   val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("findNativePaths")).asMethod
+  //   im.reflectMethod(nlm)
+  // }
 
   private def configureNativeLibrary(
       initialConfig: Config,
       analysis: ReachabilityAnalysis.Result,
       destPath: Path,
   ): Config = {
-    configureNativeLibraryMethod(initialConfig, analysis, destPath).asInstanceOf[Config]
+    configureNativeLibraryMethod.invoke(nativeLibModule, initialConfig, analysis, destPath).asInstanceOf[Config]
   }
 
   private val configureNativeLibraryMethod = {
-    val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("configureNativeLibrary")).asMethod
-    im.reflectMethod(nlm)
+    nativeLibClass.getDeclaredMethod("configureNativeLibrary", classOf[Config], classOf[ReachabilityAnalysis.Result], classOf[Path])
   }
+  //   val nlm = ru.typeOf[NativeLib.type].decl(ru.TermName("configureNativeLibrary")).asMethod
+  //   im.reflectMethod(nlm)
+  // }
 
   lazy val ninjaCompileTask =
-    Def.task {
+    Def.uncachedTask {
       val outfile = ninjaCompileFile.value
       val logger = streams.value.log.toLogger
 
       val config = {
         val mainClass = (Compile / selectMainClass).value
-        val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
+        //val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
         val baseDir = crossTarget.value
 
         scala.scalanative.build.Config.empty
           .withLogger(logger)
           .withMainClass(mainClass)
-          .withClassPath(classpath)
+          //.withClassPath(classpath)
           .withCompilerConfig(nativeConfig.value)
           .withBaseDir(baseDir.toPath())
       }
@@ -163,19 +180,19 @@ object Ninja extends AutoPlugin {
       Await.result(result, Duration.Inf)
     }
 
-  lazy val ninjaTask =
-    Def.task {
+  lazy val ninjaTask : Def.Initialize[Task[Path]] =
+    Def.uncachedTask {
       val logger = streams.value.log.toLogger
       val baseDir = crossTarget.value
       val config = {
         val mainClass = (Compile / selectMainClass).value
-        val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
+        //val classpath = (Compile / fullClasspath).value.map(_.data.toPath)
 
         scala.scalanative.build.Config.empty
           .withLogger(logger)
           .withBaseDir(baseDir.toPath)
           .withMainClass(mainClass)
-          .withClassPath(classpath)
+          //.withClassPath(classpath)
           .withCompilerConfig(nativeConfig.value)
       }
       val outpath = config.artifactPath
@@ -283,7 +300,7 @@ object Ninja extends AutoPlugin {
       if (path.endsWith("windows/time.c")) {
         // FIXME patch time.c and remove all #define's and tzset function
         val lines = for {
-          line <- scala.io.Source.fromFile(path.toFile).getLines
+          line <- scala.io.Source.fromFile(path.toFile).getLines()
           if !line.startsWith("#define") && !line.contains("_tzset")
         } yield line
 
