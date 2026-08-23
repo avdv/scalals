@@ -13,13 +13,8 @@
 /project/**/metals.sbt
 
 ### sbt ###
-/target/
-/jvm/target/
-/native/target/
-/project/target/
-/project/project/target/
+target/
 /project/boot/
-/shared/target/
 
 ### direnv ###
 .direnv
