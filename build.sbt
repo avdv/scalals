@@ -18,10 +18,8 @@ val sharedSettings = Seq(
   publish / skip := true,
   tpolecatDevModeOptions ++= Set(
     ScalacOption("-rewrite", _ => true),
-    // TODO use ScalacOptions.newSyntax instead
-    ScalacOption("-new-syntax", List.empty, _ >= V3_0_0),
-    // TODO use ScalaVersion.V3_4_0 instead
-    ScalacOptions.scala3Source("3.4-migration", _ >= ScalaVersion(3, 4, 0)),
+    ScalacOptions.newSyntax,
+    ScalacOptions.scala3Source("3.4-migration", _ >= ScalaVersion.V3_4_0),
   ),
 )
 
