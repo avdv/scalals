@@ -199,6 +199,12 @@
 
               depsWarmupCommand = "sbt tpolecatDevMode scalalsNative/compile";
 
+              overrideDepsAttrs = _final: _base: {
+                preInstall = ''
+                  rm -rf $SBT_DEPS/project/.sbtboot/cache/
+                '';
+              };
+
               installPhase = ''
                 mkdir --parents $out/bin
                 cp "$(ninja -f native/target/build.ninja -t targets rule exe)" $out/bin/scalals
