@@ -38,8 +38,14 @@ jobs:
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         pushFilter: '[-](source|nixpkgs-src)$'
     - run: git branch PR-${{ github.event.number }}
-    - run: nix develop '.#graalVM' --command sbt 'scalalsJVM / GraalVMNativeImage / packageBin'
-    - run: jvm/target/graalvm-native-image/scalals
+    - run: |
+        nix develop '.#graalVM' --command sbt 'print scalalsJVM / GraalVMNativeImage / packageBin' | tee packageBin
+        result=$( tail -n1 packageBin )
+        # we want to replace the '${OUT}' string literally
+        # shellcheck disable=SC2016
+        echo "exe=${result/'${OUT}/'/target/out/}" >> GITHUB_OUTPUT
+      id: package
+    - run: "${{steps.package.outputs.exe}}"
 
   package:
     name: Nix ❄

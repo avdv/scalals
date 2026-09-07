@@ -18,6 +18,9 @@ echo '::endgroup::'
 # Mode: {debug, release-fast, release-full, release-size}
 
 declare -a binaries
+declare targetDir
+
+targetDir=$(sbt -client 'print target' | head -n1)
 
 for target in "${TARGETS[@]}"; do
     # LTO: {none, full, thin}
@@ -38,12 +41,11 @@ for target in "${TARGETS[@]}"; do
     sbt -client "ninja"
     sbt -client "ninjaCompile"
 
-    ninja -f native/target/build.ninja
+    ninja -f "$targetDir/build.ninja"
 
-    binaries+=( "$( ninja -f native/target/build.ninja -t targets rule exe )" )
+    binaries+=("$(ninja -f "$targetDir/build.ninja" -t targets rule exe)")
 
     echo '::endgroup::'
 done
 
 mv -vt . "${binaries[@]}"
-
