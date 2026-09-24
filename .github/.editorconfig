@@ -1,0 +1,7 @@
+
+[{crosscompile,update-hash}]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
+keep_padding       = true
+shell_variant      = bash
