@@ -12,7 +12,7 @@ import scala.jdk.CollectionConverters.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-scalaVersion := "3.8.4"
+scalaVersion := "3.9.0"
 
 val sharedSettings = Seq(
   publish / skip := true,
