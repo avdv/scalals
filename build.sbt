@@ -71,7 +71,7 @@ lazy val scalals =
       buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
       buildInfoPackage := "de.bley.scalals",
       libraryDependencies ++= Seq(
-        "com.github.scopt" %% "scopt" % "4.1.0",
+        "com.github.scopt" %% "scopt" % "4.2.0",
         "org.scalameta" %% "munit" % "1.3.6" % Test,
       ),
     )
