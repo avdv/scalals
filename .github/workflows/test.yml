@@ -220,7 +220,7 @@ jobs:
           mv scalals-darwin-aarch64 scalals-arm64-darwin
           mv scalals-darwin-x86_64 scalals-x86_64-darwin
       # Drafts your next Release notes as Pull Requests are merged into "main"
-      - uses: release-drafter/release-drafter@72967cdc98ddd3160f1fc3dff619de365e137dd0 # v7.9.0
+      - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
