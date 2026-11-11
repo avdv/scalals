@@ -12,7 +12,9 @@ declare -ar TARGETS=(
 )
 
 echo '::group::configure'
-sbt -client 'project scalalsNative'
+# first shutdown cleanly and start a new server
+sbt -client shutdown >/dev/null
+sbt -no-colors -client 'project scalalsNative'
 echo '::endgroup::'
 
 # Mode: {debug, release-fast, release-full, release-size}
