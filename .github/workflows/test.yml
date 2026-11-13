@@ -102,7 +102,14 @@ jobs:
   tests:
     defaults:
       run:
-        shell: nix develop --ignore-environment --keep HOME --keep SCALANATIVE_MODE --keep GITHUB_OUTPUT --command bash --noprofile --norc -e -o pipefail {0}
+        shell: >-
+          nix develop
+          --ignore-environment
+          --keep HOME
+          --keep SCALANATIVE_MODE
+          --keep GITHUB_ACTIONS
+          --keep GITHUB_OUTPUT
+          --command bash --noprofile --norc -e -o pipefail {0}
     runs-on: ubuntu-latest
     steps:
     - name: Free disk space

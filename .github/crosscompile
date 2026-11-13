@@ -11,11 +11,22 @@ declare -ar TARGETS=(
     riscv64-unknown-linux-musl
 )
 
-echo '::group::configure'
+# GitHub Actions renders ::group:: sections in the log. Locally, print a
+# readable title instead so the output does not look like noise.
+if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+	group_start() { printf '::group::%s\n' "$1"; }
+	group_end() { printf '::endgroup::\n'; }
+else
+	group_rule=$(printf '=%.0s' {1..80})
+	group_start() { printf '%s\n==> %s\n%s\n' "$group_rule" "$1" "$group_rule"; }
+	group_end() { printf '\n'; }
+fi
+
+group_start configure
 # first shutdown cleanly and start a new server
 sbt -client shutdown >/dev/null
 sbt -no-colors -client 'project scalalsNative'
-echo '::endgroup::'
+group_end
 
 # Mode: {debug, release-fast, release-full, release-size}
 
@@ -35,7 +46,7 @@ for target in "${TARGETS[@]}"; do
         *)        LTO=full ;;
     esac
 
-    echo "::group::build $target"
+	group_start "build $target"
 
     sbt -client "set nativeConfig ~= { _.withLTO(scala.scalanative.build.LTO.$LTO) }"
     sbt -client "set targetTriplet:= Some(\"$target\")"
@@ -46,7 +57,7 @@ for target in "${TARGETS[@]}"; do
 
     binaries+=("$(ninja -f "$targetDir/build.ninja" -t targets rule exe)")
 
-    echo '::endgroup::'
+	group_end
 done
 
 mv -vt . "${binaries[@]}"
