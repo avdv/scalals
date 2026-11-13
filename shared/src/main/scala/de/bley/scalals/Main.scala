@@ -14,6 +14,9 @@ enum When:
 enum IndicatorStyle:
   case none, slash, classify, `file-type`
 
+enum LayoutMode:
+  case auto, vertical, horizontal
+
 given scopt.Read[Path] = scopt.Read.reads(Paths.get(_: String))
 
 given scopt.Read[SortMode] = scopt.Read.reads(SortMode `valueOf` _)
@@ -37,6 +40,7 @@ final case class Config(
     long: Boolean = false,
     longWithoutGroup: Boolean = false,
     oneLine: Boolean = false,
+    layout: LayoutMode = LayoutMode.auto,
     showGitStatus: Boolean = false,
     tree: Boolean = false,
     maxDepth: Option[Int] = None,
@@ -179,6 +183,14 @@ object Main:
         .unbounded()
         .text("list one file per line")
         .action((_, c) => c.copy(oneLine = true)),
+      opt[Unit]('x', "horizontal")
+        .unbounded()
+        .text("list entries by lines instead of by columns")
+        .action((_, c) => c.copy(layout = LayoutMode.horizontal, oneLine = false)),
+      opt[Unit]('C', "vertical")
+        .unbounded()
+        .text("list entries by columns instead of by lines")
+        .action((_, c) => c.copy(layout = LayoutMode.vertical, oneLine = false)),
       help("help").text("show this help and exit"),
       version("version").text("show version information"),
       note("""|
@@ -197,6 +209,16 @@ object Main:
     )
   end parser
 
+  def effectiveConfig(config: Config, isTTY: Boolean): Config =
+    if config.tree || config.long || config.longWithoutGroup || config.oneLine then config
+    else
+      config.layout match
+        case LayoutMode.auto =>
+          if isTTY then config.copy(layout = LayoutMode.vertical)
+          else config.copy(oneLine = true)
+        case _ => config
+  end effectiveConfig
+
   def main(args: Array[String]): Unit =
     // scopt does not support options with optional parameters (see https://github.com/scopt/scopt/pull/273)
     // it always requires a `=` after the option name with an empty string.
@@ -209,7 +231,7 @@ object Main:
     }
     OParser
       .parse(parser, fixed ++ rest, Config())
-      .fold(sys.exit(2)):
-        Core.ls
+      .fold(sys.exit(2)): config =>
+        Core.ls(effectiveConfig(config, Terminal.isTTYOutput))
   end main
 end Main
