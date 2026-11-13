@@ -25,7 +25,7 @@ fi
 group_start configure
 # first shutdown cleanly and start a new server
 sbt -client shutdown >/dev/null
-sbt -no-colors -client 'project scalalsNative'
+sbt -no-colors -Dsbt.log.noformat=true -client 'project scalalsNative'
 group_end
 
 # Mode: {debug, release-fast, release-full, release-size}

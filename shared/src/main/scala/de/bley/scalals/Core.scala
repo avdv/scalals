@@ -201,35 +201,45 @@ trait Core:
         yield decorator.decorate(fileInfo, builder) -> builder
 
       val sizes = output.map(_._1.abs)
-      // val minlen = sizes.min
-      val columns =
-        if config.long || config.longWithoutGroup || config.oneLine then decorators.size
-        else
-          val terminalMax = Terminal.width
-          (terminalMax / (sizes.max + 1)) max 1
-      val maxColSize =
-        val g = sizes.grouped(columns).toList
-        val h =
-          if sizes.size > columns then g.init :+ (g.last ++ List.fill(columns - g.last.size)(0))
-          else g
-        h.transpose.map(_.max)
 
-      // Console.err.println(s"$columns")
-      // Console.err.println(maxColSize.mkString(", "))
-      for record <- output.grouped(columns) do
-        for
-          ((width, builder), i) <- record.zipWithIndex
-          colSize = maxColSize(i)
-          padding = " " * (colSize - width.abs + 1)
-        do
-          if width < 0 then print(padding)
+      if config.long || config.longWithoutGroup then
+        val columns = decorators.size
+        val rows = output.indices.grouped(columns).map(_.toVector).toVector
+        val columnWidths = Vector.tabulate(columns)(column => rows.flatMap(_.lift(column)).map(sizes(_)).max)
+        printRows(output, rows, columnWidths, gap = 1)
+      else if config.oneLine then
+        val rows = output.indices.map(index => Vector(index)).toVector
+        printRows(output, rows, Vector(sizes.max), gap = 1)
+      else
+        val orientation = config.layout match
+          case LayoutMode.horizontal => Layout.Orientation.Horizontal
+          case _                     => Layout.Orientation.Vertical
+        val arrangement = Layout.arrange(sizes, Terminal.width, orientation, gap = 2)
+        printRows(output, arrangement.rows, arrangement.columnWidths, gap = 2)
+      end if
+    end if
+  end listAll
 
-          print(builder)
+  private def printRows(
+      output: IndexedSeq[(Int, StringBuilder)],
+      rows: Vector[Vector[Int]],
+      columnWidths: Vector[Int],
+      gap: Int,
+  ): Unit =
+    for row <- rows do
+      for (index, i) <- row.zipWithIndex do
+        val (width, builder) = output(index)
+        val padding = " " * (columnWidths(i) - width.abs + gap)
 
-          if i < record.size - 1 then print(if width >= 0 then padding else " ")
-          else println()
-        end for
+        if width < 0 then print(padding)
+
+        print(builder)
+
+        if i < row.size - 1 then print(if width >= 0 then padding else " ")
+        else println()
       end for
+    end for
+  end printRows
 
   final def date: Decorator = new Decorator:
     private val halfayear: Long = 31556952L / 2
