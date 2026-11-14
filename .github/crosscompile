@@ -22,7 +22,7 @@ echo '::endgroup::'
 declare -a binaries
 declare targetDir
 
-targetDir=$(sbt -client 'print target' | head -n1)
+mapfile -n 1 -t targetDir < <(sbt -client 'print target')
 
 for target in "${TARGETS[@]}"; do
     # LTO: {none, full, thin}
