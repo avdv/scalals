@@ -22,6 +22,10 @@
       };
       url = "github:zaninime/sbt-derivation";
     };
+    treefmt-nix = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:numtide/treefmt-nix";
+    };
   };
 
   outputs =
@@ -32,6 +36,7 @@
       flake-utils,
       git-hooks,
       sbt,
+      treefmt-nix,
       ...
     }:
     flake-utils.lib.eachSystem
@@ -90,6 +95,8 @@
 
           inherit (pkgs) lib stdenvNoCC;
 
+          treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+
           zig = pkgs.zig_0_15;
 
           mkShell = pkgs.mkShell.override { stdenv = stdenvNoCC; };
@@ -144,7 +151,7 @@
           ];
         in
         {
-          formatter = pkgs.nixfmt;
+          formatter = treefmtEval.config.build.wrapper;
 
           packages = rec {
             inherit (pkgs) scalafmt;
