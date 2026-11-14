@@ -244,7 +244,7 @@ object Ninja extends AutoPlugin:
       srclinks ++ gclinks ++ platformsLinks
     end links
     val linkopts = linkOpts(config) ++ links.map("-l" + _)
-    val linkflags = flto(config) ++ ninja_target(config)
+    val linkflags = flto(config) ++ ninja_target(config) ++ linkOptimize(config)
     val ltoName = lto(config).getOrElse("none")
 
     s"""|clang = ${config.clang.abs}
@@ -325,13 +325,26 @@ object Ninja extends AutoPlugin:
   val srcExtensions = Seq(".c", cppExt, ".S")
 
   private def linkOpts(config: Config): Seq[String] =
-    config.linkingOptions ++ {
+    // Avoid linking libraries (defined after this option) that are not used.
+    // scala-native does this for its own link line too, so the flag has to be repeated here.
+    val asNeeded =
+      if config.targetsWindows || config.targetsMac then Seq.empty
+      else Seq("-Wl,--as-needed")
+
+    // Strip symbols from every release binary, not just release-full ones.
+    // Debug builds are left untouched so they stay debuggable.
+    val strip =
+      config.mode match
+        case Mode.Debug => Seq.empty
+        case _          => Seq("-s")
+
+    config.linkingOptions ++ asNeeded ++ strip ++ {
       config.mode match
         // disable UB sanitizer in debug mode
-        case Mode.Debug       => Seq("-fno-sanitize=all")
-        case Mode.ReleaseFull => Seq("-s")
-        case _                => Seq.empty
+        case Mode.Debug => Seq("-fno-sanitize=all")
+        case _          => Seq.empty
     }
+  end linkOpts
 
   private def lto(config: Config): Option[String] =
     (config.mode, config.LTO) match
@@ -356,4 +369,14 @@ object Ninja extends AutoPlugin:
       case Mode.ReleaseFast => List("-O2", "-Xclang", "-O2")
       case Mode.ReleaseFull => List("-O3", "-Xclang", "-O3")
       case Mode.ReleaseSize => List("-Os", "-Xclang", "-Oz")
+
+  /** Optimisation level passed to the link step. Zig only enables section garbage collection for non-debug link steps,
+    * so this must be present in release builds even though it does not affect code generation there.
+    */
+  private def linkOptimize(config: Config): Seq[String] =
+    config.mode match
+      case Mode.Debug       => Seq.empty
+      case Mode.ReleaseFast => Seq("-O2")
+      case Mode.ReleaseFull => Seq("-O3")
+      case Mode.ReleaseSize => Seq("-Oz")
 end Ninja
