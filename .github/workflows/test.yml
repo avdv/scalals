@@ -219,6 +219,9 @@ jobs:
           mv scalals-linux-x86_64 scalals-x86_64-linux
           mv scalals-darwin-aarch64 scalals-arm64-darwin
           mv scalals-darwin-x86_64 scalals-x86_64-darwin
+      - name: Compress binaries
+        run: |
+          parallel -j "$(nproc)" xz --threads=1 --verbose ::: scalals-*
       # Drafts your next Release notes as Pull Requests are merged into "main"
       - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         id: release
@@ -227,11 +230,11 @@ jobs:
       - name: Upload binaries
         run: |
           gh release upload '${{ steps.release.outputs.tag_name }}' \
-            scalals-arm64-linux \
-            scalals-arm64-darwin \
-            scalals-riscv64-linux \
-            scalals-x86_64-linux \
-            scalals-x86_64-darwin \
+            scalals-arm64-linux.xz \
+            scalals-arm64-darwin.xz \
+            scalals-riscv64-linux.xz \
+            scalals-x86_64-linux.xz \
+            scalals-x86_64-darwin.xz \
             --clobber --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
