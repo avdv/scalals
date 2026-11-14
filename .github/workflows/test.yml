@@ -159,7 +159,7 @@ jobs:
     - name: Cross Compile
       run: .github/crosscompile
       env:
-        SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-full' || 'debug' }}
+        SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-fast' || 'debug' }}
     - shell: nix shell --inputs-from . nixpkgs#qemu nixpkgs#bash --command bash --noprofile --norc -e -o pipefail {0}
       run: qemu-aarch64 scalals-linux-aarch64
     - shell: nix shell --inputs-from . nixpkgs#qemu nixpkgs#bash --command bash --noprofile --norc -e -o pipefail {0}
