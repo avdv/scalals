@@ -29,9 +29,8 @@ for target in "${TARGETS[@]}"; do
     case "$target" in
         # zig ld does not yet support LTO for mach-O see https://github.com/ziglang/zig/issues/8680
         *darwin*) LTO=none ;;
-        # FIXME: with zig 0.14.1 using LTO leads to a runtime error:
-        #   Exception in thread "main"
-        #   Exception: java.lang.NegativeArraySizeException thrown from the UncaughtExceptionHandler in thread "main"
+        # FIXME: with zig 0.15.2 using LTO leads to a runtime error:
+        # ld.lld: error: linking module flags 'target-abi': IDs have conflicting values: '!"lp64d"' from target/out/native0.5/scala-3.10.0/scalals/native/dependencies/scalals_native0.5_3-0.1.13+234-7be7c181+20261113-1036-0/scala-native/win32_compat.c.o, and '[5 x i8] c"lp64d"' from ld-temp.o
         *risc*)   LTO=none ;;
         *)        LTO=full ;;
     esac
