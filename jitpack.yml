@@ -1,2 +1,6 @@
 jdk:
   - openjdk21
+before_install:
+  - sdk install sbt
+install:
+  - sbt -Dsbt.client=false publishM2
