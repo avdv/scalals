@@ -22,6 +22,15 @@ _Note_: scalals binaries are currently available for Linux and MacOS on amd64 an
 
 (run this again to install the latest version)
 
+## Using [DotSlash](https://dotslash-cli.com/)
+
+1. install `dotslash` (see https://dotslash-cli.com/docs/installation/)
+2. run `curl -fL https://github.com/avdv/scalals/releases/latest/download/scalals -o scalals`
+3. run `chmod +x scalals`
+4. run `./scalals`
+
+The DotSlash file supports Linux and macOS on x86_64 and aarch64. It is pinned to the release it was downloaded from; run step 2 again to update.
+
 ## With nix flakes
 
 1. `cachix use cbley` (optional, avoids re-building)

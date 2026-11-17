@@ -1,0 +1,28 @@
+{
+  "outputs": {
+    "scalals": {
+      "platforms": {
+        "linux-x86_64": {
+          "name": "scalals-x86_64-linux.xz",
+          "format": "xz",
+          "path": "scalals"
+        },
+        "linux-aarch64": {
+          "name": "scalals-arm64-linux.xz",
+          "format": "xz",
+          "path": "scalals"
+        },
+        "macos-x86_64": {
+          "name": "scalals-x86_64-darwin.xz",
+          "format": "xz",
+          "path": "scalals"
+        },
+        "macos-aarch64": {
+          "name": "scalals-arm64-darwin.xz",
+          "format": "xz",
+          "path": "scalals"
+        }
+      }
+    }
+  }
+}
