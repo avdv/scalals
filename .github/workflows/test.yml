@@ -245,6 +245,11 @@ jobs:
             --clobber --repo ${{ github.repository }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Request the main snapshot to start a JitPack build of the code being
+      # released
+      - name: Trigger build on jitpack
+        run: |
+          curl -fL https://jitpack.io/com/github/avdv/scalals/main/scalals-main-SNAPSHOT.pom
 
   benchmark:
     name: Benchmark
