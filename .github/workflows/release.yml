@@ -3,11 +3,19 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to trigger the JitPack build for
+        required: true
+        type: string
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Trigger build on jitpack
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
-          curl -L https://jitpack.io/com/github/avdv/scalals/${{ github.ref_name }}/scalals-${{ github.ref_name }}.pom
+          curl -L "https://jitpack.io/com/github/avdv/scalals/${TAG}/scalals-${TAG}.pom"
