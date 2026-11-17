@@ -18,4 +18,4 @@ jobs:
         env:
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
-          curl -L "https://jitpack.io/com/github/avdv/scalals/${TAG}/scalals-${TAG}.pom"
+          curl -fL "https://jitpack.io/com/github/avdv/scalals/${TAG}/scalals-${TAG}.pom"
