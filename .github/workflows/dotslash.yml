@@ -1,5 +1,4 @@
 name: DotSlash
-
 on:
   release:
     types: [published]
@@ -9,10 +8,8 @@ on:
         description: Release tag to generate a DotSlash file for
         required: true
         type: string
-
 permissions:
   contents: write
-
 jobs:
   dotslash:
     runs-on: ubuntu-latest

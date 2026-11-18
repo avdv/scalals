@@ -1,39 +1,37 @@
 name: Update deps hash
-
 on:
   pull_request_target:
     branches:
       - main
-
 jobs:
   update-hash:
     runs-on: ubuntu-latest
     if: ${{ github.event.pull_request.head.repo.owner.login == 'scala-steward' }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
-    - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-      with:
-        name: cbley
-        extraPullNames: pre-commit-hooks
-    - name: Update fixed output hash
-      run: |
-        outputHash=$( nix eval --raw '.#scalals.dependencies.outputHash' )
-        sed -i'' -e "s,$outputHash,," flake.nix
-        if output=$( nix build --no-link --print-build-logs '.#scalals.dependencies' 2>&1 ); then
-           echo "command succeeded unexpectedly." >&2
-           exit 1
-        fi
-        if [[ "$output" != *'error: hash mismatch in fixed-output derivation'* ]]; then
-           echo "build problem: $output" >&2 ; exit 1
-        fi
-        git restore flake.nix
-        got=$( sed -ne 's,.*got: *\([^ ]*\),\1,p' <<< "$output" )
-        sed -i'' -e "s,$outputHash,$got," flake.nix
-        git diff
-    - name: Push changes
-      uses: devops-infra/action-commit-push@f066ea8e19660de57d3d3a4a0b9d294ea2612e20 # v1.5.0
-      with:
-        amend: true
-        force: true
-        github_token: "${{ secrets.PR_TOKEN }}"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: cbley
+          extraPullNames: pre-commit-hooks
+      - name: Update fixed output hash
+        run: |
+          outputHash=$( nix eval --raw '.#scalals.dependencies.outputHash' )
+          sed -i'' -e "s,$outputHash,," flake.nix
+          if output=$( nix build --no-link --print-build-logs '.#scalals.dependencies' 2>&1 ); then
+             echo "command succeeded unexpectedly." >&2
+             exit 1
+          fi
+          if [[ "$output" != *'error: hash mismatch in fixed-output derivation'* ]]; then
+             echo "build problem: $output" >&2 ; exit 1
+          fi
+          git restore flake.nix
+          got=$( sed -ne 's,.*got: *\([^ ]*\),\1,p' <<< "$output" )
+          sed -i'' -e "s,$outputHash,$got," flake.nix
+          git diff
+      - name: Push changes
+        uses: devops-infra/action-commit-push@f066ea8e19660de57d3d3a4a0b9d294ea2612e20 # v1.5.0
+        with:
+          amend: true
+          force: true
+          github_token: "${{ secrets.PR_TOKEN }}"
