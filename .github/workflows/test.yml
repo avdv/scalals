@@ -218,6 +218,7 @@ jobs:
       # write permission is required to create a github release
       contents: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       - name: Rename binaries
         run: |
@@ -248,8 +249,9 @@ jobs:
       # Request the main snapshot to start a JitPack build of the code being
       # released
       - name: Trigger build on jitpack
-        run: |
-          curl -fL https://jitpack.io/com/github/avdv/scalals/main/scalals-main-SNAPSHOT.pom
+        uses: ./.github/actions/trigger-jitpack
+        with:
+          version: main-SNAPSHOT
 
   benchmark:
     name: Benchmark

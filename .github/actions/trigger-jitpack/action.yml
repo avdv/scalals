@@ -1,0 +1,15 @@
+name: Trigger JitPack build
+description: Request a JitPack build for the given version
+inputs:
+  version:
+    description: The JitPack version (tag, branch-SNAPSHOT or commit) to build
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Trigger build on JitPack
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+      run: |
+        curl -fL "https://jitpack.io/com/github/avdv/scalals/${VERSION}/scalals-${VERSION}.pom"
