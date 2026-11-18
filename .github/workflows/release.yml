@@ -1,5 +1,4 @@
 name: Release
-
 on:
   release:
     types: [published]
@@ -9,7 +8,6 @@ on:
         description: Release tag to trigger the JitPack build for
         required: true
         type: string
-
 jobs:
   release:
     runs-on: ubuntu-slim

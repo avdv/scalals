@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   graalvm:
     strategy:
@@ -14,40 +13,39 @@ jobs:
         os: [ubuntu-latest, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - name: Cache SBT
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: |
-          ~/.cache/coursier
-          ~/.ivy2/cache
-          ~/.ivy2/local
-          ~/.sbt/boot
-          ~/.sbt/launchers
-        key: ${{ runner.os }}-sbt-${{ hashFiles('build.sbt', 'project/plugins.sbt') }}
-    - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
-      with:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Cache SBT
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/coursier
+            ~/.ivy2/cache
+            ~/.ivy2/local
+            ~/.sbt/boot
+            ~/.sbt/launchers
+          key: ${{ runner.os }}-sbt-${{ hashFiles('build.sbt', 'project/plugins.sbt') }}
+      - name: "Install Nix ❄"
+        uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+        with:
           extra_nix_config: |
             experimental-features = nix-command flakes
-    - name: "Install Cachix ❄"
-      uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-      with:
-        name: cbley
-        extraPullNames: pre-commit-hooks
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-        pushFilter: '[-](source|nixpkgs-src)$'
-    - run: git branch PR-${{ github.event.number }}
-    - shell: nix develop .#graalVM --command bash --noprofile --norc -e -o pipefail {0}
-      run: |
-        sbt 'print scalalsJVM / GraalVMNativeImage / packageBin' | tee packageBin
-        result=$( tail -n1 packageBin )
-        # we want to replace the '${OUT}' string literally
-        # shellcheck disable=SC2016
-        echo "exe=${result/'${OUT}/'/target/out/}" >> GITHUB_OUTPUT
-      id: package
-    - run: "${{steps.package.outputs.exe}}"
-
+      - name: "Install Cachix ❄"
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: cbley
+          extraPullNames: pre-commit-hooks
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          pushFilter: '[-](source|nixpkgs-src)$'
+      - run: git branch PR-${{ github.event.number }}
+      - shell: nix develop .#graalVM --command bash --noprofile --norc -e -o pipefail {0}
+        run: |
+          sbt 'print scalalsJVM / GraalVMNativeImage / packageBin' | tee packageBin
+          result=$( tail -n1 packageBin )
+          # we want to replace the '${OUT}' string literally
+          # shellcheck disable=SC2016
+          echo "exe=${result/'${OUT}/'/target/out/}" >> GITHUB_OUTPUT
+        id: package
+      - run: "${{steps.package.outputs.exe}}"
   package:
     name: Nix ❄
     strategy:
@@ -55,126 +53,118 @@ jobs:
         os: [ubuntu-latest, macos-15]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      with:
-        fetch-depth: 3
-        persist-credentials: false
-    - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
-    - name: "Install Cachix ❄"
-      uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-      with:
-        name: cbley
-        extraPullNames: pre-commit-hooks
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-        pushFilter: '[-](source|nixpkgs-src)$'
-    - name: Update dependency hashes
-      id: hash-update
-      if: github.event_name == 'pull_request' && github.repository == 'avdv/scalals'
-      run: |-
-        if [[ "$( git diff-tree --name-only --no-commit-id '${{ github.event.pull_request.head.sha }}' )" == *.scalafmt.conf* ]]; then
-          hash=scalafmt
-        else
-          hash=scalals.dependencies
-        fi
-        echo "Update $hash"
-        .github/update-hash "$hash"
-        echo hash="$hash" >> "$GITHUB_OUTPUT"
-        echo exit="$( git diff --quiet flake.nix ; echo $? )" >> "$GITHUB_OUTPUT"
-    - name: Set author identity and push url
-      run: |-
-        git config user.email '${{ github.actor }}@users.noreply.github.com'
-        git config user.name '${{ github.actor }}'
-        git remote set-url --push origin https://x-access-token:${{ secrets.PR_TOKEN }}@github.com/${{ github.repository }}
-    - name: Push changes to PR
-      if: steps.hash-update.outputs.exit != '0'
-      env:
-        GH_HEAD_REF: ${{ github.head_ref }}
-      run: |-
-        git switch -c pr-branch ${{ github.event.pull_request.head.sha }}
-        git commit -m 'Update ${{ steps.hash-update.outputs.hash }} hash' flake.nix
-        git push origin "HEAD:$GH_HEAD_REF"
-        exit 1
-    - run: nix flake check
-    - run: nix build --print-build-logs
-    - run: nix run
-
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 3
+          persist-credentials: false
+      - name: "Install Nix ❄"
+        uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+      - name: "Install Cachix ❄"
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: cbley
+          extraPullNames: pre-commit-hooks
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          pushFilter: '[-](source|nixpkgs-src)$'
+      - name: Update dependency hashes
+        id: hash-update
+        if: github.event_name == 'pull_request' && github.repository == 'avdv/scalals'
+        run: |-
+          if [[ "$( git diff-tree --name-only --no-commit-id '${{ github.event.pull_request.head.sha }}' )" == *.scalafmt.conf* ]]; then
+            hash=scalafmt
+          else
+            hash=scalals.dependencies
+          fi
+          echo "Update $hash"
+          .github/update-hash "$hash"
+          echo hash="$hash" >> "$GITHUB_OUTPUT"
+          echo exit="$( git diff --quiet flake.nix ; echo $? )" >> "$GITHUB_OUTPUT"
+      - name: Set author identity and push url
+        run: |-
+          git config user.email '${{ github.actor }}@users.noreply.github.com'
+          git config user.name '${{ github.actor }}'
+          git remote set-url --push origin https://x-access-token:${{ secrets.PR_TOKEN }}@github.com/${{ github.repository }}
+      - name: Push changes to PR
+        if: steps.hash-update.outputs.exit != '0'
+        env:
+          GH_HEAD_REF: ${{ github.head_ref }}
+        run: |-
+          git switch -c pr-branch ${{ github.event.pull_request.head.sha }}
+          git commit -m 'Update ${{ steps.hash-update.outputs.hash }} hash' flake.nix
+          git push origin "HEAD:$GH_HEAD_REF"
+          exit 1
+      - run: nix flake check
+      - run: nix build --print-build-logs
+      - run: nix run
   tests:
     defaults:
       run:
         shell: >-
-          nix develop
-          --ignore-environment
-          --keep HOME
-          --keep SCALANATIVE_MODE
-          --keep GITHUB_ACTIONS
-          --keep GITHUB_OUTPUT
-          --command bash --noprofile --norc -e -o pipefail {0}
+          nix develop --ignore-environment --keep HOME --keep SCALANATIVE_MODE --keep GITHUB_ACTIONS --keep GITHUB_OUTPUT --command bash --noprofile --norc -e -o pipefail {0}
     runs-on: ubuntu-latest
     steps:
-    - name: Free disk space
-      shell: bash
-      run: |
-        sudo rm -rf /usr/share/dotnet /opt/ghc "$ANDROID_HOME" /usr/local/.ghcup /usr/local/share/powershell /opt/az /opt/microsoft &
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - name: Cache SBT
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: |
-          ~/.cache/coursier
-          ~/.ivy2/cache
-          ~/.ivy2/local
-          ~/.sbt/boot
-          ~/.sbt/launchers
-        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-    - name: "Install Nix ❄"
-      uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
-      with:
+      - name: Free disk space
+        shell: bash
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc "$ANDROID_HOME" /usr/local/.ghcup /usr/local/share/powershell /opt/az /opt/microsoft &
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Cache SBT
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/coursier
+            ~/.ivy2/cache
+            ~/.ivy2/local
+            ~/.sbt/boot
+            ~/.sbt/launchers
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+      - name: "Install Nix ❄"
+        uses: cachix/install-nix-action@3dc140bfc76c49fbd4dd958429132e3746bcb086 # v31.11.5
+        with:
           #install_url: https://nixos-nix-install-tests.cachix.org/serve/i6laym9jw3wg9mw6ncyrk6gjx4l34vvx/install
           #install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
           extra_nix_config: |
             experimental-features = nix-command flakes
-    - name: "Install Cachix ❄"
-      uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
-      with:
-        name: cbley
-        extraPullNames: pre-commit-hooks
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-        pushFilter: '[-](source|nixpkgs-src)$'
-        # Only needed for private caches
-        #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - name: Determine zig env
-      run: |
-        ( echo 'env<<EOF'
-          zig env \
-            | sed -ne '1i {' \
-                  -e 's/[.]zig_exe *=/"zig_exe": /p' \
-                  -e 's/[.]global_cache_dir *=/"global_cache_dir": /p' \
-                  -e 's/[.]version *=/"version": /p' \
-                  -e '$i "": "" }'
-          echo EOF ) >> "$GITHUB_OUTPUT"
-      id: nix-zig
-    - name: Cache zig ${{ fromJson(steps.nix-zig.outputs.env).version }}
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: |
-          ${{ fromJson(steps.nix-zig.outputs.env).global_cache_dir }}
-        key: zig-${{ fromJson(steps.nix-zig.outputs.env).zig_exe }}
-    - run: git branch PR-${{ github.event.number }}
-    - name: Test
-      run: sbt tpolecatCiMode 'scalalsNative / test'
-    - name: Cross Compile
-      run: .github/crosscompile
-      env:
-        SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-fast' || 'debug' }}
-    - shell: nix shell --inputs-from . nixpkgs#qemu nixpkgs#bash --command bash --noprofile --norc -e -o pipefail {0}
-      run: qemu-aarch64 scalals-linux-aarch64
-    - shell: nix shell --inputs-from . nixpkgs#qemu nixpkgs#bash --command bash --noprofile --norc -e -o pipefail {0}
-      run: qemu-riscv64 scalals-linux-riscv64
-    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-      with:
-        path: scalals-*
-
+      - name: "Install Cachix ❄"
+        uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: cbley
+          extraPullNames: pre-commit-hooks
+          signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
+          pushFilter: '[-](source|nixpkgs-src)$'
+          # Only needed for private caches
+          #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - name: Determine zig env
+        run: |
+          ( echo 'env<<EOF'
+            zig env \
+              | sed -ne '1i {' \
+                    -e 's/[.]zig_exe *=/"zig_exe": /p' \
+                    -e 's/[.]global_cache_dir *=/"global_cache_dir": /p' \
+                    -e 's/[.]version *=/"version": /p' \
+                    -e '$i "": "" }'
+            echo EOF ) >> "$GITHUB_OUTPUT"
+        id: nix-zig
+      - name: Cache zig ${{ fromJson(steps.nix-zig.outputs.env).version }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ fromJson(steps.nix-zig.outputs.env).global_cache_dir }}
+          key: zig-${{ fromJson(steps.nix-zig.outputs.env).zig_exe }}
+      - run: git branch PR-${{ github.event.number }}
+      - name: Test
+        run: sbt tpolecatCiMode 'scalalsNative / test'
+      - name: Cross Compile
+        run: .github/crosscompile
+        env:
+          SCALANATIVE_MODE: ${{ github.ref == 'refs/heads/main' && 'release-fast' || 'debug' }}
+      - shell: nix shell --inputs-from . nixpkgs#qemu nixpkgs#bash --command bash --noprofile --norc -e -o pipefail {0}
+        run: qemu-aarch64 scalals-linux-aarch64
+      - shell: nix shell --inputs-from . nixpkgs#qemu nixpkgs#bash --command bash --noprofile --norc -e -o pipefail {0}
+        run: qemu-riscv64 scalals-linux-riscv64
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: scalals-*
   run:
     name: Run
     strategy:
@@ -184,8 +174,7 @@ jobs:
           - macos-15
     needs:
       - tests
-    runs-on:
-      ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         id: download
@@ -195,19 +184,16 @@ jobs:
       - run: ./scalals-${{ runner.os == 'Linux' && 'linux' || 'darwin' }}-x86_64
       - run: ./scalals-${{ runner.os == 'Linux' && 'linux' || 'darwin' }}-aarch64
         if: ${{ runner.arch == 'ARM64' }}
-
   run-win32:
     name: Run win32
     needs:
       - tests
-    runs-on:
-      windows-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         id: download
       - run: ls
       - run: "./scalals-windows-x86_64 -lh"
-
   release:
     name: Prepare release
     if: github.ref == 'refs/heads/main'
@@ -252,7 +238,6 @@ jobs:
         uses: ./.github/actions/trigger-jitpack
         with:
           version: main-SNAPSHOT
-
   benchmark:
     name: Benchmark
     if: github.ref == 'refs/heads/main'
