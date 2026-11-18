@@ -3,4 +3,4 @@ jdk:
 before_install:
   - sdk install sbt
 install:
-  - sbt -Dsbt.client=false publishM2
+  - sbt --batch --jvm-client publishM2
