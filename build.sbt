@@ -14,6 +14,21 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 scalaVersion := "3.10.1"
 
+lazy val root = project
+  .in(file("."))
+  .aggregate(scalals.jvm, scalals.native)
+  .settings(
+    name := "scalals",
+    organization := "com.github.avdv",
+    crossPaths := false,
+    outputPath ~= (p => p + "_root"),
+    publishM2 / skip := false,
+    publish := {},
+    publishLocal := {},
+    Compile / packageSrc / publishArtifact := false,
+    Compile / packageDoc / publishArtifact := false,
+  )
+
 val sharedSettings = Seq(
   publish / skip := true,
   tpolecatDevModeOptions ++= Set(
