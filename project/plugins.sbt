@@ -1,4 +1,4 @@
-val scalaNativeVersion = "0.5.12"
+val scalaNativeVersion = "0.5.13"
 
 addSbtPlugin("org.scala-native" % "sbt-scala-native" % scalaNativeVersion)
 addSbtPlugin("org.portable-scala" % "sbt-scala-native-crossproject" % "1.4.0")
